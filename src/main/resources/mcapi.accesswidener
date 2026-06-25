@@ -1,0 +1,14 @@
+accessWidener v2 named
+
+# Allow access to Minecraft server internals for API operations
+accessible class net/minecraft/server/MinecraftServer
+accessible class net/minecraft/server/level/ServerLevel
+accessible class net/minecraft/server/level/ServerPlayer
+accessible class net/minecraft/world/level/block/Block
+accessible class net/minecraft/world/item/ItemStack
+accessible class net/minecraft/world/entity/player/Inventory
+accessible class net/minecraft/server/players/PlayerList
+
+# Removed invalid method wideners
+accessible field net/minecraft/world/entity/player/Inventory selected I
+accessible method net/minecraft/client/KeyboardHandler keyPress (JILnet/minecraft/client/input/KeyEvent;)V

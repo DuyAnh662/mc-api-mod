@@ -1,0 +1,8 @@
+build/
+.gradle/
+.tmp_gradle/
+.tmp_jdk/
+.vscode/
+out/
+/*.jar
+/*.java
