@@ -2,7 +2,9 @@
 
 ![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen)
 ![Fabric Loader](https://img.shields.io/badge/Fabric-0.19.3-blue)
+
 Created and developed by [@DuyAnh662](https://github.com/DuyAnh662)
+
 [Xem tài liệu Tiếng Việt (Vietnamese README)](#tài-liệu-tiếng-việt-vn)
 
 ---
