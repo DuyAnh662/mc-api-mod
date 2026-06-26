@@ -17,6 +17,13 @@ public class McApiClient implements ClientModInitializer {
             CLIENT = client;
             // The API server should be started once. We will handle ensuring it doesn't double-start in ApiServer.
             ApiServer.getInstance().start();
+            
+            // Disable pause on lost focus so alt-tabbing doesn't interrupt the bot
+            if (client.options != null) {
+                client.options.pauseOnLostFocus = false;
+                client.options.save();
+            }
+            
             McApiMod.LOGGER.info("Minecraft API Client Mod is ready! HTTP API available.");
         });
 
@@ -26,6 +33,11 @@ public class McApiClient implements ClientModInitializer {
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             ApiServer.getInstance().processQueuedClientCommands(client);
+            
+            // Enforce active keys so user physical interaction doesn't cancel script inputs
+            for (com.mojang.blaze3d.platform.InputConstants.Key key : com.mcapi.api.TaskManager.getInstance().getActiveKeys()) {
+                net.minecraft.client.KeyMapping.set(key, true);
+            }
         });
     }
 }

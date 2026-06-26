@@ -12,3 +12,7 @@ accessible class net/minecraft/server/players/PlayerList
 # Removed invalid method wideners
 accessible field net/minecraft/world/entity/player/Inventory selected I
 accessible method net/minecraft/client/KeyboardHandler keyPress (JILnet/minecraft/client/input/KeyEvent;)V
+
+# Allow setting old rotation values on Entity for smooth look sync
+accessible field net/minecraft/world/entity/Entity yRotO F
+accessible field net/minecraft/world/entity/Entity xRotO F

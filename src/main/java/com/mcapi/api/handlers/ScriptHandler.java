@@ -103,12 +103,31 @@ public class ScriptHandler implements HttpHandler {
                         case "look":
                             float dy = cmd.has("deltaYaw") ? cmd.get("deltaYaw").getAsFloat() : 0;
                             float dp = cmd.has("deltaPitch") ? cmd.get("deltaPitch").getAsFloat() : 0;
+                            float absYaw = cmd.has("yaw") ? cmd.get("yaw").getAsFloat() : Float.NaN;
+                            float absPitch = cmd.has("pitch") ? cmd.get("pitch").getAsFloat() : Float.NaN;
                             ApiServer.getInstance().queueCommand((server) -> {
                                 List<ServerPlayer> players = server.getPlayerList().getPlayers();
                                 if (!players.isEmpty()) {
                                     ServerPlayer p = players.get(0);
-                                    p.setYRot(p.getYRot() + dy);
-                                    p.setXRot(p.getXRot() + dp);
+                                    float newYaw = p.getYRot();
+                                    float newPitch = p.getXRot();
+                                    if (!Float.isNaN(absYaw)) {
+                                        newYaw = absYaw;
+                                    } else {
+                                        newYaw += dy;
+                                    }
+                                    if (!Float.isNaN(absPitch)) {
+                                        newPitch = absPitch;
+                                    } else {
+                                        newPitch += dp;
+                                    }
+                                    newPitch = Math.max(-90.0f, Math.min(90.0f, newPitch));
+                                    p.setYRot(newYaw);
+                                    p.setXRot(newPitch);
+                                    p.yRotO = newYaw;
+                                    p.xRotO = newPitch;
+                                    p.setYHeadRot(newYaw);
+                                    p.connection.teleport(p.getX(), p.getY(), p.getZ(), newYaw, newPitch);
                                 }
                             });
                             break;

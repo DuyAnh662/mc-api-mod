@@ -54,9 +54,16 @@ public class PlayerHandler {
                     ApiServer.sendResponse(exchange, 400, ApiResponse.jsonError(400, "No players online"));
                     return;
                 }
+                float finalYaw = Float.isNaN(yaw) ? player.getYRot() : yaw;
+                float finalPitch = Float.isNaN(pitch) ? player.getXRot() : pitch;
                 player.teleportTo(x, y, z);
-                if (!Float.isNaN(yaw)) player.setYRot(yaw);
-                if (!Float.isNaN(pitch)) player.setXRot(pitch);
+                player.setYRot(finalYaw);
+                player.setXRot(finalPitch);
+                player.yRotO = finalYaw;
+                player.xRotO = finalPitch;
+                player.setYHeadRot(finalYaw);
+                // Force-sync position and rotation to client
+                player.connection.teleport(x, y, z, finalYaw, finalPitch);
 
                 var data = new JsonObject();
                 data.addProperty("player", player.getName().getString());
@@ -94,17 +101,35 @@ public class PlayerHandler {
                     return;
                 }
 
+                float newYaw = player.getYRot();
+                float newPitch = player.getXRot();
+
                 if (!Float.isNaN(yaw)) {
-                    player.setYRot(yaw);
+                    newYaw = yaw;
                 } else if (deltaYaw != 0f) {
-                    player.setYRot(player.getYRot() + deltaYaw);
+                    newYaw = player.getYRot() + deltaYaw;
                 }
 
                 if (!Float.isNaN(pitch)) {
-                    player.setXRot(pitch);
+                    newPitch = pitch;
                 } else if (deltaPitch != 0f) {
-                    player.setXRot(player.getXRot() + deltaPitch);
+                    newPitch = player.getXRot() + deltaPitch;
                 }
+
+                // Clamp pitch to valid range [-90, 90]
+                newPitch = Math.max(-90.0f, Math.min(90.0f, newPitch));
+
+                // Set rotation on the entity
+                player.setYRot(newYaw);
+                player.setXRot(newPitch);
+                // Set old rotation to avoid interpolation glitches
+                player.yRotO = newYaw;
+                player.xRotO = newPitch;
+                // Set head rotation so the player head actually turns
+                player.setYHeadRot(newYaw);
+
+                // Force-sync to client via teleport packet (teleports to same position with new rotation)
+                player.connection.teleport(player.getX(), player.getY(), player.getZ(), newYaw, newPitch);
 
                 var data = new JsonObject();
                 data.addProperty("player", player.getName().getString());

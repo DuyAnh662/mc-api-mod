@@ -43,13 +43,15 @@ public class TaskManager {
     }
     
     public void trackKey(InputConstants.Key key) {
-        if (!activeKeys.contains(key)) {
-            activeKeys.add(key);
-        }
+        activeKeys.add(key); // Allow duplicates so overlapping scripts don't cancel each other
     }
     
     public void untrackKey(InputConstants.Key key) {
-        activeKeys.remove(key);
+        activeKeys.remove(key); // Removes only one instance
+    }
+
+    public List<InputConstants.Key> getActiveKeys() {
+        return activeKeys;
     }
 
     public void cancelAll() {
