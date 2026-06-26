@@ -57,6 +57,13 @@ For a complete list of endpoints, simply make a GET request to the root API endp
 ```bash
 curl http://localhost:25566/api/
 ```
+### ⚠️ Important Notice & Disclaimer
+By using this mod, you agree to comply with Mojang's [Minecraft End User License Agreement (EULA)](https://minecraft.net) and [Commercial Usage Guidelines](https://minecraft.net). 
+
+*   This mod is provided under the MIT License for the source code, but its utilization within Minecraft must strictly respect Mojang's terms.
+*   The developer (@DuyAnh662) is not responsible for any misuse of this API that violates Minecraft's EULA (e.g., creating unauthorized monetization systems, paywalls, or unfair advantages on public servers).
+*   This is an unofficial modification and is not affiliated with or endorsed by Mojang Studios or Microsoft.
+
 ### License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -110,5 +117,12 @@ curl -X POST http://localhost:25566/api/command \
 ```bash
 curl http://localhost:25566/api/
 ```
+### ⚠️ Lưu ý quan trọng & Tuyên bố từ chối trách nhiệm
+Bằng việc sử dụng bản mod này, bạn đồng ý tuân thủ [Thỏa thuận cấp phép người dùng cuối (EULA) của Minecraft](https://minecraft.net) và [Hướng dẫn sử dụng thương mại](https://minecraft.net) của Mojang.
+
+*   Mã nguồn của dự án này được cấp phép theo giấy phép MIT, nhưng việc vận hành và áp dụng nó trong trò chơi Minecraft phải tôn trọng tuyệt đối các điều khoản của Mojang.
+*   Nhà phát triển (@DuyAnh662) không chịu trách nhiệm cho bất kỳ hành vi lạm dụng API này dẫn đến vi phạm EULA của Minecraft (ví dụ: tạo hệ thống nạp tiền trái phép, chặn tính năng bằng tường phí, hoặc tạo lợi thế bất hợp pháp trên các máy chủ công cộng).
+*   Đây là một bản chỉnh sửa không chính thức, không liên kết, không được tài trợ hoặc phê duyệt bởi Mojang Studios hay Microsoft.
+
 ### Giấy phép
 Dự án này được phát hành dưới bản quyền Giấy phép MIT - xem tệp [LICENSE](LICENSE) để biết thêm chi tiết.
