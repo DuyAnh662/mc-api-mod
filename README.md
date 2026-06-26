@@ -2,7 +2,7 @@
 
 ![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen)
 ![Fabric Loader](https://img.shields.io/badge/Fabric-0.19.3-blue)
-
+Created and developed by [@DuyAnh662](https://github.com/DuyAnh662)
 [Xem tài liệu Tiếng Việt (Vietnamese README)](#tài-liệu-tiếng-việt-vn)
 
 ---
@@ -55,6 +55,8 @@ For a complete list of endpoints, simply make a GET request to the root API endp
 ```bash
 curl http://localhost:25566/api/
 ```
+### License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -106,3 +108,5 @@ curl -X POST http://localhost:25566/api/command \
 ```bash
 curl http://localhost:25566/api/
 ```
+### Giấy phép
+Dự án này được phát hành dưới bản quyền Giấy phép MIT - xem tệp [LICENSE](LICENSE) để biết thêm chi tiết.
