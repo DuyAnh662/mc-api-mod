@@ -1,0 +1,66 @@
+# Changelog
+
+## v1.2.0 — AI Endpoints + Observation Schema + Security Fixes
+
+### ✨ New Features
+
+- **AI-Friendly Endpoints (OpenAI Gym style)** — 6 new endpoints for Reinforcement Learning agents:
+  - `POST /session` — Create/reuse AI session
+  - `GET /observation` — Full structured game observation
+  - `POST /action` — Send actions (12 types)
+  - `POST /step` — Combined action + observation (like `env.step()`)
+  - `GET /stream` — SSE streaming of observations per tick
+  - `POST /close` — Close session and cancel tasks
+
+- **Observation Schema** — Fixed-size JSON for ML tensor compatibility:
+  - `viewport_blocks`: 4608 block IDs (16×9×32 frustum)
+  - `viewport_entities`: Up to 16 entities with type, position, health, distance
+  - `inventory.slots`: 41 fixed slots as `[item_id, count]`
+  - `player.status`: `[health, food, saturation, armor, air]`
+  - `player.flags`: 6 binary state indicators
+  - `target`: Crosshair target with `block_id`, `distance`, `face`
+
+- **Screen Observation** — Detect open UI screens with component extraction:
+  - 37 known screen class mappings (inventory, chest, crafting, furnace, etc.)
+  - Components: buttons, sliders, textboxes with type-specific properties
+  - Navigation path tracking
+
+- **AI Agent Guide** — Comprehensive documentation for AI agents:
+  - `docs/en/AI_AGENT_GUIDE.md` — Complete JSON field guide + action strategies
+  - `docs/vi/AI_AGENT_GUIDE.md` — Vietnamese version
+  - Workflows: survival, mining, combat, building, farming
+  - Error recovery and prioritization matrix
+
+- **12 Action Types**: `key`, `select_slot`, `place`, `break`, `interact`, `jump`, `swing`, `look`, `craft`, `chat`, `command`, `click_button`
+
+### 🐛 Bug Fixes
+
+- **Server no longer stops on world exit** — Removed `SERVER_STOPPING → ApiServer.stop()`. API server now stays alive when leaving a world, allowing title-screen operations (click "Singleplayer", select world, etc.). Server only stops on `CLIENT_STOPPING` (Minecraft fully closes).
+
+- **ObservationHandler async response crash** — Added `CountDownLatch` to ObservationHandler so the HTTP response is sent synchronously after the MC client thread processes the command. Previously the handler returned before the response was written, causing `curl: (18) transfer closed` errors.
+
+- **Frustum block scanning fixed** — `viewport_blocks` was returning all zeros because:
+  - `right` vector had wrong sign (`(-dirZ, 0, dirX)` → `(dirZ, 0, -dirX)`)
+  - `up` vector was not perpendicular to the look direction (computed with wrong formula)
+  - Fixed with proper cross products: `right = cross(world_up, dir)`, `up = cross(dir, right)`
+  - Added gimbal lock handling for straight up/down look
+
+- **Screen ID no longer shows obfuscated names** — `class_433` → `minecraft:pause` via 37 known screen class mappings + heuristic fallback
+
+- **World name matching case-insensitive** — `ClientUIHandler` now uses `toLowerCase().contains()` for matching button text
+
+### 🔒 Security
+
+- **Constant-time token comparison** — Using `MessageDigest.isEqual()` instead of string comparison
+- **Input validation** — Block/item IDs validated against `RESOURCE_ID` regex (`namespace:path` format)
+- **Body size limit** — 1 MB max request body
+- **Rate limiting** — 60 requests/second per IP
+- **Thread pool increased** — TaskManager scheduler pool 4→8 threads (DoS mitigation)
+
+### 🔧 Improvements
+
+- **Slot bounds checking** — Hotbar slots validated 0-8, inventory slots 0-35
+- **Client-side interactions** — Block breaking/placing uses `client.gameMode` instead of `client.player.gameMode` (compatible with access widener)
+- **Inventory API** — Uses `inventory.getItem(i)` / `inventory.getContainerSize()` instead of private field reflection
+- **Documentation** — Updated README.md, README_vi.md, docs/en/API.md, docs/vi/API.md with complete Section 8 (AI endpoints) + Section 9 (Observation Schema Details) + Section 10 (Registry Reference)
+- **Registry Reference** — Added numeric ID reference for items, blocks, entities, effects, enchantments, biomes. Note: IDs are dynamic per session; use namespaced IDs (`minecraft:stone`) for stability.

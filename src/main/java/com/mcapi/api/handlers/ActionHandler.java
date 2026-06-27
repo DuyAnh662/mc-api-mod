@@ -160,7 +160,8 @@ public class ActionHandler implements HttpHandler {
             var hitResult = client.hitResult;
             if (hitResult != null && hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
                 var blockHit = (net.minecraft.world.phys.BlockHitResult) hitResult;
-                client.gameMode.destroyBlock(blockHit.getBlockPos());
+                // Survival mining: gửi start destroy packet → block đứt tự nhiên, drop item
+                client.gameMode.startDestroyBlock(blockHit.getBlockPos(), blockHit.getDirection());
             }
         });
     }
