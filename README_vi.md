@@ -1,4 +1,4 @@
-# Minecraft API Mod
+# MC API Mod
 
 [Read in English](README.md)
 
