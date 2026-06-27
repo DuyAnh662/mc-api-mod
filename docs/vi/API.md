@@ -1,6 +1,6 @@
-# Tài Liệu Hướng Dẫn - Minecraft API Mod (1.21.11)
+# Tài Liệu Hướng Dẫn - MC API Mod (1.21.11)
 
-Minecraft API Mod cung cấp một hệ thống HTTP REST API chạy ẩn ngay bên trong Minecraft, cho phép bạn điều khiển toàn bộ trò chơi bằng code (Python, Node.js, v.v.), hoặc qua command line (cURL) mà không cần phải chạm vào bàn phím hay chuột.
+MC API Mod cung cấp một hệ thống HTTP REST API chạy ẩn ngay bên trong Minecraft, cho phép bạn điều khiển toàn bộ trò chơi bằng code (Python, Node.js, v.v.), hoặc qua command line (cURL) mà không cần phải chạm vào bàn phím hay chuột.
 
 ---
 
