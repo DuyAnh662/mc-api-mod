@@ -16,3 +16,6 @@ accessible method net/minecraft/client/KeyboardHandler keyPress (JILnet/minecraf
 # Allow setting old rotation values on Entity for smooth look sync
 accessible field net/minecraft/world/entity/Entity yRotO F
 accessible field net/minecraft/world/entity/Entity xRotO F
+
+# Allow accessing world selection list for click_button handler
+accessible field net/minecraft/client/gui/screens/worldselection/SelectWorldScreen list Lnet/minecraft/client/gui/screens/worldselection/WorldSelectionList;

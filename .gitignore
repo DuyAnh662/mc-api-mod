@@ -1,8 +1,10 @@
 build/
 .gradle/
+bin/
 .tmp_gradle/
 .tmp_jdk/
 .vscode/
 out/
 /*.jar
 /*.java
+add_fix

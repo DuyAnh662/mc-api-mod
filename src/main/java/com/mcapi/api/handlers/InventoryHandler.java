@@ -12,8 +12,12 @@ import net.minecraft.world.item.ItemStack;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class InventoryHandler {
+
+    private static final Pattern RESOURCE_ID = Pattern.compile("^[a-z0-9_.-]+:[a-z0-9_./-]+$");
+    private static final int MAX_SLOT = 35;
 
     private static ServerPlayer getPlayer(JsonObject body) {
         String playerName = body.has("player") ? body.get("player").getAsString() : "";
@@ -91,6 +95,15 @@ public class InventoryHandler {
             int slot = body.get("slot").getAsInt();
             String itemId = body.get("item").getAsString();
             int count = body.has("count") ? body.get("count").getAsInt() : 1;
+
+            if (slot < 0 || slot > MAX_SLOT) {
+                ApiServer.sendResponse(exchange, 400, ApiResponse.jsonError(400, "Slot must be 0-" + MAX_SLOT));
+                return;
+            }
+            if (!RESOURCE_ID.matcher(itemId).matches()) {
+                ApiServer.sendResponse(exchange, 400, ApiResponse.jsonError(400, "Invalid item id format (expected namespace:path)"));
+                return;
+            }
 
             ApiServer.getInstance().queueCommand((server) -> {
                 ServerPlayer player = getPlayer(body);
@@ -178,6 +191,11 @@ public class InventoryHandler {
 
             int slot = body.get("slot").getAsInt();
             boolean entireStack = body.has("all") && body.get("all").getAsBoolean();
+
+            if (slot < 0 || slot > MAX_SLOT) {
+                ApiServer.sendResponse(exchange, 400, ApiResponse.jsonError(400, "Slot must be 0-" + MAX_SLOT));
+                return;
+            }
 
             ApiServer.getInstance().queueCommand((server) -> {
                 ServerPlayer player = getPlayer(body);

@@ -3,8 +3,8 @@ package com.mcapi.api;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -14,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class TaskManager {
     private static final TaskManager INSTANCE = new TaskManager();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+    private final ExecutorService immediatePool = Executors.newCachedThreadPool();
     private final List<Future<?>> activeTasks = new CopyOnWriteArrayList<>();
     private final List<InputConstants.Key> activeKeys = new CopyOnWriteArrayList<>();
 
@@ -37,7 +38,7 @@ public class TaskManager {
     }
 
     public Future<?> submit(Runnable task) {
-        Future<?> future = scheduler.submit(task);
+        Future<?> future = immediatePool.submit(task);
         activeTasks.add(future);
         return future;
     }

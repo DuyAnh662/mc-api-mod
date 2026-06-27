@@ -8,8 +8,12 @@ import com.sun.net.httpserver.HttpHandler;
 import net.minecraft.world.Difficulty;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class SettingsHandler {
+
+    private static final Pattern GAMERULE_PATTERN = Pattern.compile("^[a-zA-Z0-9_]+$");
+    private static final Pattern GAMERULE_VALUE = Pattern.compile("^[a-zA-Z0-9_./-]+$");
 
     public static class GameRuleHandler implements HttpHandler {
         @Override
@@ -28,6 +32,11 @@ public class SettingsHandler {
                 }
                 String rule = body.get("rule").getAsString();
                 String value = body.get("value").getAsString();
+
+                if (!GAMERULE_PATTERN.matcher(rule).matches() || !GAMERULE_VALUE.matcher(value).matches()) {
+                    ApiServer.sendResponse(exchange, 400, ApiResponse.jsonError(400, "Invalid gamerule name or value format"));
+                    return;
+                }
 
                 // Use the /gamerule command to set game rules - works across all MC versions
                 ApiServer.getInstance().queueCommand((server) -> {

@@ -12,19 +12,32 @@ import net.minecraft.server.MinecraftServer;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.HexFormat;
 import java.util.concurrent.*;
 import net.minecraft.client.Minecraft;
 
 public class ApiServer {
     private static final ApiServer INSTANCE = new ApiServer();
     private static final int DEFAULT_PORT = 25566;
+    private static final int MAX_BODY_SIZE = 1_048_576;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private HttpServer server;
     private int port = DEFAULT_PORT;
-    private String authToken = ""; // loaded from -Dmcapi.key system property at runtime
+    private String authToken;
     private final BlockingQueue<QueuedCommand> commandQueue = new LinkedBlockingQueue<>();
     private final BlockingQueue<QueuedClientCommand> clientCommandQueue = new LinkedBlockingQueue<>();
     private boolean isRunning = false;
+    private final ConcurrentHashMap<String, RateLimitEntry> rateLimitMap = new ConcurrentHashMap<>();
+
+    private static class RateLimitEntry {
+        final long windowStart;
+        final int count;
+        RateLimitEntry(long windowStart, int count) { this.windowStart = windowStart; this.count = count; }
+    }
 
     private ApiServer() {}
 
@@ -38,9 +51,16 @@ public class ApiServer {
         if (isRunning) return;
         try {
             port = Integer.parseInt(System.getProperty("mcapi.port", String.valueOf(DEFAULT_PORT)));
-            authToken = System.getProperty("mcapi.key", "");
+            String keyProp = System.getProperty("mcapi.key", "");
+            if (keyProp.isEmpty()) {
+                authToken = generateRandomToken();
+                McApiMod.LOGGER.warn("mcapi.key not provided! Generated random auth token: {}", authToken);
+            } else {
+                authToken = keyProp;
+            }
+            String bindHost = System.getProperty("mcapi.host", "127.0.0.1");
 
-            server = HttpServer.create(new InetSocketAddress(port), 0);
+            server = HttpServer.create(new InetSocketAddress(bindHost, port), 0);
             server.setExecutor(Executors.newFixedThreadPool(4));
 
             // Register API endpoints
@@ -119,18 +139,36 @@ public class ApiServer {
         }
     }
 
+    private String generateRandomToken() {
+        byte[] bytes = new byte[32];
+        RANDOM.nextBytes(bytes);
+        return HexFormat.of().formatHex(bytes);
+    }
+
     public boolean checkAuth(HttpExchange exchange) {
-        if (authToken.isEmpty()) return true;
         String auth = exchange.getRequestHeaders().getFirst("Authorization");
-        return auth != null && auth.equals("Bearer " + authToken);
+        if (auth == null) return false;
+        byte[] a = auth.getBytes(StandardCharsets.UTF_8);
+        byte[] b = ("Bearer " + authToken).getBytes(StandardCharsets.UTF_8);
+        return MessageDigest.isEqual(a, b);
     }
 
     public static String readBody(HttpExchange exchange) throws IOException {
+        String contentLengthStr = exchange.getRequestHeaders().getFirst("Content-Length");
+        if (contentLengthStr != null) {
+            int contentLength = Integer.parseInt(contentLengthStr);
+            if (contentLength > MAX_BODY_SIZE) {
+                throw new IOException("Body too large: " + contentLength + " > " + MAX_BODY_SIZE);
+            }
+        }
         InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(isr);
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = br.readLine()) != null) {
+            if (sb.length() > MAX_BODY_SIZE) {
+                throw new IOException("Body exceeds maximum size of " + MAX_BODY_SIZE);
+            }
             sb.append(line);
         }
         return sb.toString();
@@ -148,15 +186,32 @@ public class ApiServer {
     public static void sendResponse(HttpExchange exchange, int status, String response) {
         try {
             exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
             byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(status, bytes.length);
             OutputStream os = exchange.getResponseBody();
             os.write(bytes);
             os.close();
+            String clientIp = exchange.getRemoteAddress() != null ? exchange.getRemoteAddress().getAddress().getHostAddress() : "unknown";
+            String method = exchange.getRequestMethod();
+            String path = exchange.getRequestURI().getPath();
+            McApiMod.LOGGER.info("{} {} {} from {}", method, path, status, clientIp);
         } catch (IOException e) {
             McApiMod.LOGGER.error("Error sending HTTP response", e);
         }
+    }
+
+    public static boolean checkRateLimit(String key) {
+        RateLimitEntry entry = INSTANCE.rateLimitMap.get(key);
+        long now = Instant.now().toEpochMilli();
+        if (entry == null || now - entry.windowStart > 1000) {
+            INSTANCE.rateLimitMap.put(key, new RateLimitEntry(now, 1));
+            return true;
+        }
+        if (entry.count >= 60) {
+            return false;
+        }
+        INSTANCE.rateLimitMap.put(key, new RateLimitEntry(entry.windowStart, entry.count + 1));
+        return true;
     }
 
     static class RootHandler implements HttpHandler {

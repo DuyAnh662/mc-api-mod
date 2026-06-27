@@ -25,40 +25,74 @@ Created and developed by [@DuyAnh662](https://github.com/DuyAnh662)
 
 ### How to Use
 
-By default, the mod starts an HTTP Server on port `25566`. You can change this or add security via JVM arguments (e.g., `-Dmcapi.port=8080 -Dmcapi.key=my_secret_token`).
+By default, the mod starts an HTTP Server bound to **127.0.0.1** (localhost only) on port `25566`.
 
-You can send HTTP POST/GET requests to the server. Here are some examples using `curl` in the terminal:
+#### Authentication (Required)
+**Auth is mandatory.** If you don't provide a token via `-Dmcapi.key`, the mod will generate a **random 64-character hex token** on startup and print it to the log. Look for:
+```
+mcapi.key not provided! Generated random auth token: <token>
+```
+All API requests require the header `Authorization: Bearer <token>`.
+
+**JVM configuration properties:**
+| Property | Default | Description |
+|----------|---------|-------------|
+| `-Dmcapi.port=25566` | `25566` | HTTP server port |
+| `-Dmcapi.key=<token>` | Auto-generated | Bearer token (mandatory) |
+| `-Dmcapi.host=127.0.0.1` | `127.0.0.1` | Bind address (use `0.0.0.0` for external access) |
+
+**Security notes:**
+- Server binds to **localhost only** by default. Use `-Dmcapi.host=0.0.0.0` for LAN/external access.
+- Rate-limited to **60 requests/second** per IP.
+- Request body limited to **1 MB**.
+- Block/item IDs must follow `namespace:path` format (e.g., `minecraft:stone`).
+
+Here are some examples using `curl` in the terminal (replace `<token>` with your actual token):
 
 **1. Break a block**
 ```bash
 curl -X POST http://localhost:25566/api/block/break \
+  -H "Authorization: Bearer <token>" \
   -d '{"x": 10, "y": 64, "z": 10}'
 ```
 
 **2. Place a block**
 ```bash
 curl -X POST http://localhost:25566/api/block/place \
+  -H "Authorization: Bearer <token>" \
   -d '{"x": 10, "y": 64, "z": 10, "block": "minecraft:diamond_block"}'
 ```
 
 **3. Set Weather to Thunder**
 ```bash
 curl -X POST http://localhost:25566/api/world/weather \
+  -H "Authorization: Bearer <token>" \
   -d '{"weather": "thunder", "duration": 6000}'
 ```
 
 **4. Execute Raw Command**
 ```bash
 curl -X POST http://localhost:25566/api/command \
+  -H "Authorization: Bearer <token>" \
   -d '{"command": "give @a minecraft:netherite_sword"}'
 ```
 
 For a complete list of endpoints, simply make a GET request to the root API endpoint:
 ```bash
-curl http://localhost:25566/api/
+curl -H "Authorization: Bearer <token>" http://localhost:25566/api/
 ```
 ### ⚠️ Important Notice & Disclaimer
 By using this mod, you agree to comply with Mojang's [Minecraft End User License Agreement (EULA)](https://minecraft.net) and [Commercial Usage Guidelines](https://minecraft.net). 
+
+*   This mod is provided under the MIT License for the source code, but its utilization within Minecraft must strictly respect Mojang's terms.
+*   The developer (@DuyAnh662) is not responsible for any misuse of this API that violates Minecraft's EULA (e.g., creating unauthorized monetization systems, paywalls, or unfair advantages on public servers).
+*   This is an unofficial modification and is not affiliated with or endorsed by Mojang Studios or Microsoft.
+
+### License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### ⚠️ Important Notice & Disclaimer
+By using this mod, you agree to comply with Mojang's [Minecraft End User License Agreement (EULA)](https://minecraft.net) and [Commercial Usage Guidelines](https://minecraft.net).
 
 *   This mod is provided under the MIT License for the source code, but its utilization within Minecraft must strictly respect Mojang's terms.
 *   The developer (@DuyAnh662) is not responsible for any misuse of this API that violates Minecraft's EULA (e.g., creating unauthorized monetization systems, paywalls, or unfair advantages on public servers).
@@ -85,38 +119,63 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Hướng Dẫn Sử Dụng
 
-Mặc định, mod sẽ chạy một HTTP Server ở cổng `25566`. Bạn có thể thay đổi cổng hoặc thêm bảo mật bằng tham số khởi chạy JVM (ví dụ: `-Dmcapi.port=8080 -Dmcapi.key=my_secret_token`).
+Mặc định, mod chạy HTTP Server ở cổng `25566`, chỉ bind tại **127.0.0.1** (localhost).
 
-Bạn có thể gửi các HTTP Request (POST/GET) đến server. Dưới đây là một số ví dụ sử dụng lệnh `curl` trên Terminal:
+#### Xác Thực (Bắt Buộc)
+**Auth là bắt buộc.** Nếu bạn không truyền `-Dmcapi.key`, mod sẽ tự động **sinh token ngẫu nhiên 64 ký tự hex** và in ra log. Tìm dòng:
+```
+mcapi.key not provided! Generated random auth token: <token>
+```
+Mọi request API đều cần header `Authorization: Bearer <token>`.
+
+**Cấu hình qua JVM properties:**
+| Property | Mặc định | Mô tả |
+|----------|----------|-------|
+| `-Dmcapi.port=25566` | `25566` | Cổng HTTP server |
+| `-Dmcapi.key=<token>` | Tự sinh | Bearer token (bắt buộc) |
+| `-Dmcapi.host=127.0.0.1` | `127.0.0.1` | Địa chỉ bind (dùng `0.0.0.0` để truy cập ngoài) |
+
+**Lưu ý bảo mật:**
+- Server chỉ **localhost** mặc định. Dùng `-Dmcapi.host=0.0.0.0` nếu cần truy cập từ LAN/mạng ngoài.
+- Giới hạn **60 requests/giây** mỗi IP.
+- Body request tối đa **1 MB**.
+- ID block/item phải đúng định dạng `namespace:path` (VD: `minecraft:stone`).
+
+Ví dụ với `curl` (thay `<token>` bằng token thật):
 
 **1. Phá 1 khối**
 ```bash
 curl -X POST http://localhost:25566/api/block/break \
+  -H "Authorization: Bearer <token>" \
   -d '{"x": 10, "y": 64, "z": 10}'
 ```
 
 **2. Đặt 1 khối**
 ```bash
 curl -X POST http://localhost:25566/api/block/place \
+  -H "Authorization: Bearer <token>" \
   -d '{"x": 10, "y": 64, "z": 10, "block": "minecraft:diamond_block"}'
 ```
 
 **3. Đổi thời tiết thành Mưa Bão**
 ```bash
 curl -X POST http://localhost:25566/api/world/weather \
+  -H "Authorization: Bearer <token>" \
   -d '{"weather": "thunder", "duration": 6000}'
 ```
 
 **4. Chạy 1 lệnh Minecraft bất kỳ**
 ```bash
 curl -X POST http://localhost:25566/api/command \
+  -H "Authorization: Bearer <token>" \
   -d '{"command": "give @a minecraft:netherite_sword"}'
 ```
 
-Để xem toàn bộ danh sách các API (Endpoints) hiện có, bạn chỉ cần mở trình duyệt hoặc gọi lệnh GET tới đường dẫn gốc:
+Để xem toàn bộ danh sách các API (Endpoints) hiện có, bạn chỉ cần gọi:
 ```bash
-curl http://localhost:25566/api/
+curl -H "Authorization: Bearer <token>" http://localhost:25566/api/
 ```
+
 ### ⚠️ Lưu ý quan trọng & Tuyên bố từ chối trách nhiệm
 Bằng việc sử dụng bản mod này, bạn đồng ý tuân thủ [Thỏa thuận cấp phép người dùng cuối (EULA) của Minecraft](https://minecraft.net) và [Hướng dẫn sử dụng thương mại](https://minecraft.net) của Mojang.
 

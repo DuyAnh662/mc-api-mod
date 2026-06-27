@@ -16,8 +16,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.registries.BuiltInRegistries;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class BlockHandler {
+
+    private static final Pattern RESOURCE_ID = Pattern.compile("^[a-z0-9_.-]+:[a-z0-9_./-]+$");
 
     private static BlockPos parseBlockPos(JsonObject body) {
         int x = body.get("x").getAsInt();
@@ -100,6 +103,10 @@ public class BlockHandler {
 
             BlockPos pos = parseBlockPos(body);
             String blockId = body.get("block").getAsString();
+            if (!RESOURCE_ID.matcher(blockId).matches()) {
+                ApiServer.sendResponse(exchange, 400, ApiResponse.jsonError(400, "Invalid block id format (expected namespace:path)"));
+                return;
+            }
             ApiServer.getInstance().queueCommand((server) -> {
 
                 // Use command to place block - cross-version compatible
@@ -126,6 +133,10 @@ public class BlockHandler {
         public void handle(HttpExchange exchange) throws IOException {
             if (!ApiServer.getInstance().checkAuth(exchange)) {
                 ApiServer.sendResponse(exchange, 401, ApiResponse.jsonError(401, "Unauthorized"));
+                return;
+            }
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                ApiServer.sendResponse(exchange, 405, ApiResponse.jsonError(405, "Method not allowed"));
                 return;
             }
             String query = exchange.getRequestURI().getQuery();

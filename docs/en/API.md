@@ -4,12 +4,40 @@ Minecraft API Mod provides an HTTP REST API running inside Minecraft, allowing y
 
 ---
 
+## 0. Authentication (Required)
+
+**All API requests require authentication.** Provide your token via the `Authorization` header:
+
+```bash
+-H "Authorization: Bearer <your_token>"
+```
+
+If you did not set `-Dmcapi.key=<token>` in JVM arguments, the mod generates a random 64-character hex token on startup and prints it to the log:
+```
+mcapi.key not provided! Generated random auth token: <your_token>
+```
+
+**Configuration properties:**
+| JVM Property | Default | Description |
+|-------------|---------|-------------|
+| `-Dmcapi.key=<token>` | Auto-generated | Bearer token |
+| `-Dmcapi.port=25566` | `25566` | HTTP server port |
+| `-Dmcapi.host=127.0.0.1` | `127.0.0.1` | Bind address (use `0.0.0.0` for LAN) |
+
+**Security limits:**
+- Rate-limited: **60 requests/second** per IP.
+- Max body size: **1 MB**.
+- Block/item IDs must follow `namespace:path` format (e.g., `minecraft:stone`).
+- Server binds to **localhost only** by default.
+
+---
+
 ## 1. Complete Command Structure
 
 To call the API successfully, you need to send a standard HTTP Request with these 4 elements:
 1. **HTTP Method**: `GET` (retrieve data) or `POST` (perform action).
 2. **Endpoint (URL)**: The command path.
-3. **Headers**: Always need `Content-Type: application/json` for POST requests with JSON body.
+3. **Headers**: `Authorization: Bearer <token>` (required) + `Content-Type: application/json` for POST.
 4. **Body (Payload)**: JSON data (Note: on terminal, JSON must be wrapped in single quotes `'...'`).
 
 ---
@@ -28,6 +56,7 @@ Press one or more keys. Supports **all keyboard keys**, including special keys.
 **Example — Walk forward for 1 second:**
 ```bash
 curl -X POST http://localhost:25566/api/client/input \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"keys": ["w"], "duration": 1000}'
 ```
@@ -91,6 +120,7 @@ Find a button on the current screen and click it.
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/client/click_button \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"button_text": "singleplayer"}'
 ```
@@ -100,6 +130,7 @@ Quickly change display configuration.
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/client/settings \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"fov": 90, "renderDistance": 12}'
 ```
@@ -116,22 +147,22 @@ Get information from the F3 Debug screen **without opening F3**. Can get all or 
 
 **Example — Get all info:**
 ```bash
-curl -X GET http://localhost:25566/api/client/debug
+curl -H "Authorization: Bearer <token>" -X GET http://localhost:25566/api/client/debug
 ```
 
 **Example — Get FPS only:**
 ```bash
-curl -X GET "http://localhost:25566/api/client/debug?fields=fps"
+curl -H "Authorization: Bearer <token>" -X GET "http://localhost:25566/api/client/debug?fields=fps"
 ```
 
 **Example — Get FPS and days played:**
 ```bash
-curl -X GET "http://localhost:25566/api/client/debug?fields=fps,days"
+curl -H "Authorization: Bearer <token>" -X GET "http://localhost:25566/api/client/debug?fields=fps,days"
 ```
 
 **Example — Get coordinates and biome:**
 ```bash
-curl -X GET "http://localhost:25566/api/client/debug?fields=xyz,biome"
+curl -H "Authorization: Bearer <token>" -X GET "http://localhost:25566/api/client/debug?fields=xyz,biome"
 ```
 
 ---
@@ -142,6 +173,7 @@ curl -X GET "http://localhost:25566/api/client/debug?fields=xyz,biome"
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/player/teleport \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"x": 100, "y": 70, "z": 200}'
 ```
@@ -181,6 +213,7 @@ curl -X POST http://localhost:25566/api/player/look \
 **Example — Spin 360 degrees:**
 ```bash
 curl -X POST http://localhost:25566/api/player/look \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"deltaYaw": 360}'
 ```
@@ -188,19 +221,21 @@ curl -X POST http://localhost:25566/api/player/look \
 ### 3.3 Jump (`POST /api/player/jump`) and Swing Hand (`POST /api/player/swing`)
 **Full cURL example:**
 ```bash
-curl -X POST http://localhost:25566/api/player/jump
+curl -X POST http://localhost:25566/api/player/jump \
+     -H "Authorization: Bearer <token>"
 ```
 ```bash
-curl -X POST http://localhost:25566/api/player/swing
+curl -X POST http://localhost:25566/api/player/swing \
+     -H "Authorization: Bearer <token>"
 ```
 
 ### 3.4 Get Position and Player List (`GET`)
 **Full cURL example:**
 ```bash
-curl -X GET http://localhost:25566/api/player/position
+curl -H "Authorization: Bearer <token>" -X GET http://localhost:25566/api/player/position
 ```
 ```bash
-curl -X GET http://localhost:25566/api/player/list
+curl -H "Authorization: Bearer <token>" -X GET http://localhost:25566/api/player/list
 ```
 
 ---
@@ -211,6 +246,7 @@ curl -X GET http://localhost:25566/api/player/list
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/block/place \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"x": 10, "y": 64, "z": 10, "block": "minecraft:diamond_block"}'
 ```
@@ -219,6 +255,7 @@ curl -X POST http://localhost:25566/api/block/place \
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/block/break \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"x": 10, "y": 64, "z": 10}'
 ```
@@ -227,6 +264,7 @@ curl -X POST http://localhost:25566/api/block/break \
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/block/interact \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"x": 10, "y": 64, "z": 10}'
 ```
@@ -234,7 +272,7 @@ curl -X POST http://localhost:25566/api/block/interact \
 ### 4.4 Get Block Info (`GET /api/block/get`)
 **Full cURL example:**
 ```bash
-curl "http://localhost:25566/api/block/get?x=10&y=64&z=10"
+curl -H "Authorization: Bearer <token>" "http://localhost:25566/api/block/get?x=10&y=64&z=10"
 ```
 
 ---
@@ -246,6 +284,7 @@ Switch held item (Hotbar slot 0 -> 8).
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/inventory/select \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"slot": 2}'
 ```
@@ -254,6 +293,7 @@ curl -X POST http://localhost:25566/api/inventory/select \
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/inventory/set \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"slot": 0, "item": "minecraft:netherite_sword", "count": 1}'
 ```
@@ -262,6 +302,7 @@ curl -X POST http://localhost:25566/api/inventory/set \
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/inventory/drop \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"slot": 0, "all": true}'
 ```
@@ -269,7 +310,7 @@ curl -X POST http://localhost:25566/api/inventory/drop \
 ### 5.4 Get Inventory Contents (`GET /api/inventory/get`)
 **Full cURL example:**
 ```bash
-curl -X GET http://localhost:25566/api/inventory/get
+curl -H "Authorization: Bearer <token>" -X GET http://localhost:25566/api/inventory/get
 ```
 
 ---
@@ -280,6 +321,7 @@ curl -X GET http://localhost:25566/api/inventory/get
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/world/time \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"time": 1000}'
 ```
@@ -288,6 +330,7 @@ curl -X POST http://localhost:25566/api/world/time \
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/world/weather \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"weather": "thunder", "duration": 6000}'
 ```
@@ -296,6 +339,7 @@ curl -X POST http://localhost:25566/api/world/weather \
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/command \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"command": "kill @e[type=zombie]"}'
 ```
@@ -304,6 +348,7 @@ curl -X POST http://localhost:25566/api/command \
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/chat/send \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"message": "Hello Server!"}'
 ```
@@ -312,11 +357,13 @@ curl -X POST http://localhost:25566/api/chat/send \
 **Full cURL example:**
 ```bash
 curl -X POST http://localhost:25566/api/settings/gamerule \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"rule": "keepInventory", "value": "true"}'
 ```
 ```bash
 curl -X POST http://localhost:25566/api/settings/difficulty \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"difficulty": "hard"}'
 ```
@@ -331,19 +378,21 @@ Send **a list of commands** to execute sequentially. Supports both **JSON** and 
 #### JSON syntax:
 ```bash
 curl -X POST http://localhost:25566/api/script \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '[
-       {"action": "key", "keys": ["w", "ctrl"], "duration": 2000},
-       {"action": "delay", "duration": 500},
-       {"action": "look", "deltaYaw": 90},
-       {"action": "chat", "message": "Done spinning!"},
-       {"action": "command", "command": "time set day"}
-     ]'
+        {"action": "key", "keys": ["w", "ctrl"], "duration": 2000},
+        {"action": "delay", "duration": 500},
+        {"action": "look", "deltaYaw": 90},
+        {"action": "chat", "message": "Done spinning!"},
+        {"action": "command", "command": "time set day"}
+      ]'
 ```
 
 #### Text syntax (ultra-short, one command per line):
 ```bash
 curl -X POST http://localhost:25566/api/script \
+     -H "Authorization: Bearer <token>" \
      -d 'key w,ctrl 2000
 delay 500
 look 90 0
@@ -364,6 +413,7 @@ command time set day'
 **Practical example — Auto-mining bot:**
 ```bash
 curl -X POST http://localhost:25566/api/script \
+     -H "Authorization: Bearer <token>" \
      -d 'key w 500
 key mouse_left 200
 delay 100
@@ -376,16 +426,19 @@ Immediately stop all scripts, held keys, and pending commands.
 
 **Full cURL example:**
 ```bash
-curl -X POST http://localhost:25566/api/cancel
+curl -X POST http://localhost:25566/api/cancel \
+     -H "Authorization: Bearer <token>"
 ```
 
 **Use case:** You start holding W for 60 seconds, but want to stop after 5 seconds:
 ```bash
 # Start walking
 curl -X POST http://localhost:25566/api/client/input \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"keys": ["w"], "duration": 60000}'
 
 # 5 seconds later, cancel!
-curl -X POST http://localhost:25566/api/cancel
+curl -X POST http://localhost:25566/api/cancel \
+     -H "Authorization: Bearer <token>"
 ```

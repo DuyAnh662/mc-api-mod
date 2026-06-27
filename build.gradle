@@ -63,7 +63,7 @@ publishing {
     }
     repositories {
         maven {
-            url = uri("file://${project.projectDir}/repo")
+            url = project.projectDir.toPath().resolve("repo").toUri()
         }
     }
 }
