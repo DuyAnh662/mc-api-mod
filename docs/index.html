@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC-API Mod Documentation</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='55,5 25,55 45,55 35,95 75,40 55,40 65,5' fill='%23ffffff'/></svg>">
+<style>
+:root{--bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;--text:#f0f0f0;--text2:#a0a0a0;--text3:#666666;--accent:#ffffff;--accent2:#2a2a2a;--accent3:#555555;--border:#222222;--hover:#1a1a1a;--code-bg:#0e0e0e;--code-border:#1a1a1a;--sidebar-w:280px;--toc-w:220px;--header-h:56px;--font:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--mono:'JetBrains Mono','Fira Code','Cascadia Code',Consolas,monospace}
+[data-theme="light"]{--bg:#ffffff;--bg2:#f5f5f5;--bg3:#ebebeb;--text:#1a1a1a;--text2:#666666;--text3:#999999;--accent:#000000;--accent2:#d4d4d4;--accent3:#aaaaaa;--border:#d4d4d4;--hover:#f0f0f0;--code-bg:#fafafa;--code-border:#e0e0e0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 24px)}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+a{color:var(--text);text-decoration:none;transition:all .15s;border-bottom:1px solid transparent}
+a:hover{color:var(--text);border-bottom-color:var(--text3)}
+h1{font-size:2rem;font-weight:700;margin:0 0 .75rem 0;letter-spacing:-.025em;line-height:1.3}
+h2{font-size:1.45rem;font-weight:600;margin:2.5rem 0 .75rem 0;padding-bottom:.3rem;border-bottom:1px solid var(--border);letter-spacing:-.01em}
+h3{font-size:1.15rem;font-weight:600;margin:1.75rem 0 .5rem 0}
+h4{font-size:1rem;font-weight:600;margin:1.25rem 0 .4rem 0}
+h2[id],h3[id],h4[id]{cursor:pointer;position:relative}
+h2[id]:hover::before,h3[id]:hover::before,h4[id]:hover::before{content:'#';position:absolute;margin-left:-1em;color:var(--text3);opacity:.6;font-weight:400}
+p{margin:0 0 1rem 0}
+ul,ol{margin:0 0 1rem 0;padding-left:1.5rem}
+li{margin:.25rem 0}
+code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.875em;color:var(--text2);border:1px solid var(--code-border)}
+pre{background:var(--code-bg);border:1px solid var(--code-border);border-radius:8px;padding:16px;overflow-x:auto;margin:0 0 1rem 0;position:relative}
+pre code{background:transparent;padding:0;font-size:.85em;color:var(--text);border:none}
+table{width:100%;border-collapse:collapse;margin:0 0 1rem 0;font-size:.925em}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg2);font-weight:600}
+tr:hover{background:var(--hover)}
+blockquote{border-left:3px solid var(--text3);padding:8px 16px;margin:0 0 1rem 0;background:var(--bg2);border-radius:0 6px 6px 0;color:var(--text2);font-size:.95em}
+blockquote p{margin:0}
+hr{border:none;border-top:1px solid var(--border);margin:2rem 0}
+.header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgba(10,10,10,.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;z-index:100;gap:8px}
+[data-theme="light"] .header{background:rgba(255,255,255,.85)}
+.header-logo{font-weight:700;font-size:1rem;color:var(--text);display:flex;align-items:center;gap:8px;white-space:nowrap;cursor:pointer;margin-right:12px;text-decoration:none}
+.header-logo:hover{opacity:.7;text-decoration:none}
+.header-logo svg{width:22px;height:22px;flex-shrink:0}
+.header-search{flex:1;max-width:420px;position:relative}
+.header-search input{width:100%;padding:7px 12px 7px 34px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:.875rem;outline:none;transition:border .2s,background .2s}
+.header-search input:focus{border-color:var(--text2);background:var(--bg2)}
+.header-search input::placeholder{color:var(--text3)}
+.header-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+.header-actions{display:flex;gap:4px;align-items:center;margin-left:auto}
+.icon-btn{background:transparent;border:none;color:var(--text2);cursor:pointer;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:1rem;text-decoration:none}
+.icon-btn:hover{color:var(--text);background:var(--hover)}
+.icon-btn svg{width:20px;height:20px}
+.lang-btn{background:var(--bg);border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:.78rem;transition:all .15s;white-space:nowrap}
+.lang-btn:hover{color:var(--text);border-color:var(--text2);background:var(--hover)}
+.sidebar{position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:50;padding:8px 0}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sidebar-section{margin:2px 0}
+.sidebar-head{display:flex;align-items:center;gap:6px;padding:7px 16px;cursor:pointer;font-weight:600;font-size:.78rem;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;transition:color .15s;user-select:none}
+.sidebar-head:hover{color:var(--text2)}
+.sidebar-head svg{width:14px;height:14px;flex-shrink:0;opacity:.6}
+.sidebar-head .arrow{font-size:.55rem;margin-left:auto;transition:transform .2s;opacity:.5}
+.sidebar-head .arrow.open{transform:rotate(90deg)}
+.sidebar-items{overflow:hidden;max-height:0;transition:max-height .22s ease}
+.sidebar-items.open{max-height:3000px}
+.sidebar-item{display:block;padding:5px 16px 5px 28px;font-size:.85rem;color:var(--text2);cursor:pointer;transition:all .12s;border-left:2px solid transparent;text-decoration:none;border-radius:0 4px 4px 0}
+.sidebar-item:hover{color:var(--text);background:var(--hover)}
+.sidebar-item.active{color:var(--text);border-left-color:var(--text);background:var(--hover)}
+.main{margin-left:var(--sidebar-w);margin-top:var(--header-h);padding:40px 56px;max-width:840px;min-height:calc(100vh - var(--header-h))}
+.toc-sidebar{position:fixed;top:var(--header-h);right:0;bottom:0;width:var(--toc-w);padding:24px 12px 24px 8px;overflow-y:auto;z-index:40;display:none}
+.toc-sidebar::-webkit-scrollbar{width:3px}
+.toc-sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.toc-sidebar.visible{display:block}
+.toc-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:8px;padding-left:8px}
+.toc-link{display:block;padding:4px 8px;font-size:.78rem;color:var(--text3);border-left:2px solid transparent;transition:all .12s;text-decoration:none;line-height:1.4}
+.toc-link:hover{color:var(--text2)}
+.toc-link.active{color:var(--text);border-left-color:var(--text)}
+.toc-link.h3{padding-left:20px;font-size:.74rem}
+.toc-link.h4{padding-left:32px;font-size:.72rem}
+.page-footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+.page-nav{display:flex;justify-content:space-between;gap:16px;margin-bottom:1rem}
+.page-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:.85rem;transition:all .15s;text-decoration:none}
+.page-nav a:hover{color:var(--text);border-color:var(--text2);background:var(--hover)}
+.page-nav .nav-next{margin-left:auto}
+.page-footer-links{display:flex;gap:16px;align-items:center;font-size:.82rem;color:var(--text3);flex-wrap:wrap}
+.page-footer-links a{color:var(--text3);display:inline-flex;align-items:center;gap:4px;border-bottom:none}
+.page-footer-links a:hover{color:var(--text);border-bottom:none}
+.alert{padding:12px 16px;border-radius:8px;margin:0 0 1rem 0;font-size:.93em;line-height:1.5}
+.alert-info{background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+.alert-warn{background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+.alert-danger{background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+.alert-success{background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+.param-table td:first-child{font-family:var(--mono);font-size:.9em;white-space:nowrap;color:var(--text2)}
+.param-table td:nth-child(2){font-size:.9em;color:var(--text2)}
+.copy-btn{position:absolute;top:6px;right:6px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:3px 8px;border-radius:4px;cursor:pointer;font-size:.72rem;opacity:0;transition:opacity .15s}
+pre:hover .copy-btn{opacity:1}
+.copy-btn:hover{background:var(--text);color:var(--bg);border-color:var(--text)}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:500;margin-right:4px;vertical-align:middle;background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.endpoint{margin:1rem 0;padding:10px 14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);transition:border-color .15s}
+.endpoint:hover{border-color:var(--text2)}
+.endpoint-url{font-family:var(--mono);font-size:.95rem;font-weight:600;color:var(--text)}
+.endpoint-desc{font-size:.85rem;color:var(--text2);margin-top:2px}
+.search-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:flex-start;justify-content:center;padding-top:80px}
+.search-overlay.open{display:flex}
+.search-modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:580px;max-width:92vw;max-height:65vh;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.7)}
+.search-modal input{width:100%;padding:14px 16px;border:none;background:transparent;color:var(--text);font-size:.95rem;outline:none;border-bottom:1px solid var(--border);font-family:var(--font)}
+.search-modal input::placeholder{color:var(--text3)}
+.search-results{overflow-y:auto;max-height:55vh}
+.search-result{padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
+.search-result:last-child{border-bottom:none}
+.search-result:hover{background:var(--hover)}
+.search-result-title{font-weight:600;color:var(--text);font-size:.9rem}
+.search-result-path{font-size:.75rem;color:var(--text3);margin-top:2px}
+.search-result-preview{font-size:.82rem;color:var(--text2);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-highlight{background:var(--text3);border-radius:2px;padding:0 2px;color:var(--bg)}
+.mobile-nav{display:none}
+.sidebar-overlay{display:none}
+@media(max-width:1100px){
+.toc-sidebar{display:none!important}
+.main{margin-right:0}
+}
+@media(max-width:768px){
+.sidebar{transform:translateX(-100%);transition:transform .25s ease;z-index:150;box-shadow:4px 0 24px rgba(0,0,0,.5)}
+.sidebar.open{transform:translateX(0)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:149}
+.sidebar-overlay.open{display:block}
+.main{margin-left:0;padding:24px 16px;max-width:100%}
+.mobile-nav{display:flex;align-items:center;gap:4px}
+.mobile-nav button{background:transparent;border:none;color:var(--text2);font-size:1.3rem;cursor:pointer;padding:4px;border-radius:4px;line-height:1}
+.mobile-nav button:hover{background:var(--hover);color:var(--text)}
+.header-search{max-width:32px}
+.header-search input{width:32px;padding:7px;cursor:pointer}
+.header-search input:focus{width:200px;position:absolute;right:0;top:0}
+.header-search input::placeholder{opacity:0}
+.header-search svg{left:8px}
+.lang-btn{font-size:.7rem;padding:4px 6px}
+}
+@media print{
+.sidebar,.header,.toc-sidebar,.copy-btn,.icon-btn,.lang-btn,.search-overlay,.page-nav,.page-footer-links{display:none!important}
+.main{margin:0;padding:0;max-width:100%}
+body{background:#fff;color:#000}
+pre,code{background:#f5f5f5!important}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="mobile-nav">
+    <button onclick="toggleSidebar()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+    </button>
+  </div>
+  <a href="#" class="header-logo" onclick="navigate('home');return false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h6v8l8-12h-6z"/></svg>
+    MC-API <span style="font-weight:400;color:var(--text2)">Docs</span>
+  </a>
+  <div class="header-search">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="7.5"/><line x1="16" y1="16" x2="22" y2="22"/></svg>
+    <input type="text" id="searchInput" placeholder="Search docs..." onfocus="openSearch()" onkeyup="searchDocs(event)">
+  </div>
+  <div class="header-actions">
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">VIỆT</button>
+    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    </button>
+    <a href="https://github.com/DuyAnh662/mc-api-mod" target="_blank" class="icon-btn" title="GitHub" aria-label="GitHub">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+    </a>
+  </div>
+</header>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div id="sidebarContent"></div>
+</nav>
+
+<aside class="toc-sidebar" id="tocSidebar">
+  <div id="tocContent"></div>
+</aside>
+
+<div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
+  <div class="search-modal">
+    <input type="text" id="searchModalInput" placeholder="Search documentation..." onkeyup="searchDocs(event)" autofocus>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<main class="main" id="mainContent">
+  <div id="contentContainer"></div>
+</main>
+<script>
+let lang='en',theme='dark',currentPage='home',searchTerm='',navHistory=[];
+const T=document.querySelector('[data-theme]'),SI=document.getElementById('searchInput'),SMI=document.getElementById('searchModalInput'),SO=document.getElementById('searchOverlay'),SR=document.getElementById('searchResults'),CC=document.getElementById('contentContainer'),SC=document.getElementById('sidebarContent'),TC=document.getElementById('tocContent'),LB=document.getElementById('langBtn'),TB=document.getElementById('themeBtn');
+
+function qs(s){return document.querySelector(s)}
+function qsa(s){return document.querySelectorAll(s)}
+
+// Load saved preferences
+try{
+const t=localStorage.getItem('mcapi-theme');if(t){theme=t;T.setAttribute('data-theme',theme)}
+const l=localStorage.getItem('mcapi-lang');if(l&&l!=='null')lang=l
+}catch(e){}
+LB.textContent=lang==='en'?'VIỆT':'EN';
+
+function toggleTheme(){theme=theme==='dark'?'light':'dark';T.setAttribute('data-theme',theme);try{localStorage.setItem('mcapi-theme',theme)}catch(e){}}
+function toggleLang(){lang=lang==='en'?'vi':'en';LB.textContent=lang==='en'?'VIỆT':'EN';try{localStorage.setItem('mcapi-lang',lang)}catch(e){};renderPage(currentPage)}
+function t(key){return translations[lang]&&translations[lang][key]||translations.en[key]||key}
+function h(str){const d=document.createElement('div');d.textContent=str;return d.innerHTML}
+
+// ====== TRANSLATIONS ======
+const translations={en:{home:'Home',guide:'Guide',api:'API Reference',schema:'Schema',ai:'AI Agent',registry:'Registry',changelog:'Changelog',search:'Search...',prevPage:'Previous',nextPage:'Next',editPage:'Edit this page',viewSource:'View source',onGitHub:'on GitHub',builtWith:'Built with',docsHome:'Documentation Home',gettingStarted:'Getting Started',apiReference:'API Reference',observationSchema:'Observation Schema',aiAgentGuide:'AI Agent Guide',registryReference:'Registry Reference',quickStart:'Quick Start',coreFeatures:'Core Features',restApi:'REST API',webSocket:'WebSocket',events:'Events',dataFormats:'Data Formats',examples:'Examples',troubleshooting:'Troubleshooting',sidebarToggle:'Toggle sidebar',themeToggle:'Toggle theme',languageToggle:'Toggle language',searchDocs:'Search documentation',noResults:'No results found',typeToSearch:'Type to search...',homeTitle:'MC-API Mod Documentation',homeSubtitle:'Complete API documentation for the MC-API Fabric mod — REST API, WebSocket, observations, and AI agent integration.',homeGetStarted:'Get Started',homeViewApi:'View API Reference',homeWhatsNew:'What\'s New',homeWhatsNewDesc:'Latest features, changes, and improvements to MC-API.',homeQuickStartTitle:'Quick Start',homeQuickStartDesc:'Get up and running with MC-API in minutes.',homeExamplesTitle:'Examples',homeExamplesDesc:'Practical examples and use cases.',section:'Section'},vi:{home:'Trang chủ',guide:'Hướng dẫn',api:'API Tham khảo',schema:'Schema',ai:'AI Agent',registry:'Registry',changelog:'Nhật ký thay đổi',search:'Tìm kiếm...',prevPage:'Trang trước',nextPage:'Trang sau',editPage:'Sửa trang này',viewSource:'Xem mã nguồn',onGitHub:'trên GitHub',builtWith:'Xây dựng với',docsHome:'Tài liệu chính',gettingStarted:'Bắt đầu',apiReference:'API Tham khảo',observationSchema:'Schema Quan sát',aiAgentGuide:'Hướng dẫn AI Agent',registryReference:'Registry Tham khảo',quickStart:'Khởi động nhanh',coreFeatures:'Tính năng chính',restApi:'REST API',webSocket:'WebSocket',events:'Sự kiện',dataFormats:'Định dạng dữ liệu',examples:'Ví dụ',troubleshooting:'Khắc phục sự cố',sidebarToggle:'Mở/đóng sidebar',themeToggle:'Chuyển đổi giao diện',languageToggle:'Chuyển đổi ngôn ngữ',searchDocs:'Tìm kiếm tài liệu',noResults:'Không tìm thấy kết quả',typeToSearch:'Gõ để tìm kiếm...',homeTitle:'Tài liệu MC-API Mod',homeSubtitle:'Tài liệu API đầy đủ cho MC-API Fabric mod — REST API, WebSocket, observations, và tích hợp AI agent.',homeGetStarted:'Bắt đầu',homeViewApi:'Xem API Tham khảo',homeWhatsNew:'Có gì mới',homeWhatsNewDesc:'Các tính năng, thay đổi và cải tiến mới nhất cho MC-API.',homeQuickStartTitle:'Khởi động nhanh',homeQuickStartDesc:'Bắt đầu với MC-API trong vài phút.',homeExamplesTitle:'Ví dụ',homeExamplesDesc:'Các ví dụ thực tế và trường hợp sử dụng.',section:'Phần'}};
+
+// ====== SIDEBAR STRUCTURE ======
+const sidebarSections=[{key:'home',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',pages:[{id:'home',labelEN:'Home',labelVI:'Trang chủ'}]},{key:'guide',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',pages:[{id:'getting-started.auth',labelEN:'Authentication & Configuration',labelVI:'Xác thực & Cấu hình'},{id:'getting-started.usage',labelEN:'How to Use',labelVI:'Cách sử dụng'}]},{key:'api',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>',pages:[{id:'api.client',labelEN:'Client Commands',labelVI:'Lệnh Client'},{id:'api.player',labelEN:'Player Commands',labelVI:'Lệnh Player'},{id:'api.block',labelEN:'Block Commands',labelVI:'Lệnh Block'},{id:'api.inventory',labelEN:'Inventory Commands',labelVI:'Lệnh Inventory'},{id:'api.world',labelEN:'World & Server',labelVI:'Thế giới & Server'},{id:'api.script',labelEN:'Script System',labelVI:'Hệ thống Script'},{id:'api.ai',labelEN:'AI Endpoints',labelVI:'AI Endpoints'}]},{key:'schema',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',pages:[{id:'obs.overview',labelEN:'Schema Overview',labelVI:'Tổng quan Schema'},{id:'obs.player',labelEN:'Player State',labelVI:'Trạng thái Người chơi'},{id:'obs.inventory',labelEN:'Inventory',labelVI:'Kho đồ'},{id:'obs.target',labelEN:'Target & Viewport',labelVI:'Mục tiêu & Góc nhìn'},{id:'obs.screen',labelEN:'Screen Observation',labelVI:'Quan sát Màn hình'}]},{key:'ai',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 014 4c0 2-2 3-4 5-2-2-4-3-4-5a4 4 0 014-4z"/><path d="M6 14a6 6 0 0112 0"/><path d="M8 18a4 4 0 018 0"/><path d="M4 22a8 8 0 0116 0"/></svg>',pages:[{id:'ai-guide.core',labelEN:'Core Loop',labelVI:'Vòng lặp chính'},{id:'ai-guide.actions',labelEN:'Action Reference',labelVI:'Tham khảo Hành động'},{id:'ai-guide.workflows',labelEN:'Workflows',labelVI:'Workflows'},{id:'ai-guide.cheatsheet',labelEN:'Quick Reference',labelVI:'Tham khảo Nhanh'}]},{key:'registry',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>',pages:[{id:'registry.basics',labelEN:'Basics & Layout',labelVI:'Cơ bản & Bố cục'},{id:'registry.entities',labelEN:'Entity IDs',labelVI:'ID Thực thể'},{id:'registry.blocks-items',labelEN:'Common Blocks & Items',labelVI:'Khối & Vật phẩm Phổ biến'}]},{key:'changelog',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',pages:[{id:'changelog',labelEN:'Changelog',labelVI:'Nhật ký thay đổi'}]}];
+
+// ====== RENDER SIDEBAR ======
+function renderSidebar(activeId){
+let html='',count=0;
+sidebarSections.forEach(s=>{
+const labelKey=s.key==='home'?'home':s.key;
+const sectionLabel=t(labelKey);
+const hasActive=s.pages.some(p=>p.id===activeId);
+html+='<div class="sidebar-section">';
+html+='<div class="sidebar-head" onclick="toggleSection(this)">'+s.icon+'<span>'+h(sectionLabel)+'</span><span class="arrow'+(hasActive?' open':'')+'">▸</span></div>';
+html+='<div class="sidebar-items'+(hasActive?' open':'')+'">';
+s.pages.forEach(p=>{
+const label=lang==='en'?p.labelEN:p.labelVI;
+const activeCls=p.id===activeId?' active':'';
+html+='<a class="sidebar-item'+activeCls+'" href="#" onclick="navigate(\''+p.id+'\');return false">'+h(label)+'</a>';
+count++;
+});
+html+='</div></div>';
+});
+SC.innerHTML=html;
+}
+
+function toggleSection(el){
+const arrow=el.querySelector('.arrow'),items=el.nextElementSibling;
+arrow.classList.toggle('open');items.classList.toggle('open');
+}
+
+// ====== RENDER PAGE ======
+function renderPage(pageId){
+currentPage=pageId;
+const content=getContent(lang,pageId);
+if(!content){CC.innerHTML='<h2>Page not found</h2><p>The page "'+h(pageId)+'" does not exist.</p>';renderSidebar(pageId);renderToc(pageId,[]);return}
+CC.innerHTML=content;
+renderSidebar(pageId);
+renderToc(pageId,content);
+window.scrollTo({top:0,behavior:'auto'});
+// Update nav history
+if(navHistory.length===0||navHistory[navHistory.length-1]!==pageId)navHistory.push(pageId);
+// Update URL hash
+history.replaceState(null,'','#'+pageId);
+}
+
+// ====== RENDER TOC ======
+function renderToc(pageId,content){
+const headings=[];
+const tmp=document.createElement('div');tmp.innerHTML=content;
+tmp.querySelectorAll('h2,h3,h4').forEach(h=>{
+const id=h.getAttribute('id');
+if(id){
+const tag=h.tagName.toLowerCase();
+const text=h.textContent;
+headings.push({id,tag,text});
+}
+});
+if(headings.length<2){TC.innerHTML='';document.getElementById('tocSidebar').classList.remove('visible');return}
+document.getElementById('tocSidebar').classList.add('visible');
+let html='<div class="toc-label">'+t('section')+'</div>';
+headings.forEach(h=>{
+const cls='toc-link '+h.tag;
+html+='<a class="'+cls+'" href="#'+h.id+'" onclick="event.preventDefault();document.getElementById(\''+h.id+'\').scrollIntoView({behavior:\'smooth\'});return false">'+h.text+'</a>';
+});
+TC.innerHTML=html;
+// highlight active toc link on scroll
+const links=TC.querySelectorAll('.toc-link');
+const handleScroll=()=>{
+let current='';
+const scrollY=window.scrollY+120;
+headings.forEach(h=>{
+const el=document.getElementById(h.id);
+if(el&&el.offsetTop<=scrollY)current=h.id;
+});
+links.forEach(l=>{l.classList.toggle('active',l.getAttribute('href')==='#'+current)});
+};
+window.addEventListener('scroll',handleScroll,{passive:true});
+}
+
+// ====== NAVIGATION ======
+function navigate(pageId){
+renderPage(pageId);
+// Close mobile sidebar
+document.getElementById('sidebar').classList.remove('open');
+document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+function toggleSidebar(){
+document.getElementById('sidebar').classList.toggle('open');
+document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+// ====== SEARCH ======
+const searchIndex=[];
+
+function buildSearchIndex(){
+searchIndex.length=0;
+sidebarSections.forEach(s=>{
+s.pages.forEach(p=>{
+const en=getContent('en',p.id);
+const vi=getContent('vi',p.id);
+const sectionLabel=t(s.key);
+const pageLabel=lang==='en'?p.labelEN:p.labelVI;
+if(en)searchIndex.push({id:p.id,lang:'en',content:en,section:sectionLabel,label:pageLabel});
+if(vi)searchIndex.push({id:p.id,lang:'vi',content:vi,section:sectionLabel,label:pageLabel});
+});
+});
+}
+
+function openSearch(){SO.classList.add('open');setTimeout(()=>SMI.focus(),100)}
+function closeSearch(){SO.classList.remove('open');SMI.value='';SR.innerHTML='';searchTerm=''}
+function searchDocs(e){
+if(e&&e.key==='Escape'){closeSearch();return}
+const val=SMI.value.toLowerCase().trim();
+searchTerm=val;
+if(val.length<2){SR.innerHTML='';return}
+const results=[];
+const textContent=content=>{
+const d=document.createElement('div');d.innerHTML=content;
+return d.textContent||d.innerText||'';
+};
+searchIndex.forEach(item=>{
+const txt=textContent(item.content).toLowerCase();
+const idx=txt.indexOf(val);
+if(idx!==-1){
+const start=Math.max(0,idx-40);
+const end=Math.min(txt.length,idx+val.length+60);
+let preview=txt.substring(start,end);
+if(start>0)preview='...'+preview;
+if(end<txt.length)preview=preview+'...';
+results.push({id:item.id,label:item.label,section:item.section,preview});
+}
+});
+results.sort((a,b)=>a.label.localeCompare(b.label));
+const seen=new Set();
+const unique=results.filter(r=>{const k=r.id+':'+r.label;if(seen.has(k))return false;seen.add(k);return true});
+const top=unique.slice(0,20);
+SR.innerHTML=top.length?'':('<div style="padding:24px;text-align:center;color:var(--text3);font-size:.9rem">'+h(t('noResults'))+'</div>');
+top.forEach(r=>{
+const div=document.createElement('div');div.className='search-result';
+div.innerHTML='<div class="search-result-title">'+h(r.label)+' <span style="font-weight:400;color:var(--text3);font-size:.8rem">— '+h(r.section)+'</span></div><div class="search-result-preview">'+h(r.preview)+'</div>';
+div.onclick=()=>{closeSearch();navigate(r.id)};
+SR.appendChild(div);
+});
+}
+// Bind search input
+SI.addEventListener('focus',openSearch);
+SMI.addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch()});
+document.addEventListener('keydown',e=>{
+if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openSearch()}
+});
+
+// ====== INIT ======
+function init(){
+// Handle hash navigation
+const hash=window.location.hash.slice(1);
+const startPage=hash&&sidebarSections.some(s=>s.pages.some(p=>p.id===hash))?hash:'home';
+// Ensure content loaded
+buildSearchIndex();
+renderPage(startPage);
+// Add copy buttons to code blocks
+document.addEventListener('click',function(e){
+const btn=e.target.closest('.copy-btn');
+if(btn){
+const code=btn.parentElement.querySelector('code');
+if(code){navigator.clipboard.writeText(code.textContent);btn.textContent='Copied!';setTimeout(()=>{btn.textContent='Copy'},1500)}
+}
+});
+}
+// Load content and init — wait for content files
+if(typeof docsData!=='undefined'&&docsData&&Object.keys(docsData.en.sections).length){
+init();
+}
+</script>
+
+<script>
+// ====== FALLBACK CONTENT (embedded) ======
+const fallbackContent={
+en:{},vi:{}
+};
+
+function getHomeContent(lang){
+const isEn=lang==='en';
+const s=(w,h)=>'<svg viewBox="0 0 24 24" width="'+w+'" height="'+h+'" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto">';
+const e='</svg>';
+const iconBook=s(28,28)+'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/>'+e;
+const iconCode=s(28,28)+'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>'+e;
+const iconEye=s(28,28)+'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'+e;
+const iconCpu=s(28,28)+'<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>'+e;
+const iconBox=s(28,28)+'<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'+e;
+const iconClip=s(28,28)+'<path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="12" y1="11" x2="8" y2="11"/><line x1="16" y1="15" x2="8" y2="15"/><line x1="14" y1="19" x2="8" y2="19"/>'+e;
+const bolt='<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;flex-shrink:0"><polygon points="14,2 4,14 12,14 8,23 20,10 12,10"/></svg>';
+return '<div style="text-align:center;padding:40px 0 20px">'+
+'<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px">'+bolt+'<h1 style="font-size:2.6rem;margin:0">MC-API Mod</h1></div>'+
+'<p style="font-size:1.15rem;color:var(--text2);max-width:560px;margin:0 auto 32px">'+(isEn?'Complete API documentation for the MC-API Fabric mod — REST API, WebSocket, observations, and AI agent integration.':'Tài liệu API đầy đủ cho MC-API Fabric mod — REST API, WebSocket, observations, và tích hợp AI agent.')+'</p>'+
+'<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:40px">'+
+'<a href="#" onclick="navigate(\'getting-started.auth\');return false" style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:var(--text);color:var(--bg);border-radius:8px;font-weight:600;text-decoration:none;transition:opacity .15s">'+(isEn?'Get Started':'Bắt đầu')+' →</a>'+
+'<a href="#" onclick="navigate(\'api.client\');return false" style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border:1px solid var(--border);border-radius:8px;color:var(--text2);text-decoration:none;transition:all .15s">'+(isEn?'API Reference':'API Tham khảo')+' →</a>'+
+'</div></div>'+
+'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:32px 0">'+
+'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;transition:border-color .15s;cursor:pointer" onclick="navigate(\'getting-started.auth\')">'+
+'<div style="width:40px;height:40px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text2)">'+iconBook+'</div>'+
+'<h3 style="margin:0 0 6px;font-size:.95rem">'+(isEn?'Getting Started':'Bắt đầu')+'</h3>'+
+'<p style="color:var(--text2);font-size:.85rem;margin:0">'+(isEn?'Configure authentication and learn how to use MC-API commands.':'Cấu hình xác thực và tìm hiểu cách sử dụng lệnh MC-API.')+'</p>'+
+'</div>'+
+'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;transition:border-color .15s;cursor:pointer" onclick="navigate(\'api.client\')">'+
+'<div style="width:40px;height:40px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text2)">'+iconCode+'</div>'+
+'<h3 style="margin:0 0 6px;font-size:.95rem">'+(isEn?'API Reference':'API Tham khảo')+'</h3>'+
+'<p style="color:var(--text2);font-size:.85rem;margin:0">'+(isEn?'Client, player, block, inventory, world, and AI endpoint commands.':'Lệnh Client, player, block, inventory, world và AI endpoint.')+'</p>'+
+'</div>'+
+'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;transition:border-color .15s;cursor:pointer" onclick="navigate(\'obs.overview\')">'+
+'<div style="width:40px;height:40px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text2)">'+iconEye+'</div>'+
+'<h3 style="margin:0 0 6px;font-size:.95rem">'+(isEn?'Observation Schema':'Schema Quan sát')+'</h3>'+
+'<p style="color:var(--text2);font-size:.85rem;margin:0">'+(isEn?'Player state, inventory, target, and screen observation formats.':'Định dạng quan sát trạng thái người chơi, kho đồ, mục tiêu và màn hình.')+'</p>'+
+'</div>'+
+'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;transition:border-color .15s;cursor:pointer" onclick="navigate(\'ai-guide.core\')">'+
+'<div style="width:40px;height:40px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text2)">'+iconCpu+'</div>'+
+'<h3 style="margin:0 0 6px;font-size:.95rem">'+(isEn?'AI Agent Guide':'Hướng dẫn AI Agent')+'</h3>'+
+'<p style="color:var(--text2);font-size:.85rem;margin:0">'+(isEn?'Core loop, action reference, workflows, and quick reference.':'Vòng lặp chính, tham khảo hành động, workflows và tham khảo nhanh.')+'</p>'+
+'</div>'+
+'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;transition:border-color .15s;cursor:pointer" onclick="navigate(\'registry.basics\')">'+
+'<div style="width:40px;height:40px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text2)">'+iconBox+'</div>'+
+'<h3 style="margin:0 0 6px;font-size:.95rem">'+(isEn?'Registry Reference':'Registry Tham khảo')+'</h3>'+
+'<p style="color:var(--text2);font-size:.85rem;margin:0">'+(isEn?'Block and item IDs, entity IDs, and registry layout.':'ID khối và vật phẩm, ID thực thể và bố cục registry.')+'</p>'+
+'</div>'+
+'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;transition:border-color .15s;cursor:pointer" onclick="navigate(\'changelog\')">'+
+'<div style="width:40px;height:40px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text2)">'+iconClip+'</div>'+
+'<h3 style="margin:0 0 6px;font-size:.95rem">'+(isEn?'Changelog':'Nhật ký thay đổi')+'</h3>'+
+'<p style="color:var(--text2);font-size:.85rem;margin:0">'+(isEn?'Latest updates and version history.':'Cập nhật mới nhất và lịch sử phiên bản.')+'</p>'+
+'</div>'+
+'</div>'+
+'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">'+
+'<div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg><span style="font-weight:600">GitHub</span><span style="color:var(--text2)">'+(isEn?'Star and contribute':'Theo dõi và đóng góp')+'</span></div>'+
+'<a href="https://github.com/DuyAnh662/mc-api-mod" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text2);text-decoration:none;font-size:.85rem;transition:all .15s">View on GitHub →</a>'+
+'</div>';
+}
+
+function getContent(lang,pageId){
+if(pageId==='home')return getHomeContent(lang);
+if(typeof docsData!=='undefined'&&docsData&&docsData[lang]&&docsData[lang].sections){
+for(const key in docsData[lang].sections){
+const section=docsData[lang].sections[key];
+if(section.pages){
+for(const page of section.pages){
+if(page.id===pageId)return page.content||'';
+}
+}
+if(key===pageId&&section.content)return section.content;
+}
+}
+if(fallbackContent[lang]&&fallbackContent[lang][pageId]){
+return fallbackContent[lang][pageId];
+}
+return null;
+}
+</script>
+<script>
+window.docsData={en:{sections:{}},vi:{sections:{}}};
+</script>
+<script src="content-en.js"></script>
+<script src="content-vi.js"></script>
+<script>
+(function waitForContent(){
+if(typeof docsData!=='undefined'&&docsData&&docsData.en&&Object.keys(docsData.en.sections).length){
+if(typeof init==='function')init();
+}else{
+setTimeout(waitForContent,50);
+}
+})();
+</script>
+</body>
+</html>
