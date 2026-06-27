@@ -91,16 +91,6 @@ By using this mod, you agree to comply with Mojang's [Minecraft End User License
 ### License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### ⚠️ Important Notice & Disclaimer
-By using this mod, you agree to comply with Mojang's [Minecraft End User License Agreement (EULA)](https://minecraft.net) and [Commercial Usage Guidelines](https://minecraft.net).
-
-*   This mod is provided under the MIT License for the source code, but its utilization within Minecraft must strictly respect Mojang's terms.
-*   The developer (@DuyAnh662) is not responsible for any misuse of this API that violates Minecraft's EULA (e.g., creating unauthorized monetization systems, paywalls, or unfair advantages on public servers).
-*   This is an unofficial modification and is not affiliated with or endorsed by Mojang Studios or Microsoft.
-
-### License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ---
 
 ## Tài Liệu Tiếng Việt (VN)
