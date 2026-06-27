@@ -10,10 +10,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledFuture;
 
 public class TaskManager {
     private static final TaskManager INSTANCE = new TaskManager();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
     private final ExecutorService immediatePool = Executors.newCachedThreadPool();
     private final List<Future<?>> activeTasks = new CopyOnWriteArrayList<>();
     private final List<InputConstants.Key> activeKeys = new CopyOnWriteArrayList<>();
@@ -39,6 +40,18 @@ public class TaskManager {
 
     public Future<?> submit(Runnable task) {
         Future<?> future = immediatePool.submit(task);
+        activeTasks.add(future);
+        return future;
+    }
+
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long initialDelayMs, long periodMs) {
+        ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(() -> {
+            try {
+                task.run();
+            } catch (Exception e) {
+                // Allow scheduled tasks to continue even after exceptions
+            }
+        }, initialDelayMs, periodMs, TimeUnit.MILLISECONDS);
         activeTasks.add(future);
         return future;
     }

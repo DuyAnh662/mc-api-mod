@@ -440,3 +440,371 @@ curl -X POST http://localhost:25566/api/client/input \
 curl -X POST http://localhost:25566/api/cancel \
      -H "Authorization: Bearer <token>"
 ```
+
+---
+
+## 8. AI Endpoints (OpenAI Gym Style)
+
+Các endpoint này biến MC-API thành **môi trường huấn luyện AI** như OpenAI Gym / MineRL. Thay vì gọi hàng chục endpoint riêng lẻ, agent AI chỉ cần 2 khái niệm: **Quan sát (Observation)** và **Hành động (Action)**.
+
+```
+GET /observation → AI xử lý → POST /action → [game tick] → GET /observation ...
+```
+
+Hoặc dạng step kết hợp:
+```
+POST /step {actions} → {observation}
+```
+
+### 8.1 Tạo Session (`POST /session`)
+
+Tạo một phiên làm việc AI mới (tùy chọn - để theo dõi nhiều agent).
+
+```bash
+curl -X POST http://localhost:25566/session \
+     -H "Authorization: Bearer <token>"
+```
+
+**Phản hồi:**
+```json
+{
+  "success": true,
+  "message": "Session created",
+  "data": { "session_id": "sess_...", "created_at": 1712345678000 }
+}
+```
+
+### 8.2 Lấy Observation (`GET /observation`)
+
+Trả về observation có cấu trúc đầy đủ của trạng thái game hiện tại. Đây là cách chính để AI "nhìn thấy" thế giới Minecraft.
+
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
+```
+
+**Cấu trúc phản hồi (schema cố định cho ML):**
+```json
+{
+  "success": true,
+  "message": "ok",
+  "data": {
+    "protocol": 1,
+    "tick": 34100,
+    "world": {
+      "time": 12000,
+      "day": 5,
+      "is_day": true,
+      "weather": "clear",
+      "dimension": 0
+    },
+    "player": {
+      "position": [120.5, 64.0, -42.3],
+      "rotation": { "yaw": 90.0, "pitch": -20.0, "facing": "West" },
+      "velocity": [0.0, 0.0, 0.0],
+      "status": [20, 15, 20, 5, 300],
+      "flags": [1, 0, 0, 0, 0, 0]
+    },
+    "camera": { "fov": 70, "matrix": [16, 9, 32] },
+    "inventory": {
+      "slots": [[0,0], [0,0], [0,0], [5,64], [0,0], ...],
+      "selected_slot": 3
+    },
+    "target": { "block_id": 56, "distance": 4.5, "face": 1 },
+    "viewport_blocks": [1, 1, 1, 0, 4, ...],
+    "viewport_entities": [[54, 3.2, 0.0, 5.1, 180, 0, 20, 6.0], ...],
+    "screen": {
+      "id": "minecraft:title",
+      "title": "Minecraft",
+      "type": "menu",
+      "pause_game": false,
+      "components": [
+        { "id": 0, "type": "button", "text": "Singleplayer", "enabled": true, "visible": true, "focused": false }
+      ],
+      "navigation": ["Main Menu"]
+    }
+  }
+}
+```
+
+**Mô tả các trường:**
+
+| Trường | Mô tả |
+|--------|-------|
+| `protocol` | Phiên bản giao thức (tương thích ngược) |
+| `tick` | Bộ đếm tick Minecraft (20 tick = 1 giây) |
+| `world.time` | Thời gian trong ngày (0-24000) |
+| `world.day` | Số ngày đã chơi |
+| `world.is_day` | Ban ngày hay không |
+| `world.weather` | `"clear"`, `"rain"`, hoặc `"thunder"` |
+| `world.dimension` | 0=Overworld, 1=Nether, 2=End |
+| `player.position` | Tọa độ [x, y, z] |
+| `player.rotation` | yaw, pitch, và hướng chính (bắc/nam/đông/tây) |
+| `player.velocity` | Vector vận tốc [x, y, z] |
+| `player.status` | [health, food, saturation, armor, air] |
+| `player.flags` | [on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1) |
+| `camera.fov` | Góc nhìn hiện tại |
+| `camera.matrix` | Kích thước viewport [width, height, depth] |
+| `inventory.slots` | 41 slot cố định [item_id, count] (0 = rỗng) |
+| `inventory.selected_slot` | Slot hotbar đang cầm (0-8) |
+| `target.block_id` | ID khối đang ngắm |
+| `target.distance` | Khoảng cách tới khối đang ngắm |
+| `target.face` | Mặt của khối (0=Trên,1=Dưới,2=Bắc,3=Nam,4=Đông,5=Tây) |
+| `viewport_blocks` | 4608 ID khối trong tầm nhìn (16×9×32) |
+| `viewport_entities` | Thực thể nhìn thấy [type_id, relX, relY, relZ, yaw, pitch, health, distance] |
+| `screen` | Thông tin màn hình UI (chỉ xuất hiện khi có màn hình đang mở) |
+
+### 8.3 Gửi Hành động (`POST /action`)
+
+Gửi một hoặc nhiều hành động để thực thi trong tick game hiện tại. Tương đương với `env.step(action)`.
+
+```bash
+curl -X POST http://localhost:25566/action \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"actions": [{"type": "jump"}, {"type": "swing"}]}'
+```
+
+**Các loại hành động:**
+
+| Loại | Tham số | Mô tả |
+|------|---------|-------|
+| `key` | `keys: ["w","ctrl"]`, `duration?: 1000` | Nhấn/thả phím bàn phím |
+| `select_slot` | `slot: 2` | Chọn slot hotbar (0-8) |
+| `place` | `face: "up"/"down"/"north"/"south"/"east"/"west"` | Đặt block vào mặt đang ngắm |
+| `break` | *(không)* | Phá khối đang ngắm |
+| `interact` | *(không)* | Click chuột phải khối đang ngắm |
+| `jump` | *(không)* | Nhảy |
+| `swing` | *(không)* | Vung tay |
+| `look` | `yaw/pitch` hoặc `deltaYaw/deltaPitch` | Xoay hướng nhìn |
+| `craft` | `recipe: "minecraft:chest"`, `mode: "craft_once"` | Chế tạo đồ |
+| `chat` | `message: "hello"` | Gửi tin nhắn chat |
+| `command` | `command: "/say hello"` | Chạy lệnh Minecraft |
+| `click_button` | `button_text: "Singleplayer"` | Click nút UI |
+
+**Ví dụ — Đi tới + nhảy:**
+```bash
+curl -X POST http://localhost:25566/action \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"actions": [{"type": "key", "keys": ["w"], "duration": 1000}, {"type": "jump"}]}'
+```
+
+**Ví dụ — Chọn slot, đặt block, xoay người:**
+```bash
+curl -X POST http://localhost:25566/action \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"actions": [
+       {"type":"select_slot", "slot": 2},
+       {"type":"place", "face":"north"},
+       {"type":"look", "deltaYaw": 90}
+     ]}'
+```
+
+### 8.4 Step Kết Hợp (`POST /step`)
+
+Kết hợp gửi hành động và lấy observation trong một lần gọi. Tương đương `env.step(action)` trong OpenAI Gym / MineRL.
+
+```bash
+curl -X POST http://localhost:25566/step \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"actions": [{"type": "jump"}]}'
+```
+
+**Phản hồi:**
+```json
+{
+  "success": true,
+  "message": "ok",
+  "data": {
+    "tick": 34101,
+    "observation": { ... }
+  }
+}
+```
+
+Trường `observation` có cấu trúc giống endpoint `/observation`. Observation phản ánh trạng thái game **sau khi** hành động đã được xử lý.
+
+### 8.5 Stream Observation (`GET /stream`)
+
+Mở kết nối Server-Sent Events (SSE) để nhận observation mới mỗi tick game (~50ms). Hữu ích cho giám sát thời gian thực hoặc điều khiển AI.
+
+```bash
+curl -N -H "Authorization: Bearer <token>" http://localhost:25566/stream
+```
+
+**Định dạng đầu ra:**
+```
+data: {"protocol":1,"tick":34100,...}
+
+data: {"protocol":1,"tick":34101,...}
+
+data: {"protocol":1,"tick":34102,...}
+...
+```
+
+Kết nối giữ nguyên cho đến khi client ngắt kết nối.
+
+### 8.6 Đóng Session (`POST /close`)
+
+Đóng phiên AI và hủy tất cả tác vụ đang chạy (phím đang giữ, script, v.v.).
+
+```bash
+curl -X POST http://localhost:25566/close \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"session_id": "sess_..."}'
+```
+
+Không có session_id, hủy toàn bộ tác vụ:
+```bash
+curl -X POST http://localhost:25566/close \
+     -H "Authorization: Bearer <token>"
+```
+
+---
+
+### Hướng Dẫn AI Agent
+
+Xem tài liệu hướng dẫn chi tiết cách AI đọc JSON observation và làm chủ Minecraft tại [AI_AGENT_GUIDE.md](AI_AGENT_GUIDE.md).
+
+---
+
+## 9. Chi Tiết Schema Observation
+
+### Inventory Slots
+
+Inventory là mảng cố định **41 slot** (36 chính + 4 giáp + 1 offhand), mỗi slot là `[item_id, count]`:
+
+| Index | Loại | Số lượng |
+|-------|------|----------|
+| 0-8 | Hotbar | 9 |
+| 9-35 | Main inventory | 27 |
+| 36-39 | Giáp (giày, quần, áo, mũ) | 4 |
+| 40 | Offhand | 1 |
+
+Slot rỗng là `[0, 0]`. Thiết kế kích thước cố định cho phép ánh xạ trực tiếp vào ML tensor.
+
+### Viewport Blocks
+
+Mảng phẳng **4608 số nguyên** (16 ngang × 9 dọc × 32 sâu) đại diện cho ID khối trong tầm nhìn của người chơi. Giá trị 0 = không khí/ngoài tầm.
+
+### Viewport Entities
+
+Mảng tối đa **16 thực thể** nhìn thấy, mỗi thực thể có 8 giá trị:
+`[entity_type_id, relX, relY, relZ, yaw, pitch, health, distance]`
+
+Thực thể vượt quá 16 bị bỏ qua. Slot trống là `[0, 0, 0, 0, 0, 0, 0, 0]`.
+
+### Player Flags (boolean, 0 hoặc 1)
+
+| Index | Flag |
+|-------|------|
+| 0 | on_ground (đang đứng trên đất) |
+| 1 | sprinting (đang chạy) |
+| 2 | sneaking (đang né) |
+| 3 | swimming (đang bơi) |
+| 4 | flying (đang bay) |
+| 5 | sleeping (đang ngủ) |
+
+---
+
+## 10. Bảng Tra Cứu (Numeric ID)
+
+Observation JSON dùng **numeric ID** (số nguyên, không phải chuỗi) cho item, block, entity. Các ID này lấy từ `BuiltInRegistries.getId()` — là **thứ tự runtime** trong registry.
+
+> **⚠️ Quan trọng:** Numeric ID có tính động — phụ thuộc vào thứ tự nạp registry. Ổn định trong cùng phiên chơi nhưng có thể khác giữa các lần khởi động hoặc khi có mod khác. Để định danh ổn định, dùng namespaced ID (`minecraft:stone`) làm chuẩn.
+
+### Bố Trí Inventory (41 slots)
+
+| Index | Khu vực | Số lượng |
+|-------|---------|----------|
+| 0 - 8 | Hotbar | 9 |
+| 9 - 35 | Main inventory | 27 |
+| 36 - 39 | Giáp (giày, quần, áo, mũ) | 4 |
+| 40 | Offhand | 1 |
+
+### Player Flags (index → ý nghĩa)
+
+| Index | Flag |
+|-------|------|
+| 0 | on_ground (đang đứng trên đất) |
+| 1 | sprinting (đang chạy) |
+| 2 | sneaking (đang né) |
+| 3 | swimming (đang bơi) |
+| 4 | flying (đang bay) |
+| 5 | sleeping (đang ngủ) |
+
+### Player Status (index → field)
+
+| Index | Field | Khoảng |
+|-------|-------|--------|
+| 0 | health | 0-20 |
+| 1 | food | 0-20 |
+| 2 | saturation | 0-20 |
+| 3 | armor | 0-20+ |
+| 4 | air | 0-300 |
+
+### Dimension ID
+
+| ID | Dimension |
+|----|-----------|
+| 0 | Overworld |
+| 1 | Nether |
+| 2 | End |
+
+### Block Face (target.face)
+
+| ID | Mặt |
+|----|-----|
+| 0 | Trên (Up) |
+| 1 | Dưới (Down) |
+| 2 | Bắc (North) |
+| 3 | Nam (South) |
+| 4 | Tây (West) |
+| 5 | Đông (East) |
+
+### Weather
+
+| Giá trị | Ý nghĩa |
+|---------|---------|
+| `"clear"` | Trời trong |
+| `"rain"` | Mưa |
+| `"thunder"` | Mưa + sấm chớp |
+
+### Namespaced ID Của Block & Item Phổ Biến
+
+**Đá & Khoáng sản:**
+`minecraft:stone`, `minecraft:cobblestone`, `minecraft:deepslate`, `minecraft:granite`, `minecraft:diorite`, `minecraft:andesite`, `minecraft:tuff`, `minecraft:calcite`, `minecraft:obsidian`, `minecraft:bedrock`, `minecraft:dirt`, `minecraft:grass_block`, `minecraft:gravel`, `minecraft:sand`
+
+**Quặng:**
+`minecraft:coal_ore`, `minecraft:iron_ore`, `minecraft:copper_ore`, `minecraft:gold_ore`, `minecraft:diamond_ore`, `minecraft:emerald_ore`, `minecraft:redstone_ore`, `minecraft:lapis_ore`, `minecraft:nether_quartz_ore`, `minecraft:nether_gold_ore`, `minecraft:ancient_debris`
+
+**Gỗ:**
+`minecraft:oak_log`, `minecraft:oak_planks`, `minecraft:spruce_log`, `minecraft:birch_log`, `minecraft:jungle_log`, `minecraft:acacia_log`, `minecraft:dark_oak_log`, `minecraft:mangrove_log`, `minecraft:cherry_log`, `minecraft:bamboo`
+
+**Item Quan Trọng:**
+`minecraft:diamond`, `minecraft:iron_ingot`, `minecraft:gold_ingot`, `minecraft:copper_ingot`, `minecraft:netherite_ingot`, `minecraft:stick`, `minecraft:bone`, `minecraft:string`, `minecraft:leather`, `minecraft:flint`, `minecraft:feather`
+
+**Tools & Vũ Khí:**
+`minecraft:wooden_sword`, `minecraft:stone_sword`, `minecraft:iron_sword`, `minecraft:diamond_sword`, `minecraft:netherite_sword`, `minecraft:bow`, `minecraft:crossbow`, `minecraft:trident`, `minecraft:shield`, `minecraft:mace`, `minecraft:wooden_pickaxe`, `minecraft:stone_pickaxe`, `minecraft:iron_pickaxe`, `minecraft:diamond_pickaxe`, `minecraft:netherite_pickaxe`
+
+**Đồ ăn:**
+`minecraft:apple`, `minecraft:golden_apple`, `minecraft:bread`, `minecraft:cooked_beef`, `minecraft:cooked_porkchop`, `minecraft:cooked_chicken`, `minecraft:carrot`, `minecraft:baked_potato`
+
+### Screen ID Phổ Biến
+
+| Screen ID | Tên Màn Hình |
+|-----------|-------------|
+| `minecraft:title` | Màn hình chính |
+| `minecraft:pause` | Menu Pause |
+| `minecraft:options` | Cài đặt |
+| `minecraft:inventory` | Túi đồ |
+| `minecraft:creative_inventory` | Kho sáng tạo |
+| `minecraft:crafting` | Bàn chế tạo |
+| `minecraft:furnace` | Lò nung |
+| `minecraft:anvil` | Đe |
+| `minecraft:chest` | Rương |
+| `minecraft:death` | Màn hình chết |
+| `minecraft:villager_trades` | Giao dịch dân làng |

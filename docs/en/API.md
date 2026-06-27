@@ -442,3 +442,373 @@ curl -X POST http://localhost:25566/api/client/input \
 curl -X POST http://localhost:25566/api/cancel \
      -H "Authorization: Bearer <token>"
 ```
+
+---
+
+## 8. AI-Friendly Endpoints (OpenAI Gym Style)
+
+These endpoints transform MC-API into an **AI training environment** like OpenAI Gym / MineRL. Instead of calling many separate endpoints, an AI agent only needs two concepts: **Observation** and **Action**.
+
+```
+GET /observation  →  AI decides action  →  POST /action  →  [game tick]  →  GET /observation ...
+```
+
+Or the combined step:
+```
+POST /step {actions}  →  {observation}
+```
+
+### 8.1 Create Session (`POST /session`)
+
+Creates a new AI session (optional - for tracking multiple agents).
+
+```bash
+curl -X POST http://localhost:25566/session \
+     -H "Authorization: Bearer <token>"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Session created",
+  "data": { "session_id": "sess_...", "created_at": 1712345678000 }
+}
+```
+
+### 8.2 Get Observation (`GET /observation`)
+
+Returns the full structured observation of the current game state. This is the primary way for an AI to "see" the Minecraft world.
+
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
+```
+
+**Response structure (fixed schema for ML compatibility):**
+```json
+{
+  "success": true,
+  "message": "ok",
+  "data": {
+    "protocol": 1,
+    "tick": 34100,
+    "world": {
+      "time": 12000,
+      "day": 5,
+      "is_day": true,
+      "weather": "clear",
+      "dimension": 0
+    },
+    "player": {
+      "position": [120.5, 64.0, -42.3],
+      "rotation": { "yaw": 90.0, "pitch": -20.0, "facing": "West" },
+      "velocity": [0.0, 0.0, 0.0],
+      "status": [20, 15, 20, 5, 300],
+      "flags": [1, 0, 0, 0, 0, 0]
+    },
+    "camera": { "fov": 70, "matrix": [16, 9, 32] },
+    "inventory": {
+      "slots": [
+        [0,0], [0,0], [0,0], [5,64], [0,0], ...
+      ],
+      "selected_slot": 3
+    },
+    "target": { "block_id": 56, "distance": 4.5, "face": 1 },
+    "viewport_blocks": [1, 1, 1, 0, 4, ...],
+    "viewport_entities": [[54, 3.2, 0.0, 5.1, 180, 0, 20, 6.0], ...],
+    "screen": {
+      "id": "minecraft:title",
+      "title": "Minecraft",
+      "type": "menu",
+      "pause_game": false,
+      "components": [
+        { "id": 0, "type": "button", "text": "Singleplayer", "enabled": true, "visible": true, "focused": false }
+      ],
+      "navigation": ["Main Menu"]
+    }
+  }
+}
+```
+
+**Field descriptions:**
+
+| Field | Description |
+|-------|-------------|
+| `protocol` | Protocol version for forward compatibility |
+| `tick` | Minecraft tick counter (20 ticks = 1 second) |
+| `world.time` | World day time (0-24000) |
+| `world.day` | Days played |
+| `world.is_day` | Whether it's daytime |
+| `world.weather` | `"clear"`, `"rain"`, or `"thunder"` |
+| `world.dimension` | 0=Overworld, 1=Nether, 2=End |
+| `player.position` | [x, y, z] coordinates |
+| `player.rotation` | yaw, pitch, and cardinal facing direction |
+| `player.velocity` | [x, y, z] movement vector |
+| `player.status` | [health, food, saturation, armor, air] |
+| `player.flags` | [on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1) |
+| `camera.fov` | Current field of view |
+| `camera.matrix` | Viewport dimensions [width, height, depth] |
+| `inventory.slots` | 41 fixed slots as [item_id, count] pairs (0 = empty) |
+| `inventory.selected_slot` | Currently held hotbar slot (0-8) |
+| `target.block_id` | Block ID the crosshair is pointing at |
+| `target.distance` | Distance to targeted block |
+| `target.face` | Face of targeted block (0=Up,1=Down,2=North,3=South,4=East,5=West) |
+| `viewport_blocks` | 4608 block IDs in view frustum (16×9×32) |
+| `viewport_entities` | Visible entities [type_id, relX, relY, relZ, yaw, pitch, health, distance] |
+| `screen` | Current UI screen info (only present when a screen is open) |
+
+### 8.3 Send Actions (`POST /action`)
+
+Send one or more actions to execute on the current game tick. This is equivalent to setting the action in an RL environment.
+
+```bash
+curl -X POST http://localhost:25566/action \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"actions": [{"type": "jump"}, {"type": "swing"}]}'
+```
+
+**Supported action types:**
+
+| Type | Parameters | Description |
+|------|-----------|-------------|
+| `key` | `keys: ["w","ctrl"]`, `duration?: 1000` | Press/release keyboard keys |
+| `select_slot` | `slot: 2` | Select hotbar slot (0-8) |
+| `place` | `face: "up"/"down"/"north"/"south"/"east"/"west"` | Place block on targeted face |
+| `break` | *(none)* | Break the targeted block |
+| `interact` | *(none)* | Right-click the targeted block |
+| `jump` | *(none)* | Make the player jump |
+| `swing` | *(none)* | Swing the player's hand |
+| `look` | `yaw/pitch` or `deltaYaw/deltaPitch` | Set look direction |
+| `craft` | `recipe: "minecraft:chest"`, `mode: "craft_once"` | Craft a recipe |
+| `chat` | `message: "hello"` | Send a chat message |
+| `command` | `command: "/say hello"` | Run a Minecraft command |
+| `click_button` | `button_text: "Singleplayer"` | Click a UI button |
+
+**Example — Move forward + jump:**
+```bash
+curl -X POST http://localhost:25566/action \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"actions": [{"type": "key", "keys": ["w"], "duration": 1000}, {"type": "jump"}]}'
+```
+
+**Example — Select slot, place block, then look around:**
+```bash
+curl -X POST http://localhost:25566/action \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"actions": [
+       {"type":"select_slot", "slot": 2},
+       {"type":"place", "face":"north"},
+       {"type":"look", "deltaYaw": 90}
+     ]}'
+```
+
+### 8.4 Combined Step (`POST /step`)
+
+Combines action execution and observation retrieval in a single call. This is the equivalent of `env.step(action)` in OpenAI Gym / MineRL.
+
+```bash
+curl -X POST http://localhost:25566/step \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"actions": [{"type": "jump"}]}'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "ok",
+  "data": {
+    "tick": 34101,
+    "observation": { ... }
+  }
+}
+```
+
+The `observation` field contains the same structure as the `/observation` endpoint. The difference is that the observation reflects the game state **after** the actions have been processed.
+
+### 8.5 Stream Observations (`GET /stream`)
+
+Opens a Server-Sent Events (SSE) connection that pushes a new observation every game tick (~50ms). Useful for monitoring or real-time AI control.
+
+```bash
+curl -N -H "Authorization: Bearer <token>" http://localhost:25566/stream
+```
+
+**Output format:**
+```
+data: {"protocol":1,"tick":34100,...}
+
+data: {"protocol":1,"tick":34101,...}
+
+data: {"protocol":1,"tick":34102,...}
+...
+```
+
+The connection stays open until the client disconnects.
+
+### 8.6 Close Session (`POST /close`)
+
+Closes an AI session and cancels all running tasks (held keys, scripts, etc.).
+
+```bash
+curl -X POST http://localhost:25566/close \
+     -H "Authorization: Bearer <token>" \
+     -H "Content-Type: application/json" \
+     -d '{"session_id": "sess_..."}'
+```
+
+Without session_id, cancels all tasks globally:
+```bash
+curl -X POST http://localhost:25566/close \
+     -H "Authorization: Bearer <token>"
+```
+
+---
+
+### AI Agent Guide
+
+For a comprehensive guide on how AI agents should interpret the observation JSON and take intelligent actions to master Minecraft, see [AI_AGENT_GUIDE.md](AI_AGENT_GUIDE.md).
+
+---
+
+## 9. Observation Schema Details
+
+### Inventory Slots
+
+The inventory is a fixed array of **41 slots** (36 main + 4 armor + 1 offhand), each as `[item_id, count]`:
+
+| Index | Type | Size |
+|-------|------|------|
+| 0-8 | Hotbar | 9 |
+| 9-35 | Main inventory | 27 |
+| 36-39 | Armor (boots, legs, chest, head) | 4 |
+| 40 | Offhand | 1 |
+
+Empty slots are represented as `[0, 0]`. This fixed-size design allows direct mapping to ML tensors.
+
+### Viewport Blocks
+
+A flat array of **4608 integers** (16 wide × 9 tall × 32 deep) representing block IDs in the player's view frustum. Each value is the numeric ID of the block (0 for air/out-of-range).
+
+### Viewport Entities
+
+An array of up to **16 entities** visible to the player, each with 8 values:
+`[entity_type_id, relX, relY, relZ, yaw, pitch, health, distance]`
+
+Entities beyond the first 16 are ignored. Empty slots are `[0, 0, 0, 0, 0, 0, 0, 0]`.
+
+### Player Flags (boolean, 0 or 1)
+
+| Index | Flag |
+|-------|------|
+| 0 | on_ground |
+| 1 | sprinting |
+| 2 | sneaking |
+| 3 | swimming |
+| 4 | flying |
+| 5 | sleeping |
+
+---
+
+## 10. Registry Reference (Numeric IDs)
+
+The observation JSON uses **numeric IDs** (not strings) for items, blocks, and entities. These come from `BuiltInRegistries.getId()` and represent the **runtime ordinal** in each registry.
+
+> **⚠️ Important:** Numeric IDs are dynamic — they depend on registry loading order at runtime. They are consistent within a single game session but may differ between launches or mod loads. For stable identification, cross-reference with the namespaced ID.
+
+### Inventory Slot Layout (41 slots)
+
+| Index Range | Section | Count |
+|-------------|---------|-------|
+| 0 - 8 | Hotbar | 9 |
+| 9 - 35 | Main inventory | 27 |
+| 36 - 39 | Armor (boots, legs, chest, head) | 4 |
+| 40 | Offhand | 1 |
+
+### Player Flags (index → meaning)
+
+| Index | Flag |
+|-------|------|
+| 0 | on_ground |
+| 1 | sprinting |
+| 2 | sneaking |
+| 3 | swimming |
+| 4 | flying |
+| 5 | sleeping |
+
+### Player Status (index → meaning)
+
+| Index | Field | Range |
+|-------|-------|-------|
+| 0 | health | 0-20 |
+| 1 | food | 0-20 |
+| 2 | saturation | 0-20 |
+| 3 | armor | 0-20+ |
+| 4 | air | 0-300 |
+
+### Dimension IDs
+
+| ID | Dimension |
+|----|-----------|
+| 0 | Overworld |
+| 1 | Nether |
+| 2 | End |
+
+### Block Face Indices (target.face)
+
+| ID | Face |
+|----|------|
+| 0 | Up (top) |
+| 1 | Down (bottom) |
+| 2 | North |
+| 3 | South |
+| 4 | West |
+| 5 | East |
+
+### Weather Values
+
+| Value | Meaning |
+|-------|---------|
+| `"clear"` | No precipitation |
+| `"rain"` | Raining |
+| `"thunder"` | Rain + lightning |
+
+### Common Block & Item Namespaced IDs (Reference)
+
+**Stone & Minerals:**
+`minecraft:stone`, `minecraft:cobblestone`, `minecraft:deepslate`, `minecraft:granite`, `minecraft:diorite`, `minecraft:andesite`, `minecraft:tuff`, `minecraft:calcite`, `minecraft:obsidian`, `minecraft:bedrock`, `minecraft:dirt`, `minecraft:grass_block`, `minecraft:gravel`, `minecraft:sand`
+
+**Ores:**
+`minecraft:coal_ore`, `minecraft:iron_ore`, `minecraft:copper_ore`, `minecraft:gold_ore`, `minecraft:diamond_ore`, `minecraft:emerald_ore`, `minecraft:redstone_ore`, `minecraft:lapis_ore`, `minecraft:nether_quartz_ore`, `minecraft:nether_gold_ore`, `minecraft:ancient_debris`
+
+**Wood:**
+`minecraft:oak_log`, `minecraft:oak_planks`, `minecraft:spruce_log`, `minecraft:birch_log`, `minecraft:jungle_log`, `minecraft:acacia_log`, `minecraft:dark_oak_log`, `minecraft:mangrove_log`, `minecraft:cherry_log`, `minecraft:bamboo`
+
+**Key Items:**
+`minecraft:diamond`, `minecraft:iron_ingot`, `minecraft:gold_ingot`, `minecraft:copper_ingot`, `minecraft:netherite_ingot`, `minecraft:stick`, `minecraft:bone`, `minecraft:string`, `minecraft:leather`, `minecraft:flint`, `minecraft:feather`
+
+**Tools & Weapons:**
+`minecraft:wooden_sword`, `minecraft:stone_sword`, `minecraft:iron_sword`, `minecraft:diamond_sword`, `minecraft:netherite_sword`, `minecraft:bow`, `minecraft:crossbow`, `minecraft:trident`, `minecraft:shield`, `minecraft:mace`, `minecraft:wooden_pickaxe`, `minecraft:stone_pickaxe`, `minecraft:iron_pickaxe`, `minecraft:diamond_pickaxe`, `minecraft:netherite_pickaxe`
+
+**Food:**
+`minecraft:apple`, `minecraft:golden_apple`, `minecraft:bread`, `minecraft:cooked_beef`, `minecraft:cooked_porkchop`, `minecraft:cooked_chicken`, `minecraft:carrot`, `minecraft:baked_potato`
+
+### Common Screen IDs
+
+| Screen ID | Screen Name |
+|-----------|-------------|
+| `minecraft:title` | Title Screen |
+| `minecraft:pause` | Pause Menu |
+| `minecraft:options` | Options |
+| `minecraft:inventory` | Inventory |
+| `minecraft:creative_inventory` | Creative Inventory |
+| `minecraft:crafting` | Crafting Table |
+| `minecraft:furnace` | Furnace |
+| `minecraft:anvil` | Anvil |
+| `minecraft:chest` | Chest |
+| `minecraft:death` | Death Screen |
+| `minecraft:villager_trades` | Villager Trading |

@@ -22,6 +22,10 @@ Created and developed by [@DuyAnh662](https://github.com/DuyAnh662)
 *   **Settings & Rules:** Modify Game Rules and adjust difficulty on the fly.
 *   **Client Simulation:** Simulate button clicks in the UI and modify client settings (FOV, Render Distance, etc.).
 *   **Chat & Commands:** Send broadcast messages and run raw Minecraft commands directly.
+*   **AI-Friendly Endpoints (OpenAI Gym style):** Get structured game observations (`/observation`), send actions (`/action`), or combined step (`/step`). Perfect for Reinforcement Learning agents!
+*   **SSE Streaming:** Stream game observations in real-time via Server-Sent Events (`/stream`).
+*   **Screen Observation:** Detect open UI screens and their components (buttons, sliders, textboxes) for AI navigation.
+*   **AI Agent Guide:** Detailed documentation teaching AI agents how to understand observations and master Minecraft. See [docs/en/AI_AGENT_GUIDE.md](docs/en/AI_AGENT_GUIDE.md).
 
 ### How to Use
 
@@ -77,6 +81,24 @@ curl -X POST http://localhost:25566/api/command \
   -d '{"command": "give @a minecraft:netherite_sword"}'
 ```
 
+**5. Get Game Observation (AI)**
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
+```
+
+**6. Step (Action + Observation)**
+```bash
+curl -X POST http://localhost:25566/step \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"actions":[{"type":"jump"},{"type":"swing"}]}'
+```
+
+**7. Stream Observations (SSE)**
+```bash
+curl -N -H "Authorization: Bearer <token>" http://localhost:25566/stream
+```
+
 For a complete list of endpoints, simply make a GET request to the root API endpoint:
 ```bash
 curl -H "Authorization: Bearer <token>" http://localhost:25566/api/
@@ -106,6 +128,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 *   **Cài Đặt & Luật Game:** Thay đổi Game Rules (luật chơi) và độ khó (Difficulty).
 *   **Mô Phỏng Client:** Giả lập click nút trong UI và thay đổi cài đặt Client (FOV, Tầm nhìn,...).
 *   **Chat & Lệnh:** Gửi tin nhắn chat và chạy lệnh Minecraft trực tiếp.
+*   **AI Endpoints (OpenAI Gym):** Lấy observation game có cấu trúc (`/observation`), gửi hành động (`/action`), hoặc step kết hợp (`/step`). Lý tưởng cho agent Học Tăng Cường!
+*   **SSE Streaming:** Nhận observation game theo thời gian thực qua Server-Sent Events (`/stream`).
+*   **Screen Observation:** Phát hiện màn hình UI đang mở và các component (button, slider, textbox) để AI điều hướng.
 
 ### Hướng Dẫn Sử Dụng
 
@@ -159,6 +184,24 @@ curl -X POST http://localhost:25566/api/world/weather \
 curl -X POST http://localhost:25566/api/command \
   -H "Authorization: Bearer <token>" \
   -d '{"command": "give @a minecraft:netherite_sword"}'
+```
+
+**5. Lấy Observation Game (AI)**
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
+```
+
+**6. Step (Hành động + Observation)**
+```bash
+curl -X POST http://localhost:25566/step \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"actions":[{"type":"jump"},{"type":"swing"}]}'
+```
+
+**7. Stream Observation (SSE)**
+```bash
+curl -N -H "Authorization: Bearer <token>" http://localhost:25566/stream
 ```
 
 Để xem toàn bộ danh sách các API (Endpoints) hiện có, bạn chỉ cần gọi:

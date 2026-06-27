@@ -28,10 +28,12 @@ public class McApiMod implements ModInitializer {
             LOGGER.info("Minecraft API Mod is ready! HTTP API available on port {}", ApiServer.getInstance().getPort());
         });
 
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            ApiServer.getInstance().stop();
-            LOGGER.info("Minecraft API Mod stopped.");
-        });
+        // Don't stop API server on world exit – keep alive for title-screen operations.
+        // Server is stopped only on CLIENT_STOPPING (Minecraft window close).
+        // ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+        //     ApiServer.getInstance().stop();
+        //     LOGGER.info("Minecraft API Mod stopped.");
+        // });
 
         ServerTickEvents.START_SERVER_TICK.register(server -> {
             ApiServer.getInstance().processQueuedCommands(server);

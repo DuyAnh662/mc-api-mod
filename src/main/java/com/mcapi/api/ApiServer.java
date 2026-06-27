@@ -92,6 +92,14 @@ public class ApiServer {
             server.createContext("/api/client/debug", new ClientDebugHandler());
             server.createContext("/api/script", new ScriptHandler());
             server.createContext("/api/cancel", new CancelHandler());
+
+            // AI-friendly endpoints (OpenAI Gym style)
+            server.createContext("/session", new SessionHandler());
+            server.createContext("/observation", new ObservationHandler());
+            server.createContext("/action", new ActionHandler());
+            server.createContext("/step", new StepHandler());
+            server.createContext("/stream", new StreamHandler());
+            server.createContext("/close", new CloseHandler());
             server.start();
             isRunning = true;
             McApiMod.LOGGER.info("API Server started on port {}", port);
@@ -250,6 +258,12 @@ public class ApiServer {
                 endpoints.addProperty("client/debug", "GET - Get F3 debug info (fps, biome, xyz, etc.)");
                 endpoints.addProperty("script", "POST - Run multiple commands as a macro script");
                 endpoints.addProperty("cancel", "POST - Cancel all running tasks and held keys");
+                endpoints.addProperty("session", "POST - Create a new AI session");
+                endpoints.addProperty("observation", "GET - Get current game observation (Gym-style)");
+                endpoints.addProperty("action", "POST - Send actions for current tick");
+                endpoints.addProperty("step", "POST - Send actions and return next observation (env.step equivalent)");
+                endpoints.addProperty("stream", "GET - SSE stream of continuous observations");
+                endpoints.addProperty("close", "POST - Close session and cancel tasks");
                 String json = ApiResponse.jsonData(endpoints);
                 sendResponse(exchange, 200, json);
             } else {

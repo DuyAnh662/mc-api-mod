@@ -38,10 +38,10 @@ public class ClientUIHandler implements HttpHandler {
             
             // Handle world selection screen entries
             if (screen instanceof SelectWorldScreen worldScreen) {
-                WorldSelectionList worldList = worldScreen.list;
+                    WorldSelectionList worldList = worldScreen.list;
                 for (var entry : worldList.children()) {
                     if (entry instanceof WorldSelectionList.WorldListEntry worldEntry) {
-                        if (worldEntry.getLevelName().contains(targetText)) {
+                        if (worldEntry.getLevelName().toLowerCase().contains(targetText.toLowerCase())) {
                             worldEntry.joinWorld();
                             return;
                         }
