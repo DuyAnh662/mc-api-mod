@@ -919,7 +919,7 @@ SECTIONS['observation-schema'] = {
 <p>A flat array of <strong>4608 integers</strong> (16 wide × 9 tall × 32 deep) representing block IDs in the player's view frustum.</p>
 
 <h4>Index Formula</h4>
-<pre><code>index = depth * 288 + height * 16 + width</code></pre>
+<pre><code>index = depth * 144 + height * 16 + width</code></pre>
 <ul>
   <li><code>depth</code>: 0 (nearest) to 31 (farthest)</li>
   <li><code>height</code>: 0 (bottom of frustum) to 8 (top)</li>
@@ -931,7 +931,7 @@ SECTIONS['observation-schema'] = {
 </ul>
 
 <h2 id="viewport-entities">Viewport Entities — Nearby Creatures</h2>
-<p>Up to <strong>16 entities</strong> within the player's view frustum (FOV-filtered, not radius-based), each with 8 values:</p>
+<p>Up to <strong>16 entities</strong> within the player's view frustum (FOV-filtered, not radius-based), each with 8 values. Only visible/filtered entities are returned (no empty padding):</p>
 <pre><code>[type_id, relX, relY, relZ, yaw, pitch, health, distance]</code></pre>
 
 <table>
@@ -943,7 +943,6 @@ SECTIONS['observation-schema'] = {
   <tr><td>6</td><td>health</td><td>Entity health (0 for non-living)</td></tr>
   <tr><td>7</td><td>distance</td><td>Euclidean distance from player</td></tr>
 </table>
-<p>Empty slots: <code>[0, 0, 0, 0, 0, 0, 0, 0]</code></p>
 `
     },
     {
@@ -1437,7 +1436,7 @@ SECTIONS['registry'] = {
 <h3>Viewport Blocks Array</h3>
 <ul>
   <li>Size: 4608 elements (16 wide × 9 tall × 32 deep)</li>
-  <li>Index: <code>depth * 288 + height * 16 + width</code></li>
+  <li>Index: <code>depth * 144 + height * 16 + width</code></li>
   <li>0 = air or out-of-range</li>
 </ul>
 

@@ -908,7 +908,7 @@ SECTIONS['observation-schema'] = {
 <p>Mảng phẳng <strong>4608 số nguyên</strong> (16 ngang × 9 dọc × 32 sâu) đại diện ID khối trong tầm nhìn.</p>
 
 <h4>Công Thức Index</h4>
-<pre><code>index = depth * 288 + height * 16 + width</code></pre>
+<pre><code>index = depth * 144 + height * 16 + width</code></pre>
 <ul>
   <li><code>depth</code>: 0 (gần) đến 31 (xa)</li>
   <li><code>height</code>: 0 (đáy) đến 8 (đỉnh)</li>
@@ -920,7 +920,7 @@ SECTIONS['observation-schema'] = {
 </ul>
 
 <h2 id="viewport-entities">Viewport Entities — Sinh Vật Gần Đó</h2>
-<p>Tối đa <strong>16 entity</strong> trong view frustum (lọc theo FOV, không phải bán kính), mỗi entity 8 giá trị:</p>
+<p>Tối đa <strong>16 entity</strong> trong view frustum (lọc theo FOV, không phải bán kính), mỗi entity 8 giá trị. Chỉ trả về entity thực tế (không pad rỗng):</p>
 <pre><code>[type_id, relX, relY, relZ, yaw, pitch, health, distance]</code></pre>
 
 <table>
@@ -932,7 +932,6 @@ SECTIONS['observation-schema'] = {
   <tr><td>6</td><td>health</td><td>Máu (0 nếu không sống)</td></tr>
   <tr><td>7</td><td>distance</td><td>Khoảng cách Euclid</td></tr>
 </table>
-<p>Slot trống: <code>[0, 0, 0, 0, 0, 0, 0, 0]</code></p>
 `
     },
     {
@@ -1391,7 +1390,7 @@ SECTIONS['registry'] = {
 <h3>Viewport Blocks Array</h3>
 <ul>
   <li>Kích thước: 4608 phần tử (16 ngang × 9 cao × 32 sâu)</li>
-  <li>Index: <code>depth * 288 + height * 16 + width</code></li>
+  <li>Index: <code>depth * 144 + height * 16 + width</code></li>
   <li>0 = không khí hoặc ngoài tầm</li>
 </ul>
 

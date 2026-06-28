@@ -699,7 +699,7 @@ A flat array of **4608 integers** (16 wide × 9 tall × 32 deep) representing bl
 An array of up to **16 entities** visible to the player, each with 8 values:
 `[entity_type_id, relX, relY, relZ, yaw, pitch, health, distance]`
 
-Entities beyond the first 16 are ignored. Empty slots are `[0, 0, 0, 0, 0, 0, 0, 0]`.
+Entities beyond the first 16 are ignored. Only visible/filtered entities are returned (no empty padding; array may have 0–16 elements).
 
 ### Player Flags (boolean, 0 or 1)
 

@@ -243,7 +243,7 @@ The array is ordered: **depth-first, then height, then width:**
 for d = 0..31 (depth):
   for h = 0..8 (height):
     for w = 0..15 (width):
-      arr[d * 288 + h * 16 + w] = blockId
+      arr[d * 144 + h * 16 + w] = blockId
 ```
 
 - Depth = distance from player (0 = nearest, 31 = farthest)

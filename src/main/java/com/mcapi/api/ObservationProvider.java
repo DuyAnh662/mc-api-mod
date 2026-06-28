@@ -128,13 +128,7 @@ public class ObservationProvider {
     }
 
     private static JsonArray emptyViewportEntities() {
-        JsonArray arr = new JsonArray();
-        for (int i = 0; i < 16; i++) {
-            JsonArray e = new JsonArray();
-            for (int j = 0; j < 8; j++) e.add(0);
-            arr.add(e);
-        }
-        return arr;
+        return new JsonArray();
     }
 
     private static JsonObject buildWorld(ClientLevel level) {
@@ -405,13 +399,6 @@ public class ObservationProvider {
             e.add(dist);
 
             arr.add(e);
-            count++;
-        }
-
-        while (count < 16) {
-            JsonArray empty = new JsonArray();
-            for (int i = 0; i < 8; i++) empty.add(0);
-            arr.add(empty);
             count++;
         }
 

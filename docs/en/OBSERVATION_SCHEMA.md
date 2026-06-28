@@ -173,7 +173,7 @@ Currently held hotbar slot.
 
 ### Index Formula
 ```
-index = depth * 288 + height * 16 + width
+index = depth * 144 + height * 16 + width
 ```
 where:
 - `depth`: 0 (nearest) to 31 (farthest)
@@ -210,7 +210,7 @@ Each entity has 8 values:
 | 6 | health | Entity health (0 for non-living) |
 | 7 | distance | Euclidean distance from player |
 
-Empty slots: `[0, 0, 0, 0, 0, 0, 0, 0]`
+Only entities actually visible in the frustum are included (no empty padding; array may have 0–16 elements).
 
 ### Entity Type IDs (stable)
 

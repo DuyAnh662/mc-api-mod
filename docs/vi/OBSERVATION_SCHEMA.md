@@ -173,7 +173,7 @@ Slot hotbar đang chọn.
 
 ### Công thức chỉ mục
 ```
-index = depth * 288 + height * 16 + width
+index = depth * 144 + height * 16 + width
 ```
 với:
 - `depth`: 0 (gần nhất) đến 31 (xa nhất)
@@ -210,7 +210,7 @@ Mỗi entity có 8 giá trị:
 | 6 | health | Máu entity (0 nếu không sống) |
 | 7 | distance | Khoảng cách Euclid từ người chơi |
 
-Slot trống: `[0, 0, 0, 0, 0, 0, 0, 0]`
+Chỉ trả về entity thực tế trong frustum (không pad rỗng; mảng có 0–16 phần tử).
 
 ### Bảng ID Entity (cập nhật từ runtime)
 

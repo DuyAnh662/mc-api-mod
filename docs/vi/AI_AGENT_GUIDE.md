@@ -202,7 +202,7 @@ Mảng 4608 số nguyên (16×9×32 hình nón). Mỗi giá trị là ID khối 
 
 **Thứ tự:** depth → height → width:
 ```
-arr[d * 288 + h * 16 + w] = blockId
+arr[d * 144 + h * 16 + w] = blockId
 ```
 
 **Logic AI:**
