@@ -804,7 +804,7 @@ SECTIONS['observation-schema'] = {
   <tr><td><code>target.distance</code></td><td>Distance to targeted block</td></tr>
   <tr><td><code>target.face</code></td><td>Face of targeted block (0=Up,1=Down,2=North,3=South,4=West,5=East)</td></tr>
   <tr><td><code>viewport_blocks</code></td><td>4608 block IDs in view frustum (16×9×32)</td></tr>
-  <tr><td><code>viewport_entities</code></td><td>Visible entities [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
+  <tr><td><code>viewport_entities</code></td><td>Visible entities in frustum (FOV-filtered) [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
   <tr><td><code>screen</code></td><td>Current UI screen info (only present when a screen is open)</td></tr>
 </table>
 `
@@ -931,7 +931,7 @@ SECTIONS['observation-schema'] = {
 </ul>
 
 <h2 id="viewport-entities">Viewport Entities — Nearby Creatures</h2>
-<p>Up to <strong>16 entities</strong> visible to the player, each with 8 values:</p>
+<p>Up to <strong>16 entities</strong> within the player's view frustum (FOV-filtered, not radius-based), each with 8 values:</p>
 <pre><code>[type_id, relX, relY, relZ, yaw, pitch, health, distance]</code></pre>
 
 <table>
@@ -1452,8 +1452,8 @@ SECTIONS['registry'] = {
       id: 'registry.entities',
       title: 'Entity IDs',
       content: `
-<h2 id="entity-ids">Entity Registry — Complete 0–119</h2>
-<p>Entity type IDs are stable across sessions (unlike block/item IDs). Values from 0 (empty) to 119.</p>
+<h2 id="entity-ids">Entity Registry — Complete 0–127</h2>
+<p>Entity type IDs from the vanilla Minecraft 1.21.11 <code>BuiltInRegistries.ENTITY_TYPE</code>. Registry order may shift with mods or updates. For runtime lookup, use <code>GET /api/registry/entities</code>.</p>
 <table>
   <tr><th>ID</th><th>Entity</th><th>Notes</th><th>ID</th><th>Entity</th><th>Notes</th></tr>
   <tr><td>0</td><td>Allay</td><td>—</td><td>1</td><td>Area Effect Cloud</td><td>—</td></tr>
@@ -1463,61 +1463,65 @@ SECTIONS['registry'] = {
   <tr><td>8</td><td><strong>Blaze</strong></td><td>Hostile, Nether</td><td>9</td><td>Block Display</td><td>—</td></tr>
   <tr><td>10</td><td>Boat</td><td>—</td><td>11</td><td><strong>Bogged</strong></td><td>Hostile</td></tr>
   <tr><td>12</td><td><strong>Breeze</strong></td><td>Hostile</td><td>13</td><td>Breeze Wind Charge</td><td>—</td></tr>
-  <tr><td>14</td><td>Cat</td><td>—</td><td>15</td><td>Camel</td><td>—</td></tr>
+  <tr><td>14</td><td>Camel</td><td>—</td><td>15</td><td>Cat</td><td>—</td></tr>
   <tr><td>16</td><td><strong>Cave Spider</strong></td><td>Hostile</td><td>17</td><td>Chest Boat</td><td>—</td></tr>
   <tr><td>18</td><td>Chest Minecart</td><td>—</td><td>19</td><td>Chicken</td><td>Food source</td></tr>
-  <tr><td>20</td><td>Cod</td><td>—</td><td>21</td><td>Cow</td><td>Food/leather</td></tr>
-  <tr><td>22</td><td><strong>Creeper</strong></td><td>Hostile, explodes</td><td>23</td><td>Dolphin</td><td>—</td></tr>
-  <tr><td>24</td><td>Donkey</td><td>Rideable</td><td>25</td><td>Dragon Fireball</td><td>—</td></tr>
-  <tr><td>26</td><td><strong>Drowned</strong></td><td>Hostile</td><td>27</td><td>Egg</td><td>—</td></tr>
-  <tr><td>28</td><td><strong>Elder Guardian</strong></td><td>Hostile</td><td>29</td><td>End Crystal</td><td>—</td></tr>
-  <tr><td>30</td><td><strong>Ender Dragon</strong></td><td><strong>Boss</strong></td><td>31</td><td>Ender Pearl</td><td>—</td></tr>
-  <tr><td>32</td><td>Enderman</td><td>Neutral</td><td>33</td><td>Endermite</td><td>Neutral</td></tr>
-  <tr><td>34</td><td><strong>Evoker</strong></td><td>Hostile</td><td>35</td><td>Evoker Fangs</td><td>—</td></tr>
-  <tr><td>36</td><td>Experience Bottle</td><td>—</td><td>37</td><td>Experience Orb</td><td>—</td></tr>
-  <tr><td>38</td><td>Eye of Ender</td><td>—</td><td>39</td><td>Falling Block</td><td>—</td></tr>
-  <tr><td>40</td><td>Firework Rocket</td><td>—</td><td>41</td><td>Fox</td><td>—</td></tr>
-  <tr><td>42</td><td>Frog</td><td>—</td><td>43</td><td>Furnace Minecart</td><td>—</td></tr>
-  <tr><td>44</td><td><strong>Ghast</strong></td><td>Hostile, Nether</td><td>45</td><td><strong>Giant</strong></td><td>Hostile</td></tr>
-  <tr><td>46</td><td>Glow Item Frame</td><td>—</td><td>47</td><td>Glow Squid</td><td>—</td></tr>
-  <tr><td>48</td><td>Goat</td><td>—</td><td>49</td><td><strong>Guardian</strong></td><td>Hostile, water</td></tr>
-  <tr><td>50</td><td><strong>Hoglin</strong></td><td>Hostile, Nether</td><td>51</td><td>Hopper Minecart</td><td>—</td></tr>
-  <tr><td>52</td><td>Horse</td><td>Rideable</td><td>53</td><td><strong>Husk</strong></td><td>Hostile</td></tr>
-  <tr><td>54</td><td><strong>Illusioner</strong></td><td>Hostile</td><td>55</td><td>Interaction</td><td>—</td></tr>
-  <tr><td>56</td><td>Iron Golem</td><td>Neutral</td><td>57</td><td>Item (dropped)</td><td>—</td></tr>
-  <tr><td>58</td><td>Item Display</td><td>—</td><td>59</td><td>Item Frame</td><td>—</td></tr>
-  <tr><td>60</td><td>Llama</td><td>Carries chests</td><td>61</td><td><strong>Magma Cube</strong></td><td>Hostile, Nether</td></tr>
-  <tr><td>62</td><td>Marker</td><td>—</td><td>63</td><td>Minecart</td><td>—</td></tr>
-  <tr><td>64</td><td>Mooshroom</td><td>—</td><td>65</td><td>Mule</td><td>Rideable</td></tr>
-  <tr><td>66</td><td>Ocelot</td><td>—</td><td>67</td><td>Painting</td><td>—</td></tr>
-  <tr><td>68</td><td>Panda</td><td>—</td><td>69</td><td>Parrot</td><td>—</td></tr>
-  <tr><td>70</td><td><strong>Phantom</strong></td><td>Hostile</td><td>71</td><td>Pig</td><td>Food source</td></tr>
-  <tr><td>72</td><td>Piglin</td><td>Neutral</td><td>73</td><td><strong>Piglin Brute</strong></td><td>Hostile, Nether</td></tr>
-  <tr><td>74</td><td><strong>Pillager</strong></td><td>Hostile, raids</td><td>75</td><td>Polar Bear</td><td>Neutral</td></tr>
-  <tr><td>76</td><td>Potion</td><td>—</td><td>77</td><td>Pufferfish</td><td>—</td></tr>
-  <tr><td>78</td><td>Rabbit</td><td>—</td><td>79</td><td><strong>Ravager</strong></td><td>Hostile, raids</td></tr>
-  <tr><td>80</td><td>Salmon</td><td>—</td><td>81</td><td>Sheep</td><td>Wool/mutton</td></tr>
-  <tr><td>82</td><td><strong>Shulker</strong></td><td>Hostile, End</td><td>83</td><td>Shulker Bullet</td><td>—</td></tr>
-  <tr><td>84</td><td><strong>Silverfish</strong></td><td>Hostile</td><td>85</td><td><strong>Skeleton</strong></td><td>Hostile, ranged</td></tr>
-  <tr><td>86</td><td>Skeleton Horse</td><td>—</td><td>87</td><td><strong>Slime</strong></td><td>Hostile</td></tr>
-  <tr><td>88</td><td>Small Fireball</td><td>—</td><td>89</td><td>Sniffer</td><td>—</td></tr>
-  <tr><td>90</td><td>Snow Golem</td><td>—</td><td>91</td><td>Snowball</td><td>—</td></tr>
-  <tr><td>92</td><td><strong>Spider</strong></td><td>Hostile</td><td>93</td><td>Spectral Arrow</td><td>—</td></tr>
-  <tr><td>94</td><td>Squid</td><td>—</td><td>95</td><td><strong>Stray</strong></td><td>Hostile</td></tr>
-  <tr><td>96</td><td>Strider</td><td>Nether, rideable</td><td>97</td><td>Tadpole</td><td>—</td></tr>
-  <tr><td>98</td><td>Text Display</td><td>—</td><td>99</td><td>TNT</td><td>Primed</td></tr>
-  <tr><td>100</td><td>Trader Llama</td><td>—</td><td>101</td><td>Trident</td><td>—</td></tr>
-  <tr><td>102</td><td>Tropical Fish</td><td>—</td><td>103</td><td>Turtle</td><td>—</td></tr>
-  <tr><td>104</td><td><strong>Vex</strong></td><td>Hostile</td><td>105</td><td>Villager</td><td>Trading</td></tr>
-  <tr><td>106</td><td><strong>Vindicator</strong></td><td>Hostile</td><td>107</td><td>Wandering Trader</td><td>—</td></tr>
-  <tr><td>108</td><td><strong>Warden</strong></td><td>Hostile, blind</td><td>109</td><td>Wind Charge</td><td>—</td></tr>
-  <tr><td>110</td><td><strong>Witch</strong></td><td>Hostile</td><td>111</td><td><strong>Wither</strong></td><td><strong>Boss</strong></td></tr>
-  <tr><td>112</td><td><strong>Wither Skeleton</strong></td><td>Hostile, Nether</td><td>113</td><td>Wither Skull</td><td>—</td></tr>
-  <tr><td>114</td><td>Wolf</td><td>Neutral</td><td>115</td><td><strong>Zoglin</strong></td><td>Hostile</td></tr>
-  <tr><td>116</td><td><strong>Zombie</strong></td><td>Hostile, common</td><td>117</td><td>Zombie Horse</td><td>—</td></tr>
-  <tr><td>118</td><td><strong>Zombie Villager</strong></td><td>Hostile</td><td>119</td><td>Zombified Piglin</td><td>Neutral, Nether</td></tr>
+  <tr><td>20</td><td>Cod</td><td>—</td><td>21</td><td>Minecart with Command Block</td><td>—</td></tr>
+  <tr><td>22</td><td>Cow</td><td>Food/leather</td><td>23</td><td><strong>Creeper</strong></td><td>Hostile, explodes</td></tr>
+  <tr><td>24</td><td>Dolphin</td><td>—</td><td>25</td><td>Donkey</td><td>Rideable</td></tr>
+  <tr><td>26</td><td>Dragon Fireball</td><td>—</td><td>27</td><td><strong>Drowned</strong></td><td>Hostile</td></tr>
+  <tr><td>28</td><td>Egg</td><td>—</td><td>29</td><td><strong>Elder Guardian</strong></td><td>Hostile</td></tr>
+  <tr><td>30</td><td>End Crystal</td><td>—</td><td>31</td><td><strong>Ender Dragon</strong></td><td><strong>Boss</strong></td></tr>
+  <tr><td>32</td><td>Ender Pearl</td><td>—</td><td>33</td><td>Enderman</td><td>Neutral</td></tr>
+  <tr><td>34</td><td>Endermite</td><td>Neutral</td><td>35</td><td><strong>Evoker</strong></td><td>Hostile</td></tr>
+  <tr><td>36</td><td>Evoker Fangs</td><td>—</td><td>37</td><td>Experience Bottle</td><td>—</td></tr>
+  <tr><td>38</td><td>Experience Orb</td><td>—</td><td>39</td><td>Eye of Ender</td><td>—</td></tr>
+  <tr><td>40</td><td>Falling Block</td><td>—</td><td>41</td><td>Firework Rocket</td><td>—</td></tr>
+  <tr><td>42</td><td>Fox</td><td>—</td><td>43</td><td>Frog</td><td>—</td></tr>
+  <tr><td>44</td><td>Furnace Minecart</td><td>—</td><td>45</td><td><strong>Ghast</strong></td><td>Hostile, Nether</td></tr>
+  <tr><td>46</td><td><strong>Giant</strong></td><td>Hostile</td><td>47</td><td>Glow Item Frame</td><td>—</td></tr>
+  <tr><td>48</td><td>Glow Squid</td><td>—</td><td>49</td><td>Goat</td><td>—</td></tr>
+  <tr><td>50</td><td><strong>Guardian</strong></td><td>Hostile, water</td><td>51</td><td><strong>Hoglin</strong></td><td>Hostile, Nether</td></tr>
+  <tr><td>52</td><td>Hopper Minecart</td><td>—</td><td>53</td><td>Horse</td><td>Rideable</td></tr>
+  <tr><td>54</td><td><strong>Husk</strong></td><td>Hostile</td><td>55</td><td><strong>Illusioner</strong></td><td>Hostile</td></tr>
+  <tr><td>56</td><td>Interaction</td><td>—</td><td>57</td><td>Iron Golem</td><td>Neutral</td></tr>
+  <tr><td>58</td><td>Item (dropped)</td><td>—</td><td>59</td><td>Item Display</td><td>—</td></tr>
+  <tr><td>60</td><td>Item Frame</td><td>—</td><td>61</td><td>Ominous Item Spawner</td><td>—</td></tr>
+  <tr><td>62</td><td>Ghast Fireball</td><td>—</td><td>63</td><td>Leash Knot</td><td>—</td></tr>
+  <tr><td>64</td><td>Lightning Bolt</td><td>—</td><td>65</td><td>Llama</td><td>Carries chests</td></tr>
+  <tr><td>66</td><td>Llama Spit</td><td>—</td><td>67</td><td><strong>Magma Cube</strong></td><td>Hostile, Nether</td></tr>
+  <tr><td>68</td><td>Marker</td><td>—</td><td>69</td><td>Minecart</td><td>—</td></tr>
+  <tr><td>70</td><td>Mooshroom</td><td>—</td><td>71</td><td>Mule</td><td>Rideable</td></tr>
+  <tr><td>72</td><td>Ocelot</td><td>—</td><td>73</td><td>Painting</td><td>—</td></tr>
+  <tr><td>74</td><td>Panda</td><td>—</td><td>75</td><td>Parrot</td><td>—</td></tr>
+  <tr><td>76</td><td><strong>Phantom</strong></td><td>Hostile</td><td>77</td><td>Pig</td><td>Food source</td></tr>
+  <tr><td>78</td><td>Piglin</td><td>Neutral</td><td>79</td><td><strong>Piglin Brute</strong></td><td>Hostile, Nether</td></tr>
+  <tr><td>80</td><td><strong>Pillager</strong></td><td>Hostile, raids</td><td>81</td><td>Polar Bear</td><td>Neutral</td></tr>
+  <tr><td>82</td><td>Potion</td><td>—</td><td>83</td><td>Pufferfish</td><td>—</td></tr>
+  <tr><td>84</td><td>Rabbit</td><td>—</td><td>85</td><td><strong>Ravager</strong></td><td>Hostile, raids</td></tr>
+  <tr><td>86</td><td>Salmon</td><td>—</td><td>87</td><td>Sheep</td><td>Wool/mutton</td></tr>
+  <tr><td>88</td><td><strong>Shulker</strong></td><td>Hostile, End</td><td>89</td><td>Shulker Bullet</td><td>—</td></tr>
+  <tr><td>90</td><td><strong>Silverfish</strong></td><td>Hostile</td><td>91</td><td><strong>Skeleton</strong></td><td>Hostile, ranged</td></tr>
+  <tr><td>92</td><td>Skeleton Horse</td><td>—</td><td>93</td><td><strong>Slime</strong></td><td>Hostile</td></tr>
+  <tr><td>94</td><td>Blaze Fireball</td><td>—</td><td>95</td><td>Sniffer</td><td>—</td></tr>
+  <tr><td>96</td><td>Snow Golem</td><td>—</td><td>97</td><td>Snowball</td><td>—</td></tr>
+  <tr><td>98</td><td>Minecart with Spawner</td><td>—</td><td>99</td><td>Spectral Arrow</td><td>—</td></tr>
+  <tr><td>100</td><td><strong>Spider</strong></td><td>Hostile</td><td>101</td><td>Squid</td><td>—</td></tr>
+  <tr><td>102</td><td><strong>Stray</strong></td><td>Hostile</td><td>103</td><td>Strider</td><td>Nether, rideable</td></tr>
+  <tr><td>104</td><td>Tadpole</td><td>—</td><td>105</td><td>Text Display</td><td>—</td></tr>
+  <tr><td>106</td><td>Primed TNT</td><td>—</td><td>107</td><td>Minecart with TNT</td><td>—</td></tr>
+  <tr><td>108</td><td>Trader Llama</td><td>—</td><td>109</td><td>Trident</td><td>—</td></tr>
+  <tr><td>110</td><td>Tropical Fish</td><td>—</td><td>111</td><td>Turtle</td><td>—</td></tr>
+  <tr><td>112</td><td><strong>Vex</strong></td><td>Hostile</td><td>113</td><td>Villager</td><td>Trading</td></tr>
+  <tr><td>114</td><td><strong>Vindicator</strong></td><td>Hostile</td><td>115</td><td>Wandering Trader</td><td>—</td></tr>
+  <tr><td>116</td><td><strong>Warden</strong></td><td>Hostile, blind</td><td>117</td><td>Wind Charge</td><td>—</td></tr>
+  <tr><td>118</td><td>Witch</td><td>Hostile</td><td>119</td><td><strong>Wither</strong></td><td><strong>Boss</strong></td></tr>
+  <tr><td>120</td><td><strong>Wither Skeleton</strong></td><td>Hostile, Nether</td><td>121</td><td>Wither Skull</td><td>—</td></tr>
+  <tr><td>122</td><td>Wolf</td><td>Neutral</td><td>123</td><td><strong>Zoglin</strong></td><td>Hostile</td></tr>
+  <tr><td>124</td><td><strong>Zombie</strong></td><td>Hostile, common</td><td>125</td><td>Zombie Horse</td><td>—</td></tr>
+  <tr><td>126</td><td><strong>Zombie Villager</strong></td><td>Hostile</td><td>127</td><td>Zombified Piglin</td><td>Neutral, Nether</td></tr>
 </table>
-<p>Empty slot = all zeros <code>[0, 0, 0, 0, 0, 0, 0, 0]</code>. Bold = hostile toward player.</p>
+<p>Empty slot = all zeros <code>[0, 0, 0, 0, 0, 0, 0, 0]</code>. Bold = hostile toward player. For runtime lookup, call <code>GET /api/registry/entities</code>.</p>
 `
     },
     {
@@ -1783,6 +1787,34 @@ SECTIONS['changelog'] = {
   title: 'Changelog',
   content: `
 <h1 id="changelog">Changelog</h1>
+
+<h2 id="v121">v1.2.1 — Registry Endpoints + Bug Fixes + Doc Sync</h2>
+
+<h3>New Features</h3>
+<ul>
+  <li><strong>Registry Dump Endpoints</strong> — Runtime entity/item ID lookup:
+    <ul>
+      <li><code>GET /api/registry/entities</code> — Full entity type registry (<code>BuiltInRegistries.ENTITY_TYPE</code>) with namespaced names</li>
+      <li><code>GET /api/registry/items</code> — Full item registry (<code>BuiltInRegistries.ITEM</code>) with namespaced names</li>
+      <li>Response: <code>{"id": 0, "name": "minecraft:allay"}, ...</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h3>Bug Fixes</h3>
+<ul>
+  <li><strong>world.time clamp</strong> — <code>GET /observation</code> now returns <code>world.time</code> in 0-24000 range (was raw tick value)</li>
+  <li><strong>viewport_entities FOV filter</strong> — Entities outside the player's horizontal field of view are now excluded</li>
+  <li><strong>Entity ID table corrected</strong> — All entity IDs now match real <code>BuiltInRegistries.ENTITY_TYPE</code> registry order (0-127, added 8 missing entries)</li>
+  <li><strong>Doc site sync</strong> — HTML docs (<code>content-en.js</code>, <code>content-vi.js</code>) updated with corrected entity tables, registry endpoints, and FOV notes</li>
+</ul>
+
+<h3>Improvements</h3>
+<ul>
+  <li>Doc tables now reference <code>GET /api/registry/entities</code> for runtime lookup</li>
+  <li>All observation schema docs updated to reflect 0-127 entity range</li>
+  <li>Vietnamese docs fully synced</li>
+</ul>
 
 <h2 id="v120">v1.2.0 — AI Endpoints + Observation Schema + Security Fixes</h2>
 

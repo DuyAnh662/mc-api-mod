@@ -796,7 +796,7 @@ SECTIONS['observation-schema'] = {
   <tr><td><code>target.distance</code></td><td>Khoảng cách tới khối đang ngắm</td></tr>
   <tr><td><code>target.face</code></td><td>Mặt của khối (0=Trên,1=Dưới,2=Bắc,3=Nam,4=Tây,5=Đông)</td></tr>
   <tr><td><code>viewport_blocks</code></td><td>4608 ID khối (16×9×32)</td></tr>
-  <tr><td><code>viewport_entities</code></td><td>Entity nhìn thấy [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
+  <tr><td><code>viewport_entities</code></td><td>Entity trong frustum (lọc FOV) [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
   <tr><td><code>screen</code></td><td>Thông tin màn hình UI (chỉ khi có màn hình mở)</td></tr>
 </table>
 `
@@ -920,7 +920,7 @@ SECTIONS['observation-schema'] = {
 </ul>
 
 <h2 id="viewport-entities">Viewport Entities — Sinh Vật Gần Đó</h2>
-<p>Tối đa <strong>16 entity</strong>, mỗi entity 8 giá trị:</p>
+<p>Tối đa <strong>16 entity</strong> trong view frustum (lọc theo FOV, không phải bán kính), mỗi entity 8 giá trị:</p>
 <pre><code>[type_id, relX, relY, relZ, yaw, pitch, health, distance]</code></pre>
 
 <table>
@@ -1406,8 +1406,8 @@ SECTIONS['registry'] = {
       id: 'registry.entities',
       title: 'Entity IDs',
       content: `
-<h2 id="entity-ids">Entity Registry — Đầy Đủ 0–119</h2>
-<p>Entity type IDs ổn định giữa các phiên. ID 0–119, mỗi entity 8 giá trị <code>[type, rx, ry, rz, yaw, pitch, health, dist]</code>.</p>
+<h2 id="entity-ids">Entity Registry — Đầy Đủ 0–127</h2>
+<p>Entity type IDs từ <code>BuiltInRegistries.ENTITY_TYPE</code> Minecraft 1.21.11. Thứ tự registry có thể khác nếu dùng mod. Tra runtime: <code>GET /api/registry/entities</code>.</p>
 <table>
   <tr><th>ID</th><th>Entity</th><th>Ghi chú</th><th>ID</th><th>Entity</th><th>Ghi chú</th></tr>
   <tr><td>0</td><td>Allay</td><td>—</td><td>1</td><td>Area Effect Cloud</td><td>—</td></tr>
@@ -1417,61 +1417,65 @@ SECTIONS['registry'] = {
   <tr><td>8</td><td><strong>Blaze</strong></td><td>Thù địch, Nether</td><td>9</td><td>Block Display</td><td>—</td></tr>
   <tr><td>10</td><td>Boat</td><td>—</td><td>11</td><td><strong>Bogged</strong></td><td>Thù địch</td></tr>
   <tr><td>12</td><td><strong>Breeze</strong></td><td>Thù địch</td><td>13</td><td>Breeze Wind Charge</td><td>—</td></tr>
-  <tr><td>14</td><td>Cat</td><td>—</td><td>15</td><td>Camel</td><td>—</td></tr>
+  <tr><td>14</td><td>Camel</td><td>—</td><td>15</td><td>Cat</td><td>—</td></tr>
   <tr><td>16</td><td><strong>Cave Spider</strong></td><td>Thù địch</td><td>17</td><td>Chest Boat</td><td>—</td></tr>
   <tr><td>18</td><td>Chest Minecart</td><td>—</td><td>19</td><td>Chicken</td><td>Thức ăn</td></tr>
-  <tr><td>20</td><td>Cod</td><td>—</td><td>21</td><td>Cow</td><td>Thức ăn/da</td></tr>
-  <tr><td>22</td><td><strong>Creeper</strong></td><td>Thù địch, nổ</td><td>23</td><td>Dolphin</td><td>—</td></tr>
-  <tr><td>24</td><td>Donkey</td><td>Cưỡi được</td><td>25</td><td>Dragon Fireball</td><td>—</td></tr>
-  <tr><td>26</td><td><strong>Drowned</strong></td><td>Thù địch</td><td>27</td><td>Egg</td><td>—</td></tr>
-  <tr><td>28</td><td><strong>Elder Guardian</strong></td><td>Thù địch</td><td>29</td><td>End Crystal</td><td>—</td></tr>
-  <tr><td>30</td><td><strong>Ender Dragon</strong></td><td><strong>Boss</strong></td><td>31</td><td>Ender Pearl</td><td>—</td></tr>
-  <tr><td>32</td><td>Enderman</td><td>Neutral</td><td>33</td><td>Endermite</td><td>Neutral</td></tr>
-  <tr><td>34</td><td><strong>Evoker</strong></td><td>Thù địch</td><td>35</td><td>Evoker Fangs</td><td>—</td></tr>
-  <tr><td>36</td><td>Experience Bottle</td><td>—</td><td>37</td><td>Experience Orb</td><td>—</td></tr>
-  <tr><td>38</td><td>Eye of Ender</td><td>—</td><td>39</td><td>Falling Block</td><td>—</td></tr>
-  <tr><td>40</td><td>Firework Rocket</td><td>—</td><td>41</td><td>Fox</td><td>—</td></tr>
-  <tr><td>42</td><td>Frog</td><td>—</td><td>43</td><td>Furnace Minecart</td><td>—</td></tr>
-  <tr><td>44</td><td><strong>Ghast</strong></td><td>Thù địch, Nether</td><td>45</td><td><strong>Giant</strong></td><td>Thù địch</td></tr>
-  <tr><td>46</td><td>Glow Item Frame</td><td>—</td><td>47</td><td>Glow Squid</td><td>—</td></tr>
-  <tr><td>48</td><td>Goat</td><td>—</td><td>49</td><td><strong>Guardian</strong></td><td>Thù địch, nước</td></tr>
-  <tr><td>50</td><td><strong>Hoglin</strong></td><td>Thù địch, Nether</td><td>51</td><td>Hopper Minecart</td><td>—</td></tr>
-  <tr><td>52</td><td>Horse</td><td>Cưỡi được</td><td>53</td><td><strong>Husk</strong></td><td>Thù địch</td></tr>
-  <tr><td>54</td><td><strong>Illusioner</strong></td><td>Thù địch</td><td>55</td><td>Interaction</td><td>—</td></tr>
-  <tr><td>56</td><td>Iron Golem</td><td>Neutral</td><td>57</td><td>Item (rơi)</td><td>—</td></tr>
-  <tr><td>58</td><td>Item Display</td><td>—</td><td>59</td><td>Item Frame</td><td>—</td></tr>
-  <tr><td>60</td><td>Llama</td><td>Mang rương</td><td>61</td><td><strong>Magma Cube</strong></td><td>Thù địch, Nether</td></tr>
-  <tr><td>62</td><td>Marker</td><td>—</td><td>63</td><td>Minecart</td><td>—</td></tr>
-  <tr><td>64</td><td>Mooshroom</td><td>—</td><td>65</td><td>Mule</td><td>Cưỡi được</td></tr>
-  <tr><td>66</td><td>Ocelot</td><td>—</td><td>67</td><td>Painting</td><td>—</td></tr>
-  <tr><td>68</td><td>Panda</td><td>—</td><td>69</td><td>Parrot</td><td>—</td></tr>
-  <tr><td>70</td><td><strong>Phantom</strong></td><td>Thù địch</td><td>71</td><td>Pig</td><td>Thức ăn</td></tr>
-  <tr><td>72</td><td>Piglin</td><td>Neutral</td><td>73</td><td><strong>Piglin Brute</strong></td><td>Thù địch, Nether</td></tr>
-  <tr><td>74</td><td><strong>Pillager</strong></td><td>Thù địch, cướp</td><td>75</td><td>Polar Bear</td><td>Neutral</td></tr>
-  <tr><td>76</td><td>Potion</td><td>—</td><td>77</td><td>Pufferfish</td><td>—</td></tr>
-  <tr><td>78</td><td>Rabbit</td><td>—</td><td>79</td><td><strong>Ravager</strong></td><td>Thù địch, cướp</td></tr>
-  <tr><td>80</td><td>Salmon</td><td>—</td><td>81</td><td>Sheep</td><td>Len/thịt</td></tr>
-  <tr><td>82</td><td><strong>Shulker</strong></td><td>Thù địch, End</td><td>83</td><td>Shulker Bullet</td><td>—</td></tr>
-  <tr><td>84</td><td><strong>Silverfish</strong></td><td>Thù địch</td><td>85</td><td><strong>Skeleton</strong></td><td>Thù địch, bắn</td></tr>
-  <tr><td>86</td><td>Skeleton Horse</td><td>—</td><td>87</td><td><strong>Slime</strong></td><td>Thù địch</td></tr>
-  <tr><td>88</td><td>Small Fireball</td><td>—</td><td>89</td><td>Sniffer</td><td>—</td></tr>
-  <tr><td>90</td><td>Snow Golem</td><td>—</td><td>91</td><td>Snowball</td><td>—</td></tr>
-  <tr><td>92</td><td><strong>Spider</strong></td><td>Thù địch</td><td>93</td><td>Spectral Arrow</td><td>—</td></tr>
-  <tr><td>94</td><td>Squid</td><td>—</td><td>95</td><td><strong>Stray</strong></td><td>Thù địch</td></tr>
-  <tr><td>96</td><td>Strider</td><td>Nether, cưỡi được</td><td>97</td><td>Tadpole</td><td>—</td></tr>
-  <tr><td>98</td><td>Text Display</td><td>—</td><td>99</td><td>TNT</td><td>Đã kích hoạt</td></tr>
-  <tr><td>100</td><td>Trader Llama</td><td>—</td><td>101</td><td>Trident</td><td>—</td></tr>
-  <tr><td>102</td><td>Tropical Fish</td><td>—</td><td>103</td><td>Turtle</td><td>—</td></tr>
-  <tr><td>104</td><td><strong>Vex</strong></td><td>Thù địch</td><td>105</td><td>Villager</td><td>Giao dịch</td></tr>
-  <tr><td>106</td><td><strong>Vindicator</strong></td><td>Thù địch</td><td>107</td><td>Wandering Trader</td><td>—</td></tr>
-  <tr><td>108</td><td><strong>Warden</strong></td><td>Thù địch, mù</td><td>109</td><td>Wind Charge</td><td>—</td></tr>
-  <tr><td>110</td><td><strong>Witch</strong></td><td>Thù địch</td><td>111</td><td><strong>Wither</strong></td><td><strong>Boss</strong></td></tr>
-  <tr><td>112</td><td><strong>Wither Skeleton</strong></td><td>Thù địch, Nether</td><td>113</td><td>Wither Skull</td><td>—</td></tr>
-  <tr><td>114</td><td>Wolf</td><td>Neutral</td><td>115</td><td><strong>Zoglin</strong></td><td>Thù địch</td></tr>
-  <tr><td>116</td><td><strong>Zombie</strong></td><td>Thù địch, phổ biến</td><td>117</td><td>Zombie Horse</td><td>—</td></tr>
-  <tr><td>118</td><td><strong>Zombie Villager</strong></td><td>Thù địch</td><td>119</td><td>Zombified Piglin</td><td>Neutral, Nether</td></tr>
+  <tr><td>20</td><td>Cod</td><td>—</td><td>21</td><td>Minecart with Command Block</td><td>—</td></tr>
+  <tr><td>22</td><td>Cow</td><td>Thức ăn/da</td><td>23</td><td><strong>Creeper</strong></td><td>Thù địch, nổ</td></tr>
+  <tr><td>24</td><td>Dolphin</td><td>—</td><td>25</td><td>Donkey</td><td>Cưỡi được</td></tr>
+  <tr><td>26</td><td>Dragon Fireball</td><td>—</td><td>27</td><td><strong>Drowned</strong></td><td>Thù địch</td></tr>
+  <tr><td>28</td><td>Egg</td><td>—</td><td>29</td><td><strong>Elder Guardian</strong></td><td>Thù địch</td></tr>
+  <tr><td>30</td><td>End Crystal</td><td>—</td><td>31</td><td><strong>Ender Dragon</strong></td><td><strong>Boss</strong></td></tr>
+  <tr><td>32</td><td>Ender Pearl</td><td>—</td><td>33</td><td>Enderman</td><td>Neutral</td></tr>
+  <tr><td>34</td><td>Endermite</td><td>Neutral</td><td>35</td><td><strong>Evoker</strong></td><td>Thù địch</td></tr>
+  <tr><td>36</td><td>Evoker Fangs</td><td>—</td><td>37</td><td>Experience Bottle</td><td>—</td></tr>
+  <tr><td>38</td><td>Experience Orb</td><td>—</td><td>39</td><td>Eye of Ender</td><td>—</td></tr>
+  <tr><td>40</td><td>Falling Block</td><td>—</td><td>41</td><td>Firework Rocket</td><td>—</td></tr>
+  <tr><td>42</td><td>Fox</td><td>—</td><td>43</td><td>Frog</td><td>—</td></tr>
+  <tr><td>44</td><td>Furnace Minecart</td><td>—</td><td>45</td><td><strong>Ghast</strong></td><td>Thù địch, Nether</td></tr>
+  <tr><td>46</td><td><strong>Giant</strong></td><td>Thù địch</td><td>47</td><td>Glow Item Frame</td><td>—</td></tr>
+  <tr><td>48</td><td>Glow Squid</td><td>—</td><td>49</td><td>Goat</td><td>—</td></tr>
+  <tr><td>50</td><td><strong>Guardian</strong></td><td>Thù địch, nước</td><td>51</td><td><strong>Hoglin</strong></td><td>Thù địch, Nether</td></tr>
+  <tr><td>52</td><td>Hopper Minecart</td><td>—</td><td>53</td><td>Horse</td><td>Cưỡi được</td></tr>
+  <tr><td>54</td><td><strong>Husk</strong></td><td>Thù địch</td><td>55</td><td><strong>Illusioner</strong></td><td>Thù địch</td></tr>
+  <tr><td>56</td><td>Interaction</td><td>—</td><td>57</td><td>Iron Golem</td><td>Neutral</td></tr>
+  <tr><td>58</td><td>Item (rơi)</td><td>—</td><td>59</td><td>Item Display</td><td>—</td></tr>
+  <tr><td>60</td><td>Item Frame</td><td>—</td><td>61</td><td>Ominous Item Spawner</td><td>—</td></tr>
+  <tr><td>62</td><td>Ghast Fireball</td><td>—</td><td>63</td><td>Leash Knot</td><td>—</td></tr>
+  <tr><td>64</td><td>Lightning Bolt</td><td>—</td><td>65</td><td>Llama</td><td>Mang rương</td></tr>
+  <tr><td>66</td><td>Llama Spit</td><td>—</td><td>67</td><td><strong>Magma Cube</strong></td><td>Thù địch, Nether</td></tr>
+  <tr><td>68</td><td>Marker</td><td>—</td><td>69</td><td>Minecart</td><td>—</td></tr>
+  <tr><td>70</td><td>Mooshroom</td><td>—</td><td>71</td><td>Mule</td><td>Cưỡi được</td></tr>
+  <tr><td>72</td><td>Ocelot</td><td>—</td><td>73</td><td>Painting</td><td>—</td></tr>
+  <tr><td>74</td><td>Panda</td><td>—</td><td>75</td><td>Parrot</td><td>—</td></tr>
+  <tr><td>76</td><td><strong>Phantom</strong></td><td>Thù địch</td><td>77</td><td>Pig</td><td>Thức ăn</td></tr>
+  <tr><td>78</td><td>Piglin</td><td>Neutral</td><td>79</td><td><strong>Piglin Brute</strong></td><td>Thù địch, Nether</td></tr>
+  <tr><td>80</td><td><strong>Pillager</strong></td><td>Thù địch, cướp</td><td>81</td><td>Polar Bear</td><td>Neutral</td></tr>
+  <tr><td>82</td><td>Potion</td><td>—</td><td>83</td><td>Pufferfish</td><td>—</td></tr>
+  <tr><td>84</td><td>Rabbit</td><td>—</td><td>85</td><td><strong>Ravager</strong></td><td>Thù địch, cướp</td></tr>
+  <tr><td>86</td><td>Salmon</td><td>—</td><td>87</td><td>Sheep</td><td>Len/thịt</td></tr>
+  <tr><td>88</td><td><strong>Shulker</strong></td><td>Thù địch, End</td><td>89</td><td>Shulker Bullet</td><td>—</td></tr>
+  <tr><td>90</td><td><strong>Silverfish</strong></td><td>Thù địch</td><td>91</td><td><strong>Skeleton</strong></td><td>Thù địch, bắn</td></tr>
+  <tr><td>92</td><td>Skeleton Horse</td><td>—</td><td>93</td><td><strong>Slime</strong></td><td>Thù địch</td></tr>
+  <tr><td>94</td><td>Blaze Fireball</td><td>—</td><td>95</td><td>Sniffer</td><td>—</td></tr>
+  <tr><td>96</td><td>Snow Golem</td><td>—</td><td>97</td><td>Snowball</td><td>—</td></tr>
+  <tr><td>98</td><td>Minecart with Spawner</td><td>—</td><td>99</td><td>Spectral Arrow</td><td>—</td></tr>
+  <tr><td>100</td><td><strong>Spider</strong></td><td>Thù địch</td><td>101</td><td>Squid</td><td>—</td></tr>
+  <tr><td>102</td><td><strong>Stray</strong></td><td>Thù địch</td><td>103</td><td>Strider</td><td>Nether, cưỡi được</td></tr>
+  <tr><td>104</td><td>Tadpole</td><td>—</td><td>105</td><td>Text Display</td><td>—</td></tr>
+  <tr><td>106</td><td>Primed TNT</td><td>—</td><td>107</td><td>Minecart with TNT</td><td>—</td></tr>
+  <tr><td>108</td><td>Trader Llama</td><td>—</td><td>109</td><td>Trident</td><td>—</td></tr>
+  <tr><td>110</td><td>Tropical Fish</td><td>—</td><td>111</td><td>Turtle</td><td>—</td></tr>
+  <tr><td>112</td><td><strong>Vex</strong></td><td>Thù địch</td><td>113</td><td>Villager</td><td>Giao dịch</td></tr>
+  <tr><td>114</td><td><strong>Vindicator</strong></td><td>Thù địch</td><td>115</td><td>Wandering Trader</td><td>—</td></tr>
+  <tr><td>116</td><td><strong>Warden</strong></td><td>Thù địch, mù</td><td>117</td><td>Wind Charge</td><td>—</td></tr>
+  <tr><td>118</td><td>Witch</td><td>Thù địch</td><td>119</td><td><strong>Wither</strong></td><td><strong>Boss</strong></td></tr>
+  <tr><td>120</td><td><strong>Wither Skeleton</strong></td><td>Thù địch, Nether</td><td>121</td><td>Wither Skull</td><td>—</td></tr>
+  <tr><td>122</td><td>Wolf</td><td>Neutral</td><td>123</td><td><strong>Zoglin</strong></td><td>Thù địch</td></tr>
+  <tr><td>124</td><td><strong>Zombie</strong></td><td>Thù địch, phổ biến</td><td>125</td><td>Zombie Horse</td><td>—</td></tr>
+  <tr><td>126</td><td><strong>Zombie Villager</strong></td><td>Thù địch</td><td>127</td><td>Zombified Piglin</td><td>Neutral, Nether</td></tr>
 </table>
-<p>Ô trống = toàn 0 <code>[0, 0, 0, 0, 0, 0, 0, 0]</code>. Đậm = thù địch.</p>
+<p>Ô trống = toàn 0 <code>[0, 0, 0, 0, 0, 0, 0, 0]</code>. Đậm = thù địch. Tra runtime: <code>GET /api/registry/entities</code>.</p>
 `
     },
     {
@@ -1711,6 +1715,34 @@ SECTIONS['changelog'] = {
   title: 'Changelog',
   content: `
 <h1 id="changelog">Lịch Sử Thay Đổi</h1>
+
+<h2 id="v121">v1.2.1 — Registry Endpoints + Sửa Lỗi + Đồng Bộ Tài Liệu</h2>
+
+<h3>Tính Năng Mới</h3>
+<ul>
+  <li><strong>Registry Dump Endpoints</strong> — Tra ID entity/item runtime:
+    <ul>
+      <li><code>GET /api/registry/entities</code> — Toàn bộ registry entity với tên namespaced</li>
+      <li><code>GET /api/registry/items</code> — Toàn bộ registry item với tên namespaced</li>
+      <li>Phản hồi: <code>{"id": 0, "name": "minecraft:allay"}, ...</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h3>Sửa Lỗi</h3>
+<ul>
+  <li><strong>world.time clamp</strong> — <code>GET /observation</code> trả về <code>world.time</code> trong 0-24000 (trước đây trả raw tick)</li>
+  <li><strong>viewport_entities FOV</strong> — Entity ngoài góc nhìn ngang bị loại bỏ</li>
+  <li><strong>Bảng entity ID sửa sai</strong> — Tất cả ID entity khớp với registry thật (0-127, thêm 8 entity thiếu)</li>
+  <li><strong>Đồng bộ tài liệu</strong> — HTML docs cập nhật bảng entity, registry endpoints, ghi chú FOV</li>
+</ul>
+
+<h3>Cải Tiến</h3>
+<ul>
+  <li>Bảng tài liệu tham chiếu <code>GET /api/registry/entities</code> để tra cứu runtime</li>
+  <li>Tài liệu observation schema cập nhật khoảng entity 0-127</li>
+  <li>Đồng bộ hoàn toàn tài liệu tiếng Việt</li>
+</ul>
 
 <h2 id="v120">v1.2.0 — AI Endpoints + Observation Schema + Bảo Mật</h2>
 
