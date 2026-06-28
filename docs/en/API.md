@@ -777,6 +777,43 @@ The observation JSON uses **numeric IDs** (not strings) for items, blocks, and e
 | `"rain"` | Raining |
 | `"thunder"` | Rain + lightning |
 
+### Registry Dump Endpoints
+
+For AI agents that need to resolve numeric IDs at runtime, two endpoints dump the live registry mappings:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/registry/entities` | GET | Returns `{"entities": {"0": "minecraft:allay", "1": "minecraft:area_effect_cloud", ...}}` |
+| `/api/registry/items` | GET | Returns `{"items": {"0": "minecraft:air", "1": "minecraft:stone", ...}}` |
+
+**Example:**
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:25566/api/registry/entities
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Entity registry dump",
+  "data": {
+    "entities": {
+      "0": "minecraft:allay",
+      "1": "minecraft:area_effect_cloud",
+      "2": "minecraft:armadillo",
+      "3": "minecraft:armor_stand",
+      "...": "...",
+      "116": "minecraft:zombie",
+      "117": "minecraft:zombie_horse",
+      "118": "minecraft:zombie_villager",
+      "119": "minecraft:zombified_piglin"
+    }
+  }
+}
+```
+
+> **Use case:** AI agents can call this once per session to build a lookup table of ID → name, eliminating the need for hardcoded ID references.
+
 ### Common Block & Item Namespaced IDs (Reference)
 
 **Stone & Minerals:**

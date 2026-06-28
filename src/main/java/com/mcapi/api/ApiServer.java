@@ -92,6 +92,8 @@ public class ApiServer {
             server.createContext("/api/client/debug", new ClientDebugHandler());
             server.createContext("/api/script", new ScriptHandler());
             server.createContext("/api/cancel", new CancelHandler());
+            server.createContext("/api/registry/entities", new RegistryHandler.EntitiesHandler());
+            server.createContext("/api/registry/items", new RegistryHandler.ItemsHandler());
 
             // AI-friendly endpoints (OpenAI Gym style)
             server.createContext("/session", new SessionHandler());
@@ -258,6 +260,8 @@ public class ApiServer {
                 endpoints.addProperty("client/debug", "GET - Get F3 debug info (fps, biome, xyz, etc.)");
                 endpoints.addProperty("script", "POST - Run multiple commands as a macro script");
                 endpoints.addProperty("cancel", "POST - Cancel all running tasks and held keys");
+                endpoints.addProperty("registry/entities", "GET - Dump entity type ID → namespaced name mapping");
+                endpoints.addProperty("registry/items", "GET - Dump item ID → namespaced name mapping");
                 endpoints.addProperty("session", "POST - Create a new AI session");
                 endpoints.addProperty("observation", "GET - Get current game observation (Gym-style)");
                 endpoints.addProperty("action", "POST - Send actions for current tick");

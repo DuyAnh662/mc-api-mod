@@ -199,7 +199,7 @@ Item IDs are numeric (from `BuiltInRegistries.ITEM`). Key item IDs to recognize:
 | 800-900 | Food | apple, bread, cooked_beef |
 | 900+ | Special/Misc | enchanted_book, potion |
 
-**Cross-reference tip:** Always use namespaced IDs (`minecraft:stone`) for reliability. Numeric IDs are dynamic per session.
+**Cross-reference tip:** Always use namespaced IDs (`minecraft:stone`) for reliability. Numeric IDs are dynamic per session. For runtime lookup, call `GET /api/registry/items` and `GET /api/registry/entities` to get the live `id → "minecraft:name"` mapping.
 
 ### 2.8 `target` — What You're Looking At
 
@@ -301,7 +301,7 @@ Array of up to 16 entities, each:
 |---------|--------|----------|-------|
 | 4 | Arrow | No | Projectile, dodge |
 | 8 | Blaze | Yes | Nether, ranged attack |
-| 14 | Cat | No | Passive |
+| 15 | Cat | No | Passive |
 | 22 | Cow | No | Source of leather/beef |
 | 23 | Creeper | Yes | Explodes near player |
 | 31 | Ender Dragon | Yes | Boss |
@@ -310,21 +310,23 @@ Array of up to 16 entities, each:
 | 50 | Guardian | Yes | Underwater |
 | 51 | Hoglin | Yes | Nether |
 | 53 | Horse | No | Rideable |
-| 61 | Iron Golem | Neutral | Protects villagers |
-| 66 | Llama | No | Can carry chests |
+| 57 | Iron Golem | Neutral | Protects villagers |
+| 65 | Llama | No | Can carry chests |
 | 74 | Panda | No | Passive |
 | 76 | Phantom | Yes | Attacks after sleepless nights |
-| 78 | Pig | No | Source of pork |
-| 80 | Piglin | Neutral (gold) | Nether |
-| 81 | Piglin Brute | Yes | Nether |
-| 83 | Pillager | Yes | Raids |
-| 86 | Rabbit | No | Passive |
+| 77 | Pig | No | Source of pork |
+| 78 | Piglin | Neutral (gold) | Nether |
+| 79 | Piglin Brute | Yes | Nether |
+| 80 | Pillager | Yes | Raids |
+| 84 | Rabbit | No | Passive |
 | 91 | Skeleton | Yes | Ranged, burns in day |
-| 101 | Spider | Yes | Climbs walls |
+| 100 | Spider | Yes | Climbs walls |
 | 102 | Stray | Yes | Ice variant skeleton |
 | 119 | Wither | Yes | Boss |
 | 124 | Zombie | Yes | Common, burns in day |
 | 127 | Zombified Piglin | Neutral | Nether |
+
+> **Note:** These IDs are captured from a vanilla Minecraft 1.21.11 runtime. Registry order can vary with mods or version changes. For the definitive mapping at any time, use `GET /api/registry/entities` which dumps `id → "minecraft:name"` from the live `EntityType` registry.
 
 #### AI logic for entity analysis:
 - Calculate absolute position: `[player.x + relX, player.y + relY, player.z + relZ]`

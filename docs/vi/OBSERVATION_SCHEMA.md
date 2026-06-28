@@ -201,7 +201,7 @@ Mỗi entity có 8 giá trị:
 
 | Index | Field | Mô tả |
 |-------|-------|-------|
-| 0 | type_id | ID loại entity (0–127, **ổn định qua các session**) |
+| 0 | type_id | ID loại entity (0–127, **thường ổn định**) |
 | 1 | relX | X tương đối so với người chơi |
 | 2 | relY | Y tương đối so với người chơi |
 | 3 | relZ | Z tương đối so với người chơi |
@@ -212,130 +212,140 @@ Mỗi entity có 8 giá trị:
 
 Slot trống: `[0, 0, 0, 0, 0, 0, 0, 0]`
 
-### Bảng ID Entity (ổn định)
+### Bảng ID Entity (cập nhật từ runtime)
 
-| ID | Entity | Thù địch? | Ghi chú |
-|----|--------|-----------|---------|
-| 0 | Allay | Không | |
-| 1 | Area Effect Cloud | Không | |
-| 2 | Armadillo | Không | |
-| 3 | Armor Stand | Không | |
-| 4 | Arrow | Không | Đạn |
-| 5 | Axolotl | Không | |
-| 6 | Bat | Không | |
-| 7 | Bee | Neutral | |
-| 8 | **Blaze** | **Có** | Nether |
-| 9 | Block Display | Không | |
-| 10 | Boat | Không | |
-| 11 | Bogged | Có | |
-| 12 | Breeze | **Có** | |
-| 13 | Breeze Wind Charge | Không | |
-| 14 | Cat | Không | |
-| 15 | Camel | Không | |
-| 16 | Cave Spider | **Có** | |
-| 17 | Chest Boat | Không | |
-| 18 | Chest Minecart | Không | |
-| 19 | Chicken | Không | Nguồn thức ăn |
-| 20 | Cod | Không | |
-| 21 | Cow | Không | Nguồn thịt/da |
-| 22 | **Creeper** | **Có** | Phát nổ |
-| 23 | Dolphin | Không | |
-| 24 | Donkey | Không | Cưỡi được |
-| 25 | Dragon Fireball | Không | |
-| 26 | Drowned | **Có** | |
-| 27 | Egg | Không | |
-| 28 | Elder Guardian | **Có** | |
-| 29 | End Crystal | Không | |
-| 30 | **Ender Dragon** | **Có** | Boss |
-| 31 | Ender Pearl | Không | |
-| 32 | **Enderman** | Neutral | Đừng nhìn vào |
-| 33 | Endermite | Neutral | |
-| 34 | Evoker | **Có** | |
-| 35 | Evoker Fangs | Không | |
-| 36 | Experience Bottle | Không | |
-| 37 | Experience Orb | Không | |
-| 38 | Eye of Ender | Không | |
-| 39 | Falling Block | Không | |
-| 40 | Firework Rocket | Không | |
-| 41 | Fox | Không | |
-| 42 | Frog | Không | |
-| 43 | Furnace Minecart | Không | |
-| 44 | **Ghast** | **Có** | Nether |
-| 45 | Giant | **Có** | |
-| 46 | Glow Item Frame | Không | |
-| 47 | Glow Squid | Không | |
-| 48 | Goat | Không | |
-| 49 | Guardian | **Có** | Dưới nước |
-| 50 | **Hoglin** | **Có** | Nether |
-| 51 | Hopper Minecart | Không | |
-| 52 | Horse | Không | Cưỡi được |
-| 53 | Husk | **Có** | |
-| 54 | Illusioner | **Có** | |
-| 55 | Interaction | Không | |
-| 56 | Iron Golem | Neutral | Bảo vệ dân làng |
-| 57 | Item (rơi) | Không | |
-| 58 | Item Display | Không | |
-| 59 | Item Frame | Không | |
-| 60 | Llama | Không | Chở rương |
-| 61 | Magma Cube | **Có** | Nether |
-| 62 | Marker | Không | |
-| 63 | Minecart | Không | |
-| 64 | Mooshroom | Không | |
-| 65 | Mule | Không | Cưỡi được |
-| 66 | Ocelot | Không | |
-| 67 | Painting | Không | |
-| 68 | Panda | Không | |
-| 69 | Parrot | Không | |
-| 70 | Phantom | **Có** | Xuất hiện sau đêm không ngủ |
-| 71 | Pig | Không | Nguồn thức ăn |
-| 72 | **Piglin** | Neutral | Nether, bị phân tâm bởi vàng |
-| 73 | **Piglin Brute** | **Có** | Nether |
-| 74 | **Pillager** | **Có** | Đột kích |
-| 75 | Polar Bear | Neutral | |
-| 76 | Potion | Không | |
-| 77 | Pufferfish | Không | |
-| 78 | Rabbit | Không | |
-| 79 | Ravager | **Có** | Đột kích |
-| 80 | Salmon | Không | |
-| 81 | Sheep | Không | Nguồn len/thịt |
-| 82 | Shulker | **Có** | End |
-| 83 | Shulker Bullet | Không | |
-| 84 | Silverfish | **Có** | |
-| 85 | **Skeleton** | **Có** | Bắn xa, cháy dưới nắng |
-| 86 | Skeleton Horse | Không | |
-| 87 | Slime | **Có** | |
-| 88 | Small Fireball | Không | |
-| 89 | Sniffer | Không | |
-| 90 | Snow Golem | Không | |
-| 91 | Snowball | Không | |
-| 92 | Spider | **Có** | Leo tường |
-| 93 | Spectral Arrow | Không | |
-| 94 | Squid | Không | |
-| 95 | **Stray** | **Có** | Skeleton băng |
-| 96 | Strider | Không | Nether, cưỡi trên lava |
-| 97 | Tadpole | Không | |
-| 98 | Text Display | Không | |
-| 99 | TNT | Không | Đã kích hoạt |
-| 100 | Trader Llama | Không | |
-| 101 | Trident | Không | |
-| 102 | Tropical Fish | Không | |
-| 103 | Turtle | Không | |
-| 104 | Vex | **Có** | |
-| 105 | Villager | Không | Trao đổi |
-| 106 | Vindicator | **Có** | |
-| 107 | Wandering Trader | Không | |
-| 108 | **Warden** | **Có** | Mù, tấn công bằng sóng âm |
-| 109 | Wind Charge | Không | |
-| 110 | Witch | **Có** | |
-| 111 | **Wither** | **Có** | Boss |
-| 112 | Wither Skeleton | **Có** | Nether |
-| 113 | Wither Skull | Không | |
-| 114 | Wolf | Neutral | Có thể thuần hóa |
-| 115 | Zoglin | **Có** | |
-| 116 | **Zombie** | **Có** | Phổ biến, cháy dưới nắng |
-| 117 | Zombie Horse | Không | |
-| 118 | Zombie Villager | **Có** | |
-| 119 | Zombified Piglin | Neutral | Nether |
+> **⚠️ Các ID này được dump từ vanilla Minecraft 1.21.11 (`BuiltInRegistries.ENTITY_TYPE`). Thứ tự registry có thể thay đổi theo mod hoặc phiên bản. Để có mapping chính xác, dùng `GET /api/registry/entities` lúc runtime.**
+
+| ID | Entity | Thù địch? | Namespaced ID |
+|----|--------|-----------|---------------|
+| 0 | Allay | Không | minecraft:allay |
+| 1 | Area Effect Cloud | Không | minecraft:area_effect_cloud |
+| 2 | Armadillo | Không | minecraft:armadillo |
+| 3 | Armor Stand | Không | minecraft:armor_stand |
+| 4 | Arrow | Không | minecraft:arrow |
+| 5 | Axolotl | Không | minecraft:axolotl |
+| 6 | Bat | Không | minecraft:bat |
+| 7 | Bee | Neutral | minecraft:bee |
+| 8 | **Blaze** | **Có** | minecraft:blaze |
+| 9 | Block Display | Không | minecraft:block_display |
+| 10 | Boat | Không | minecraft:boat |
+| 11 | Bogged | Có | minecraft:bogged |
+| 12 | Breeze | **Có** | minecraft:breeze |
+| 13 | Breeze Wind Charge | Không | minecraft:breeze_wind_charge |
+| 14 | Camel | Không | minecraft:camel |
+| 15 | Cat | Không | minecraft:cat |
+| 16 | Cave Spider | **Có** | minecraft:cave_spider |
+| 17 | Chest Boat | Không | minecraft:chest_boat |
+| 18 | Chest Minecart | Không | minecraft:chest_minecart |
+| 19 | Chicken | Không | minecraft:chicken |
+| 20 | Cod | Không | minecraft:cod |
+| 21 | Minecart with Command Block | Không | minecraft:command_block_minecart |
+| 22 | Cow | Không | minecraft:cow |
+| 23 | **Creeper** | **Có** | minecraft:creeper |
+| 24 | Dolphin | Không | minecraft:dolphin |
+| 25 | Donkey | Không | minecraft:donkey |
+| 26 | Dragon Fireball | Không | minecraft:dragon_fireball |
+| 27 | Drowned | **Có** | minecraft:drowned |
+| 28 | Egg | Không | minecraft:egg |
+| 29 | Elder Guardian | **Có** | minecraft:elder_guardian |
+| 30 | End Crystal | Không | minecraft:end_crystal |
+| 31 | **Ender Dragon** | **Có** | minecraft:ender_dragon |
+| 32 | Ender Pearl | Không | minecraft:ender_pearl |
+| 33 | **Enderman** | Neutral | minecraft:enderman |
+| 34 | Endermite | Neutral | minecraft:endermite |
+| 35 | Evoker | **Có** | minecraft:evoker |
+| 36 | Evoker Fangs | Không | minecraft:evoker_fangs |
+| 37 | Experience Bottle | Không | minecraft:experience_bottle |
+| 38 | Experience Orb | Không | minecraft:experience_orb |
+| 39 | Eye of Ender | Không | minecraft:eye_of_ender |
+| 40 | Falling Block | Không | minecraft:falling_block |
+| 41 | Firework Rocket | Không | minecraft:firework_rocket |
+| 42 | Fox | Không | minecraft:fox |
+| 43 | Frog | Không | minecraft:frog |
+| 44 | Minecart with Furnace | Không | minecraft:furnace_minecart |
+| 45 | **Ghast** | **Có** | minecraft:ghast |
+| 46 | Giant | **Có** | minecraft:giant |
+| 47 | Glow Item Frame | Không | minecraft:glow_item_frame |
+| 48 | Glow Squid | Không | minecraft:glow_squid |
+| 49 | Goat | Không | minecraft:goat |
+| 50 | Guardian | **Có** | minecraft:guardian |
+| 51 | **Hoglin** | **Có** | minecraft:hoglin |
+| 52 | Minecart with Hopper | Không | minecraft:hopper_minecart |
+| 53 | Horse | Không | minecraft:horse |
+| 54 | Husk | **Có** | minecraft:husk |
+| 55 | Illusioner | **Có** | minecraft:illusioner |
+| 56 | Interaction | Không | minecraft:interaction |
+| 57 | Iron Golem | Neutral | minecraft:iron_golem |
+| 58 | Item (rơi) | Không | minecraft:item |
+| 59 | Item Display | Không | minecraft:item_display |
+| 60 | Item Frame | Không | minecraft:item_frame |
+| 61 | Ominous Item Spawner | Không | minecraft:ominous_item_spawner |
+| 62 | Ghast Fireball | Không | minecraft:fireball |
+| 63 | Leash Knot | Không | minecraft:leash_knot |
+| 64 | Lightning Bolt | Không | minecraft:lightning_bolt |
+| 65 | Llama | Không | minecraft:llama |
+| 66 | Llama Spit | Không | minecraft:llama_spit |
+| 67 | **Magma Cube** | **Có** | minecraft:magma_cube |
+| 68 | Marker | Không | minecraft:marker |
+| 69 | Minecart | Không | minecraft:minecart |
+| 70 | Mooshroom | Không | minecraft:mooshroom |
+| 71 | Mule | Không | minecraft:mule |
+| 72 | Ocelot | Không | minecraft:ocelot |
+| 73 | Painting | Không | minecraft:painting |
+| 74 | Panda | Không | minecraft:panda |
+| 75 | Parrot | Không | minecraft:parrot |
+| 76 | **Phantom** | **Có** | minecraft:phantom |
+| 77 | Pig | Không | minecraft:pig |
+| 78 | **Piglin** | Neutral | minecraft:piglin |
+| 79 | **Piglin Brute** | **Có** | minecraft:piglin_brute |
+| 80 | **Pillager** | **Có** | minecraft:pillager |
+| 81 | Polar Bear | Neutral | minecraft:polar_bear |
+| 82 | Potion | Không | minecraft:potion |
+| 83 | Pufferfish | Không | minecraft:pufferfish |
+| 84 | Rabbit | Không | minecraft:rabbit |
+| 85 | Ravager | **Có** | minecraft:ravager |
+| 86 | Salmon | Không | minecraft:salmon |
+| 87 | Sheep | Không | minecraft:sheep |
+| 88 | Shulker | **Có** | minecraft:shulker |
+| 89 | Shulker Bullet | Không | minecraft:shulker_bullet |
+| 90 | Silverfish | **Có** | minecraft:silverfish |
+| 91 | **Skeleton** | **Có** | minecraft:skeleton |
+| 92 | Skeleton Horse | Không | minecraft:skeleton_horse |
+| 93 | Slime | **Có** | minecraft:slime |
+| 94 | Blaze Fireball | Không | minecraft:small_fireball |
+| 95 | Sniffer | Không | minecraft:sniffer |
+| 96 | Snow Golem | Không | minecraft:snow_golem |
+| 97 | Snowball | Không | minecraft:snowball |
+| 98 | Minecart with Spawner | Không | minecraft:spawner_minecart |
+| 99 | Spectral Arrow | Không | minecraft:spectral_arrow |
+| 100 | **Spider** | **Có** | minecraft:spider |
+| 101 | Squid | Không | minecraft:squid |
+| 102 | **Stray** | **Có** | minecraft:stray |
+| 103 | Strider | Không | minecraft:strider |
+| 104 | Tadpole | Không | minecraft:tadpole |
+| 105 | Text Display | Không | minecraft:text_display |
+| 106 | Primed TNT | Không | minecraft:tnt |
+| 107 | Minecart with TNT | Không | minecraft:tnt_minecart |
+| 108 | Trader Llama | Không | minecraft:trader_llama |
+| 109 | Trident | Không | minecraft:trident |
+| 110 | Tropical Fish | Không | minecraft:tropical_fish |
+| 111 | Turtle | Không | minecraft:turtle |
+| 112 | Vex | **Có** | minecraft:vex |
+| 113 | Villager | Không | minecraft:villager |
+| 114 | Vindicator | **Có** | minecraft:vindicator |
+| 115 | Wandering Trader | Không | minecraft:wandering_trader |
+| 116 | **Warden** | **Có** | minecraft:warden |
+| 117 | Wind Charge | Không | minecraft:wind_charge |
+| 118 | Witch | **Có** | minecraft:witch |
+| 119 | **Wither** | **Có** | minecraft:wither |
+| 120 | Wither Skeleton | **Có** | minecraft:wither_skeleton |
+| 121 | Wither Skull | Không | minecraft:wither_skull |
+| 122 | Wolf | Neutral | minecraft:wolf |
+| 123 | Zoglin | **Có** | minecraft:zoglin |
+| 124 | **Zombie** | **Có** | minecraft:zombie |
+| 125 | Zombie Horse | Không | minecraft:zombie_horse |
+| 126 | Zombie Villager | **Có** | minecraft:zombie_villager |
+| 127 | Zombified Piglin | Neutral | minecraft:zombified_piglin |
 
 ---
 
@@ -510,4 +520,6 @@ Tổng: 41 slots
 
 ---
 
-> **⚠️ Lưu ý:** ID số (`block_id`, `item_id`, `entity_type_id`) lấy từ `BuiltInRegistries.getId()`. Item và block thay đổi mỗi session. Entity type ID ổn định (0–127, giống nhau qua các session). Để xác định chính xác, dùng ID dạng text (`minecraft:stone`) để đối chiếu.
+> **⚠️ Lưu ý:** ID số (`block_id`, `item_id`, `entity_type_id`) lấy từ `BuiltInRegistries.getId()`. Item và block thay đổi mỗi session. Entity type ID thường ổn định trong cùng phiên bản Minecraft nhưng có thể thay đổi nếu có mod hoặc cập nhật. Để xác định chính xác, dùng ID dạng text (`minecraft:stone`) để đối chiếu.
+>
+> **Tra cứu runtime:** Dùng `GET /api/registry/entities` và `GET /api/registry/items` để lấy mapping `id → "minecraft:name"` trực tiếp từ registry. AI agent nên gọi các endpoint này một lần mỗi session để có bảng tra chính xác.

@@ -140,7 +140,7 @@ public class ObservationProvider {
     private static JsonObject buildWorld(ClientLevel level) {
         JsonObject w = new JsonObject();
         long dayTime = level.getDayTime();
-        w.addProperty("time", dayTime);
+        w.addProperty("time", dayTime % 24000L);
         w.addProperty("day", dayTime / 24000L);
         w.addProperty("is_day", dayTime % 24000L < 13000L);
 
@@ -352,10 +352,31 @@ public class ObservationProvider {
         return arr;
     }
 
+    private static double getPlayerFov(Minecraft client) {
+        double fov = 70;
+        if (client.options != null) {
+            fov = client.options.fov().get();
+        }
+        return fov;
+    }
+
+    private static boolean isEntityInViewport(LocalPlayer player, Entity entity, double fov) {
+        Vec3 lookDir = player.getLookAngle();
+        Vec3 toEntity = entity.position().subtract(player.getEyePosition()).normalize();
+
+        double cosAngle = lookDir.dot(toEntity);
+        cosAngle = Math.max(-1.0, Math.min(1.0, cosAngle));
+        double angleDeg = Math.toDegrees(Math.acos(cosAngle));
+
+        return angleDeg <= fov / 2.0;
+    }
+
     private static JsonArray buildViewportEntities(LocalPlayer player, ClientLevel level) {
         JsonArray arr = new JsonArray();
         int count = 0;
 
+        Minecraft client = Minecraft.getInstance();
+        double fov = getPlayerFov(client);
         Vec3 playerPos = player.position();
         double maxDist = 48.0;
 
@@ -366,6 +387,7 @@ public class ObservationProvider {
             Vec3 rel = entity.position().subtract(playerPos);
             double dist = rel.length();
             if (dist > maxDist) continue;
+            if (!isEntityInViewport(player, entity, fov)) continue;
 
             JsonArray e = new JsonArray();
             e.add(BuiltInRegistries.ENTITY_TYPE.getId(entity.getType()));

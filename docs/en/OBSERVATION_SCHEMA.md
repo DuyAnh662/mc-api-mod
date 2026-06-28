@@ -201,7 +201,7 @@ Each entity has 8 values:
 
 | Index | Field | Description |
 |-------|-------|-------------|
-| 0 | type_id | Entity type ID (0–127, **stable across sessions**) |
+| 0 | type_id | Entity type ID (0–127, generally stable per version) |
 | 1 | relX | X relative to player |
 | 2 | relY | Y relative to player |
 | 3 | relZ | Z relative to player |
@@ -214,128 +214,138 @@ Empty slots: `[0, 0, 0, 0, 0, 0, 0, 0]`
 
 ### Entity Type IDs (stable)
 
-| ID | Entity | Hostile? | Notes |
-|----|--------|----------|-------|
-| 0 | Allay | No | |
-| 1 | Area Effect Cloud | No | |
-| 2 | Armadillo | No | |
-| 3 | Armor Stand | No | |
-| 4 | Arrow | No | Projectile |
-| 5 | Axolotl | No | |
-| 6 | Bat | No | |
-| 7 | Bee | Neutral | |
-| 8 | **Blaze** | **Yes** | Nether |
-| 9 | Block Display | No | |
-| 10 | Boat | No | |
-| 11 | Bogged | Yes | |
-| 12 | Breeze | **Yes** | |
-| 13 | Breeze Wind Charge | No | |
-| 14 | Cat | No | |
-| 15 | Camel | No | |
-| 16 | Cave Spider | **Yes** | |
-| 17 | Chest Boat | No | |
-| 18 | Chest Minecart | No | |
-| 19 | Chicken | No | Food source |
-| 20 | Cod | No | |
-| 21 | Cow | No | Food/leather source |
-| 22 | **Creeper** | **Yes** | Explodes |
-| 23 | Dolphin | No | |
-| 24 | Donkey | No | Rideable |
-| 25 | Dragon Fireball | No | |
-| 26 | Drowned | **Yes** | |
-| 27 | Egg | No | |
-| 28 | Elder Guardian | **Yes** | |
-| 29 | End Crystal | No | |
-| 30 | **Ender Dragon** | **Yes** | Boss |
-| 31 | Ender Pearl | No | |
-| 32 | **Enderman** | Neutral | Don't look at |
-| 33 | Endermite | Neutral | |
-| 34 | Evoker | **Yes** | |
-| 35 | Evoker Fangs | No | |
-| 36 | Experience Bottle | No | |
-| 37 | Experience Orb | No | |
-| 38 | Eye of Ender | No | |
-| 39 | Falling Block | No | |
-| 40 | Firework Rocket | No | |
-| 41 | Fox | No | |
-| 42 | Frog | No | |
-| 43 | Furnace Minecart | No | |
-| 44 | **Ghast** | **Yes** | Nether |
-| 45 | Giant | **Yes** | |
-| 46 | Glow Item Frame | No | |
-| 47 | Glow Squid | No | |
-| 48 | Goat | No | |
-| 49 | Guardian | **Yes** | Underwater |
-| 50 | **Hoglin** | **Yes** | Nether |
-| 51 | Hopper Minecart | No | |
-| 52 | Horse | No | Rideable |
-| 53 | Husk | **Yes** | |
-| 54 | Illusioner | **Yes** | |
-| 55 | Interaction | No | |
-| 56 | Iron Golem | Neutral | Protects villagers |
-| 57 | Item (dropped) | No | |
-| 58 | Item Display | No | |
-| 59 | Item Frame | No | |
-| 60 | Llama | No | Carries chests |
-| 61 | Magma Cube | **Yes** | Nether |
-| 62 | Marker | No | |
-| 63 | Minecart | No | |
-| 64 | Mooshroom | No | |
-| 65 | Mule | No | Rideable |
-| 66 | Ocelot | No | |
-| 67 | Painting | No | |
-| 68 | Panda | No | |
-| 69 | Parrot | No | |
-| 70 | Phantom | **Yes** | Spawns after sleepless nights |
-| 71 | Pig | No | Food source |
-| 72 | **Piglin** | Neutral | Nether, distracted by gold |
-| 73 | **Piglin Brute** | **Yes** | Nether |
-| 74 | **Pillager** | **Yes** | Raids |
-| 75 | Polar Bear | Neutral | |
-| 76 | Potion | No | |
-| 77 | Pufferfish | No | |
-| 78 | Rabbit | No | |
-| 79 | Ravager | **Yes** | Raids |
-| 80 | Salmon | No | |
-| 81 | Sheep | No | Wool/mutton source |
-| 82 | Shulker | **Yes** | End |
-| 83 | Shulker Bullet | No | |
-| 84 | Silverfish | **Yes** | |
-| 85 | **Skeleton** | **Yes** | Ranged, burns in day |
-| 86 | Skeleton Horse | No | |
-| 87 | Slime | **Yes** | |
-| 88 | Small Fireball | No | |
-| 89 | Sniffer | No | |
-| 90 | Snow Golem | No | |
-| 91 | Snowball | No | |
-| 92 | Spider | **Yes** | Climbs walls |
-| 93 | Spectral Arrow | No | |
-| 94 | Squid | No | |
-| 95 | **Stray** | **Yes** | Ice skeleton |
-| 96 | Strider | No | Nether, rideable on lava |
-| 97 | Tadpole | No | |
-| 98 | Text Display | No | |
-| 99 | TNT | No | Primed |
-| 100 | Trader Llama | No | |
-| 101 | Trident | No | |
-| 102 | Tropical Fish | No | |
-| 103 | Turtle | No | |
-| 104 | Vex | **Yes** | |
-| 105 | Villager | No | Trading |
-| 106 | Vindicator | **Yes** | |
-| 107 | Wandering Trader | No | |
-| 108 | **Warden** | **Yes** | Blind, sonic shriek |
-| 109 | Wind Charge | No | |
-| 110 | Witch | **Yes** | |
-| 111 | **Wither** | **Yes** | Boss |
-| 112 | Wither Skeleton | **Yes** | Nether |
-| 113 | Wither Skull | No | |
-| 114 | Wolf | Neutral | Tameable |
-| 115 | Zoglin | **Yes** | |
-| 116 | **Zombie** | **Yes** | Common, burns in day |
-| 117 | Zombie Horse | No | |
-| 118 | Zombie Villager | **Yes** | |
-| 119 | Zombified Piglin | Neutral | Nether |
+> **⚠️ These IDs were captured from a vanilla Minecraft 1.21.11 runtime (`BuiltInRegistries.ENTITY_TYPE`). Registry order can shift with mods or version updates. For the definitive mapping, use `GET /api/registry/entities` at runtime.**
+
+| ID | Entity | Hostile? | Namespaced ID |
+|----|--------|----------|---------------|
+| 0 | Allay | No | minecraft:allay |
+| 1 | Area Effect Cloud | No | minecraft:area_effect_cloud |
+| 2 | Armadillo | No | minecraft:armadillo |
+| 3 | Armor Stand | No | minecraft:armor_stand |
+| 4 | Arrow | No | minecraft:arrow |
+| 5 | Axolotl | No | minecraft:axolotl |
+| 6 | Bat | No | minecraft:bat |
+| 7 | Bee | Neutral | minecraft:bee |
+| 8 | **Blaze** | **Yes** | minecraft:blaze |
+| 9 | Block Display | No | minecraft:block_display |
+| 10 | Boat | No | minecraft:boat |
+| 11 | Bogged | Yes | minecraft:bogged |
+| 12 | Breeze | **Yes** | minecraft:breeze |
+| 13 | Breeze Wind Charge | No | minecraft:breeze_wind_charge |
+| 14 | Camel | No | minecraft:camel |
+| 15 | Cat | No | minecraft:cat |
+| 16 | Cave Spider | **Yes** | minecraft:cave_spider |
+| 17 | Chest Boat | No | minecraft:chest_boat |
+| 18 | Chest Minecart | No | minecraft:chest_minecart |
+| 19 | Chicken | No | minecraft:chicken |
+| 20 | Cod | No | minecraft:cod |
+| 21 | Minecart with Command Block | No | minecraft:command_block_minecart |
+| 22 | Cow | No | minecraft:cow |
+| 23 | **Creeper** | **Yes** | minecraft:creeper |
+| 24 | Dolphin | No | minecraft:dolphin |
+| 25 | Donkey | No | minecraft:donkey |
+| 26 | Dragon Fireball | No | minecraft:dragon_fireball |
+| 27 | Drowned | **Yes** | minecraft:drowned |
+| 28 | Egg | No | minecraft:egg |
+| 29 | Elder Guardian | **Yes** | minecraft:elder_guardian |
+| 30 | End Crystal | No | minecraft:end_crystal |
+| 31 | **Ender Dragon** | **Yes** | minecraft:ender_dragon |
+| 32 | Ender Pearl | No | minecraft:ender_pearl |
+| 33 | **Enderman** | Neutral | minecraft:enderman |
+| 34 | Endermite | Neutral | minecraft:endermite |
+| 35 | Evoker | **Yes** | minecraft:evoker |
+| 36 | Evoker Fangs | No | minecraft:evoker_fangs |
+| 37 | Experience Bottle | No | minecraft:experience_bottle |
+| 38 | Experience Orb | No | minecraft:experience_orb |
+| 39 | Eye of Ender | No | minecraft:eye_of_ender |
+| 40 | Falling Block | No | minecraft:falling_block |
+| 41 | Firework Rocket | No | minecraft:firework_rocket |
+| 42 | Fox | No | minecraft:fox |
+| 43 | Frog | No | minecraft:frog |
+| 44 | Minecart with Furnace | No | minecraft:furnace_minecart |
+| 45 | **Ghast** | **Yes** | minecraft:ghast |
+| 46 | Giant | **Yes** | minecraft:giant |
+| 47 | Glow Item Frame | No | minecraft:glow_item_frame |
+| 48 | Glow Squid | No | minecraft:glow_squid |
+| 49 | Goat | No | minecraft:goat |
+| 50 | Guardian | **Yes** | minecraft:guardian |
+| 51 | **Hoglin** | **Yes** | minecraft:hoglin |
+| 52 | Minecart with Hopper | No | minecraft:hopper_minecart |
+| 53 | Horse | No | minecraft:horse |
+| 54 | Husk | **Yes** | minecraft:husk |
+| 55 | Illusioner | **Yes** | minecraft:illusioner |
+| 56 | Interaction | No | minecraft:interaction |
+| 57 | Iron Golem | Neutral | minecraft:iron_golem |
+| 58 | Item (dropped) | No | minecraft:item |
+| 59 | Item Display | No | minecraft:item_display |
+| 60 | Item Frame | No | minecraft:item_frame |
+| 61 | Ominous Item Spawner | No | minecraft:ominous_item_spawner |
+| 62 | Ghast Fireball | No | minecraft:fireball |
+| 63 | Leash Knot | No | minecraft:leash_knot |
+| 64 | Lightning Bolt | No | minecraft:lightning_bolt |
+| 65 | Llama | No | minecraft:llama |
+| 66 | Llama Spit | No | minecraft:llama_spit |
+| 67 | **Magma Cube** | **Yes** | minecraft:magma_cube |
+| 68 | Marker | No | minecraft:marker |
+| 69 | Minecart | No | minecraft:minecart |
+| 70 | Mooshroom | No | minecraft:mooshroom |
+| 71 | Mule | No | minecraft:mule |
+| 72 | Ocelot | No | minecraft:ocelot |
+| 73 | Painting | No | minecraft:painting |
+| 74 | Panda | No | minecraft:panda |
+| 75 | Parrot | No | minecraft:parrot |
+| 76 | **Phantom** | **Yes** | minecraft:phantom |
+| 77 | Pig | No | minecraft:pig |
+| 78 | **Piglin** | Neutral | minecraft:piglin |
+| 79 | **Piglin Brute** | **Yes** | minecraft:piglin_brute |
+| 80 | **Pillager** | **Yes** | minecraft:pillager |
+| 81 | Polar Bear | Neutral | minecraft:polar_bear |
+| 82 | Potion | No | minecraft:potion |
+| 83 | Pufferfish | No | minecraft:pufferfish |
+| 84 | Rabbit | No | minecraft:rabbit |
+| 85 | Ravager | **Yes** | minecraft:ravager |
+| 86 | Salmon | No | minecraft:salmon |
+| 87 | Sheep | No | minecraft:sheep |
+| 88 | Shulker | **Yes** | minecraft:shulker |
+| 89 | Shulker Bullet | No | minecraft:shulker_bullet |
+| 90 | Silverfish | **Yes** | minecraft:silverfish |
+| 91 | **Skeleton** | **Yes** | minecraft:skeleton |
+| 92 | Skeleton Horse | No | minecraft:skeleton_horse |
+| 93 | Slime | **Yes** | minecraft:slime |
+| 94 | Blaze Fireball | No | minecraft:small_fireball |
+| 95 | Sniffer | No | minecraft:sniffer |
+| 96 | Snow Golem | No | minecraft:snow_golem |
+| 97 | Snowball | No | minecraft:snowball |
+| 98 | Minecart with Spawner | No | minecraft:spawner_minecart |
+| 99 | Spectral Arrow | No | minecraft:spectral_arrow |
+| 100 | **Spider** | **Yes** | minecraft:spider |
+| 101 | Squid | No | minecraft:squid |
+| 102 | **Stray** | **Yes** | minecraft:stray |
+| 103 | Strider | No | minecraft:strider |
+| 104 | Tadpole | No | minecraft:tadpole |
+| 105 | Text Display | No | minecraft:text_display |
+| 106 | Primed TNT | No | minecraft:tnt |
+| 107 | Minecart with TNT | No | minecraft:tnt_minecart |
+| 108 | Trader Llama | No | minecraft:trader_llama |
+| 109 | Trident | No | minecraft:trident |
+| 110 | Tropical Fish | No | minecraft:tropical_fish |
+| 111 | Turtle | No | minecraft:turtle |
+| 112 | Vex | **Yes** | minecraft:vex |
+| 113 | Villager | No | minecraft:villager |
+| 114 | Vindicator | **Yes** | minecraft:vindicator |
+| 115 | Wandering Trader | No | minecraft:wandering_trader |
+| 116 | **Warden** | **Yes** | minecraft:warden |
+| 117 | Wind Charge | No | minecraft:wind_charge |
+| 118 | Witch | **Yes** | minecraft:witch |
+| 119 | **Wither** | **Yes** | minecraft:wither |
+| 120 | Wither Skeleton | **Yes** | minecraft:wither_skeleton |
+| 121 | Wither Skull | No | minecraft:wither_skull |
+| 122 | Wolf | Neutral | minecraft:wolf |
+| 123 | Zoglin | **Yes** | minecraft:zoglin |
+| 124 | **Zombie** | **Yes** | minecraft:zombie |
+| 125 | Zombie Horse | No | minecraft:zombie_horse |
+| 126 | Zombie Villager | **Yes** | minecraft:zombie_villager |
+| 127 | Zombified Piglin | Neutral | minecraft:zombified_piglin |
 
 ---
 
@@ -512,4 +522,6 @@ Total: 41 slots
 
 ---
 
-> **⚠️ Note:** Numeric IDs (`block_id`, `item_id`, `entity_type_id`) are from `BuiltInRegistries.getId()`. Items and blocks are **dynamic** (change each session). Entity type IDs are **stable** (0–127, same across sessions). For reliable identification, use namespaced IDs (`minecraft:stone`) as cross-reference.
+> **⚠️ Note:** Numeric IDs (`block_id`, `item_id`, `entity_type_id`) are from `BuiltInRegistries.getId()`. Items and blocks are **dynamic** (change each session). Entity type IDs are generally stable per Minecraft version but can shift with mods or updates. For reliable identification, use namespaced IDs (`minecraft:stone`) as cross-reference.
+>
+> **Runtime resolution:** Use `GET /api/registry/entities` and `GET /api/registry/items` to dump the live `id → "minecraft:name"` mapping at any time. AI agents should call these once per session for accurate lookup.

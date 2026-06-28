@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.2.1 — Registry Endpoints + Bug Fixes
+
+### ✨ New Features
+
+- **Registry Dump Endpoints** — Two new runtime endpoints for resolving numeric IDs:
+  - `GET /api/registry/entities` — Dumps `id → "minecraft:name"` from `BuiltInRegistries.ENTITY_TYPE`
+  - `GET /api/registry/items` — Dumps `id → "minecraft:name"` from `BuiltInRegistries.ITEM`
+  - AI agents can call these once per session for accurate ID lookup, eliminating hardcoded tables.
+
+### 🐛 Bug Fixes
+
+- **`world.time` clamping** — Observation now returns `dayTime % 24000` (range 0–24000) as documented, instead of raw tick value. Fixes `ObservationProvider.java:143`.
+- **`viewport_entities` FOV filtering** — Entities are now filtered by the player's actual field of view (frustum cone). Previously all entities within 48 blocks were included regardless of direction. Fixes `ObservationProvider.java:363-371`.
+- **Entity ID table in docs** — Both `OBSERVATION_SCHEMA.md` and `AI_AGENT_GUIDE.md` entity type ID tables updated to match the real Minecraft 1.21.11 registry order (from `BuiltInRegistries.ENTITY_TYPE`).
+- **API.md doc updates** — Added documentation for registry endpoints; updated `viewport_entities` description to clarify frustum filtering.
+
 ## v1.2.0 — AI Endpoints + Observation Schema + Security Fixes
 
 ### ✨ New Features

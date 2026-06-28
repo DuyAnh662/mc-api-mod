@@ -773,6 +773,22 @@ Observation JSON dùng **numeric ID** (số nguyên, không phải chuỗi) cho 
 | `"rain"` | Mưa |
 | `"thunder"` | Mưa + sấm chớp |
 
+### Endpoint Tra Cứu Registry
+
+AI agent có thể dùng các endpoint sau để lấy mapping ID → tên trực tiếp từ registry runtime:
+
+| Endpoint | Method | Mô tả |
+|----------|--------|-------|
+| `/api/registry/entities` | GET | Trả về `{"entities": {"0": "minecraft:allay", "1": "minecraft:area_effect_cloud", ...}}` |
+| `/api/registry/items` | GET | Trả về `{"items": {"0": "minecraft:air", "1": "minecraft:stone", ...}}` |
+
+**Ví dụ:**
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:25566/api/registry/entities
+```
+
+> **Công dụng:** AI agent gọi một lần mỗi session để xây bảng tra ID → tên, không cần hardcode ID.
+
 ### Namespaced ID Của Block & Item Phổ Biến
 
 **Đá & Khoáng sản:**
