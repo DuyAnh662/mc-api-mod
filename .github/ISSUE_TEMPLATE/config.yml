@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord
+    url: https://discord.gg/mcapi
+    about: Get help or discuss ideas on our Discord server
+  - name: Documentation
+    url: https://duyanh662.github.io/mc-api-mod
+    about: Check the docs first
