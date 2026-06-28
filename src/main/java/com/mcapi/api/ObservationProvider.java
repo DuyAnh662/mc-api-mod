@@ -23,6 +23,7 @@ public class ObservationProvider {
     private static final int VIEWPORT_WIDTH = 16;
     private static final int VIEWPORT_HEIGHT = 9;
     private static final int VIEWPORT_DEPTH = 32;
+    private static final int VIEWPORT_RAYS = VIEWPORT_WIDTH * VIEWPORT_HEIGHT;
     private static final int TOTAL_SLOTS = 41;
 
     public static JsonObject generateObservation() {
@@ -94,7 +95,7 @@ public class ObservationProvider {
         JsonObject c = new JsonObject();
         c.addProperty("fov", 70);
         JsonArray m = new JsonArray();
-        m.add(VIEWPORT_WIDTH); m.add(VIEWPORT_HEIGHT); m.add(VIEWPORT_DEPTH);
+        m.add(VIEWPORT_WIDTH); m.add(VIEWPORT_HEIGHT);
         c.add("matrix", m);
         return c;
     }
@@ -122,8 +123,7 @@ public class ObservationProvider {
 
     private static JsonArray emptyViewportBlocks() {
         JsonArray arr = new JsonArray();
-        int size = VIEWPORT_WIDTH * VIEWPORT_HEIGHT * VIEWPORT_DEPTH;
-        for (int i = 0; i < size; i++) arr.add(0);
+        for (int i = 0; i < VIEWPORT_RAYS; i++) arr.add(0);
         return arr;
     }
 
@@ -219,7 +219,6 @@ public class ObservationProvider {
         JsonArray m = new JsonArray();
         m.add(VIEWPORT_WIDTH);
         m.add(VIEWPORT_HEIGHT);
-        m.add(VIEWPORT_DEPTH);
         c.add("matrix", m);
         return c;
     }
@@ -285,7 +284,6 @@ public class ObservationProvider {
     }
 
     private static JsonArray buildViewportBlocks(LocalPlayer player, ClientLevel level) {
-        int total = VIEWPORT_WIDTH * VIEWPORT_HEIGHT * VIEWPORT_DEPTH;
         JsonArray arr = new JsonArray();
 
         float yaw = player.getYRot();
@@ -303,7 +301,6 @@ public class ObservationProvider {
         int halfW = VIEWPORT_WIDTH / 2;
         int halfH = VIEWPORT_HEIGHT / 2;
 
-        // right = cross(world_up, dir), up = cross(dir, right)
         Vec3 right = new Vec3(dirZ, 0, -dirX).normalize();
         if (Double.isNaN(right.x) || Double.isNaN(right.y) || Double.isNaN(right.z)) {
             right = new Vec3(1, 0, 0);
@@ -314,33 +311,30 @@ public class ObservationProvider {
                 dirX * right.y - dirY * right.x
         ).normalize();
 
-        for (int d = 0; d < VIEWPORT_DEPTH; d++) {
-            double depth = d + 1;
-            for (int h = 0; h < VIEWPORT_HEIGHT; h++) {
-                double heightOffset = (h - halfH) * 0.5;
-                for (int w = 0; w < VIEWPORT_WIDTH; w++) {
-                    double widthOffset = (w - halfW) * 0.5;
+        for (int h = 0; h < VIEWPORT_HEIGHT; h++) {
+            double heightOffset = (h - halfH) * 0.5;
+            for (int w = 0; w < VIEWPORT_WIDTH; w++) {
+                double widthOffset = (w - halfW) * 0.5;
 
+                int depthVal = VIEWPORT_DEPTH;
+                for (int d = 0; d < VIEWPORT_DEPTH; d++) {
+                    double depth = d + 1;
                     Vec3 samplePos = eyePos
                             .add(new Vec3(dirX * depth, dirY * depth, dirZ * depth))
                             .add(right.scale(widthOffset))
                             .add(up.scale(heightOffset));
 
                     BlockPos bp = BlockPos.containing(samplePos);
-                    int blockId = 0;
                     if (level.isLoaded(bp)) {
                         BlockState state = level.getBlockState(bp);
                         if (!state.isAir()) {
-                            blockId = BuiltInRegistries.BLOCK.getId(state.getBlock());
+                            depthVal = d + 1;
+                            break;
                         }
                     }
-                    arr.add(blockId);
                 }
+                arr.add(depthVal);
             }
-        }
-
-        while (arr.size() < total) {
-            arr.add(0);
         }
 
         return arr;

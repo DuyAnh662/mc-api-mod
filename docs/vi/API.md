@@ -504,7 +504,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
       "status": [20, 15, 20, 5, 300],
       "flags": [1, 0, 0, 0, 0, 0]
     },
-    "camera": { "fov": 70, "matrix": [16, 9, 32] },
+    "camera": { "fov": 70, "matrix": [16, 9] },
     "inventory": {
       "slots": [[0,0], [0,0], [0,0], [5,64], [0,0], ...],
       "selected_slot": 3
@@ -543,13 +543,13 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
 | `player.status` | [health, food, saturation, armor, air] |
 | `player.flags` | [on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1) |
 | `camera.fov` | Góc nhìn hiện tại |
-| `camera.matrix` | Kích thước viewport [width, height, depth] |
+| `camera.matrix` | Lưới tia depth-map [width, height] |
 | `inventory.slots` | 41 slot cố định [item_id, count] (0 = rỗng) |
 | `inventory.selected_slot` | Slot hotbar đang cầm (0-8) |
 | `target.block_id` | ID khối đang ngắm |
 | `target.distance` | Khoảng cách tới khối đang ngắm |
 | `target.face` | Mặt của khối (0=Trên,1=Dưới,2=Bắc,3=Nam,4=Đông,5=Tây) |
-| `viewport_blocks` | 4608 ID khối trong tầm nhìn (16×9×32) |
+| `viewport_blocks` | 144 giá trị depth (16×9 depth-map, 1–32 = khoảng cách tới khối đặc) |
 | `viewport_entities` | Thực thể nhìn thấy [type_id, relX, relY, relZ, yaw, pitch, health, distance] |
 | `screen` | Thông tin màn hình UI (chỉ xuất hiện khi có màn hình đang mở) |
 
@@ -688,7 +688,7 @@ Slot rỗng là `[0, 0]`. Thiết kế kích thước cố định cho phép án
 
 ### Viewport Blocks
 
-Mảng phẳng **4608 số nguyên** (16 ngang × 9 dọc × 32 sâu) đại diện cho ID khối trong tầm nhìn của người chơi. Giá trị 0 = không khí/ngoài tầm.
+Mảng depth-map phẳng **144 số nguyên** (16 ngang × 9 dọc). Mỗi giá trị là khoảng cách (1–32 block) tới khối đặc đầu tiên. 32 = không vật cản.
 
 ### Viewport Entities
 

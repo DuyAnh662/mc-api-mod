@@ -646,7 +646,7 @@ curl -X POST http://localhost:25566/api/cancel \\
       "status": [20, 15, 20, 5, 300],
       "flags": [1, 0, 0, 0, 0, 0]
     },
-    "camera": { "fov": 70, "matrix": [16, 9, 32] },
+    "camera": { "fov": 70, "matrix": [16, 9] },
     "inventory": {
       "slots": [[0,0], [0,0], [0,0], [5,64], [0,0], ...],
       "selected_slot": 3
@@ -797,13 +797,13 @@ SECTIONS['observation-schema'] = {
   <tr><td><code>player.status</code></td><td>[health, food, saturation, armor, air]</td></tr>
   <tr><td><code>player.flags</code></td><td>[on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1)</td></tr>
   <tr><td><code>camera.fov</code></td><td>Current field of view (30-110)</td></tr>
-  <tr><td><code>camera.matrix</code></td><td>Viewport dimensions [width=16, height=9, depth=32] = 4608 blocks</td></tr>
+  <tr><td><code>camera.matrix</code></td><td>Viewport ray grid [width=16, height=9] = 144 depth samples</td></tr>
   <tr><td><code>inventory.slots</code></td><td>41 fixed slots as [item_id, count] pairs (0 = empty)</td></tr>
   <tr><td><code>inventory.selected_slot</code></td><td>Currently held hotbar slot (0-8)</td></tr>
   <tr><td><code>target.block_id</code></td><td>Block ID the crosshair is pointing at</td></tr>
   <tr><td><code>target.distance</code></td><td>Distance to targeted block</td></tr>
   <tr><td><code>target.face</code></td><td>Face of targeted block (0=Up,1=Down,2=North,3=South,4=West,5=East)</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>4608 block IDs in view frustum (16×9×32)</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>144 depth values (16×9 depth-map)</td></tr>
   <tr><td><code>viewport_entities</code></td><td>Visible entities in frustum (FOV-filtered) [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
   <tr><td><code>screen</code></td><td>Current UI screen info (only present when a screen is open)</td></tr>
 </table>
@@ -915,19 +915,11 @@ SECTIONS['observation-schema'] = {
   <tr><td>5</td><td>East</td></tr>
 </table>
 
-<h2 id="viewport-blocks">Viewport Blocks — 3D Block Vision</h2>
-<p>A flat array of <strong>4608 integers</strong> (16 wide × 9 tall × 32 deep) representing block IDs in the player's view frustum.</p>
-
-<h4>Index Formula</h4>
-<pre><code>index = depth * 144 + height * 16 + width</code></pre>
+<h2 id="viewport-blocks">Viewport Blocks — Depth-Map Vision</h2>
+<p>A flat depth-map of <strong>144 integers</strong> (16 wide × 9 tall). Each value is the distance in blocks (1–32) to the first non-air block along that ray. 32 means no solid within range.</p>
 <ul>
-  <li><code>depth</code>: 0 (nearest) to 31 (farthest)</li>
-  <li><code>height</code>: 0 (bottom of frustum) to 8 (top)</li>
   <li><code>width</code>: 0 (left) to 15 (right)</li>
-</ul>
-<ul>
-  <li><code>0</code> = air or out-of-range/unloaded chunk</li>
-  <li>Other values = numeric block IDs from <code>BuiltInRegistries.BLOCK</code></li>
+  <li><code>height</code>: 0 (bottom of frustum) to 8 (top)</li>
 </ul>
 
 <h2 id="viewport-entities">Viewport Entities — Nearby Creatures</h2>
@@ -1101,12 +1093,11 @@ SECTIONS['ai-guide'] = {
   <li>Use <code>face</code> to know where block will be placed</li>
 </ul>
 
-<h3 id="viewport-interp">viewport_blocks — 3D Block Vision</h3>
+<h3 id="viewport-interp">viewport_blocks — Depth-Map Vision</h3>
 <ul>
-  <li><strong>Check for walls:</strong> If most blocks at depth 0-3 are non-zero → you're facing a wall</li>
-  <li><strong>Find paths:</strong> Look for columns of air (0) at center through all depths</li>
-  <li><strong>Detect resources:</strong> Scan for valuable block IDs</li>
-  <li><strong>Avoid danger:</strong> If lava blocks (ID ~11) appear up close → move away</li>
+  <li><strong>Depth perception:</strong> Each value is the distance to the nearest solid block. Small values (1–3) mean a nearby wall or obstacle. Large values (20–32) mean open space. Low values across many adjacent rays indicate walls or cliffs.</li>
+  <li><strong>Find paths:</strong> Look for rays with large depth values (20+) at center — these are clear paths</li>
+  <li><strong>Avoid danger:</strong> If all rays in a region show small values (1–3), you're boxed in — turn around</li>
 </ul>
 
 <h3 id="entities-interp">viewport_entities — Nearby Creatures</h3>
@@ -1271,7 +1262,7 @@ Step 5: OBSERVE → screen is gone (in-game!)</code></pre>
 <table>
   <tr><th>Symptom</th><th>Probable Cause</th><th>Recovery</th></tr>
   <tr><td><code>tick</code> not increasing</td><td>Game frozen/paused</td><td>Press Esc, check screen, resume</td></tr>
-  <tr><td>All <code>viewport_blocks</code> = 0</td><td>In void/loading</td><td>Move to loaded area</td></tr>
+  <tr><td>All <code>viewport_blocks</code> = 32</td><td>In void/loading (no solids detected)</td><td>Move to loaded area</td></tr>
   <tr><td><code>screen.id == "minecraft:death"</code></td><td>You died</td><td>Click "Respawn", retrieve items</td></tr>
   <tr><td><code>target.block_id</code> always 0</td><td>Looking at sky/too far</td><td>Look down or move closer</td></tr>
   <tr><td>Inventory all [0,0]</td><td>Not in game</td><td>Navigate from title screen to world</td></tr>
@@ -1283,12 +1274,12 @@ Step 5: OBSERVE → screen is gone (in-game!)</code></pre>
 <h2 id="strategies">Advanced AI Strategies</h2>
 
 <h3>Pathfinding (without a map)</h3>
-<p>Use <code>viewport_blocks</code> to find clear paths:</p>
+<p>Use <code>viewport_blocks</code> depth-map to find clear paths:</p>
 <ol>
-  <li>Check the center column of the frustum (w=7,8, h=4) at depths 0-10</li>
-  <li>If all blocks are 0 (air) → path is clear</li>
-  <li>If blocks are non-zero → obstacle ahead</li>
-  <li>Turn slightly and re-check</li>
+  <li>Check center rays (w=7,8, h=4) for large depth values</li>
+  <li>If depth ≥ 20 → path is clear for at least 20 blocks</li>
+  <li>If depth ≤ 3 → obstacle very close, turn</li>
+  <li>Scan across all 9 height rows to detect elevation changes (stairs, hills)</li>
 </ol>
 
 <h3>Resource Location</h3>
@@ -1340,7 +1331,7 @@ Step 5: OBSERVE → screen is gone (in-game!)</code></pre>
   <tr><td><code>target.block_id</code></td><td>int</td><td>Block I'm aiming at (0=none)</td></tr>
   <tr><td><code>target.distance</code></td><td>float</td><td>Distance to target</td></tr>
   <tr><td><code>target.face</code></td><td>int</td><td>Face of targeted block</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>[4608]</td><td>Block IDs in 16×9×32 frustum</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>[144]</td><td>Depth-map (16×9 rays, value = distance to solid)</td></tr>
   <tr><td><code>viewport_entities[i]</code></td><td>[8 vals]</td><td>Nearby entities</td></tr>
   <tr><td><code>screen.id</code></td><td>string</td><td>Current UI screen (if any)</td></tr>
 </table>
@@ -1435,9 +1426,9 @@ SECTIONS['registry'] = {
 
 <h3>Viewport Blocks Array</h3>
 <ul>
-  <li>Size: 4608 elements (16 wide × 9 tall × 32 deep)</li>
-  <li>Index: <code>depth * 144 + height * 16 + width</code></li>
-  <li>0 = air or out-of-range</li>
+  <li>Size: 144 elements (16 wide × 9 tall)</li>
+  <li>Index: <code>height * 16 + width</code></li>
+  <li>Value = distance in blocks (1–32) to nearest solid; 32 = clear</li>
 </ul>
 
 <h3>Viewport Entities Array</h3>
@@ -1831,7 +1822,7 @@ SECTIONS['changelog'] = {
   </li>
   <li><strong>Observation Schema</strong> — Fixed-size JSON for ML tensor compatibility:
     <ul>
-      <li><code>viewport_blocks</code>: 4608 block IDs (16×9×32 frustum)</li>
+      <li><code>viewport_blocks</code>: 144 depth values (16×9 depth-map)</li>
       <li><code>viewport_entities</code>: Up to 16 entities</li>
       <li><code>inventory.slots</code>: 41 fixed slots as <code>[item_id, count]</code></li>
       <li><code>player.status</code>: [health, food, saturation, armor, air]</li>

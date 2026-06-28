@@ -111,9 +111,9 @@ Game tick counter. **20 ticks = 1 second.** Resets when world loads.
 | Field | Type | Range | Description |
 |-------|------|-------|-------------|
 | `fov` | float | 30–110 | Field of view (default 70) |
-| `matrix` | [int,int,int] | [16, 9, 32] | Viewport_blocks dimensions: [width, height, depth] |
+| `matrix` | [int,int] | [16, 9] | Depth-map ray grid: [width, height] |
 
-`width × height × depth = 16 × 9 × 32 = 4608` blocks.
+`width × height = 16 × 9 = 144` depth rays.
 
 ---
 
@@ -164,25 +164,29 @@ Currently held hotbar slot.
 
 ---
 
-## 9. `viewport_blocks` — 3D Block Vision
+## 9. `viewport_blocks` — Depth-Map Vision
 
 ### Format
 ```json
-[ block_id_0, block_id_1, ..., block_id_4607 ]   // 4608 ints
+[ depth_0, depth_1, ..., depth_143 ]   // 144 ints
 ```
 
-### Index Formula
+### Structure
+- **144 values** (16 wide × 9 tall), one per ray
+- Each value = distance in blocks (1–32) to the first non-air block along that ray
+- `32` = no solid block within range (clear path)
+
+### Index
 ```
-index = depth * 144 + height * 16 + width
+index = height * 16 + width
 ```
 where:
-- `depth`: 0 (nearest) to 31 (farthest)
 - `height`: 0 (bottom of frustum) to 8 (top)
 - `width`: 0 (left) to 15 (right)
 
 ### Values
-- `0` = air or out-of-range/unloaded chunk
-- Other values = numeric block IDs from `BuiltInRegistries.BLOCK` (**dynamic per session**)
+- **1–31**: distance to first solid block
+- **32**: all clear (no solid within 32 blocks) (**dynamic per session**)
 
 ---
 

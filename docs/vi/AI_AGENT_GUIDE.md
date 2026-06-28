@@ -136,12 +136,12 @@ Số tick game. **20 ticks = 1 giây.** Dùng để:
 ```json
 {
   "fov": 70,
-  "matrix": [16, 9, 32]
+  "matrix": [16, 9]
 }
 ```
 
 - `fov`: góc nhìn hiện tại
-- `matrix`: kích thước mảng `viewport_blocks` = `[width=16, height=9, depth=32]` (4608 khối)
+- `matrix`: lưới tia depth-map `viewport_blocks` = `[width=16, height=9]` (144 tia)
 
 ### 2.7 `inventory` — Đồ Trong Người
 
@@ -196,19 +196,20 @@ Mỗi slot là `[item_id, count]`:
 - `distance <= 4.5` → trong tầm với
 - `face: 0` (đỉnh) → đặt khối sẽ đặt BÊN DƯỚI khối đang nhìn
 
-### 2.9 `viewport_blocks` — Tầm Nhìn 3D
+### 2.9 `viewport_blocks` — Depth-Map
 
-Mảng 4608 số nguyên (16×9×32 hình nón). Mỗi giá trị là ID khối (0 = không khí).
+Mảng **144 số nguyên** (16×9 tia). Mỗi giá trị là khoảng cách (1–32 block) tới khối đặc đầu tiên. 32 = không vật cản.
 
-**Thứ tự:** depth → height → width:
+**Thứ tự:** height → width:
 ```
-arr[d * 144 + h * 16 + w] = blockId
+arr[h * 16 + w] = depth
 ```
 
 **Logic AI:**
-- Hầu hết depth 0-3 là khối → đang đứng trước tường
-- Cột không khí (0) ở giữa xuyên suốt → đường đi thoáng
-- Phát hiện lava (ID ~11) → tránh xa
+- Giá trị nhỏ (1–3) = tường/va chạm gần → không đi được hướng đó
+- Giá trị lớn (20–32) = đường thoáng → có thể đi
+- Nhiều tia liền kề có giá trị nhỏ → tường/vách đá
+- Giá trị 32 ở trung tâm → đường đi thẳng phía trước
 
 ### 2.10 `viewport_entities` — Sinh Vật Gần Đó
 

@@ -506,7 +506,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
       "status": [20, 15, 20, 5, 300],
       "flags": [1, 0, 0, 0, 0, 0]
     },
-    "camera": { "fov": 70, "matrix": [16, 9, 32] },
+    "camera": { "fov": 70, "matrix": [16, 9] },
     "inventory": {
       "slots": [
         [0,0], [0,0], [0,0], [5,64], [0,0], ...
@@ -547,13 +547,13 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
 | `player.status` | [health, food, saturation, armor, air] |
 | `player.flags` | [on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1) |
 | `camera.fov` | Current field of view |
-| `camera.matrix` | Viewport dimensions [width, height, depth] |
+| `camera.matrix` | Depth-map ray grid [width, height] |
 | `inventory.slots` | 41 fixed slots as [item_id, count] pairs (0 = empty) |
 | `inventory.selected_slot` | Currently held hotbar slot (0-8) |
 | `target.block_id` | Block ID the crosshair is pointing at |
 | `target.distance` | Distance to targeted block |
 | `target.face` | Face of targeted block (0=Up,1=Down,2=North,3=South,4=East,5=West) |
-| `viewport_blocks` | 4608 block IDs in view frustum (16×9×32) |
+| `viewport_blocks` | 144 depth values (16×9 depth-map, 1–32 = distance to nearest solid) |
 | `viewport_entities` | Visible entities [type_id, relX, relY, relZ, yaw, pitch, health, distance] |
 | `screen` | Current UI screen info (only present when a screen is open) |
 
@@ -692,7 +692,7 @@ Empty slots are represented as `[0, 0]`. This fixed-size design allows direct ma
 
 ### Viewport Blocks
 
-A flat array of **4608 integers** (16 wide × 9 tall × 32 deep) representing block IDs in the player's view frustum. Each value is the numeric ID of the block (0 for air/out-of-range).
+A flat depth-map of **144 integers** (16 wide × 9 tall). Each value is the distance in blocks (1–32) to the first non-air block along that ray. 32 means no solid within range.
 
 ### Viewport Entities
 

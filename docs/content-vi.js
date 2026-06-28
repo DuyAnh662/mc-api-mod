@@ -638,7 +638,7 @@ curl -X POST http://localhost:25566/api/cancel \\
       "status": [20, 15, 20, 5, 300],
       "flags": [1, 0, 0, 0, 0, 0]
     },
-    "camera": { "fov": 70, "matrix": [16, 9, 32] },
+    "camera": { "fov": 70, "matrix": [16, 9] },
     "inventory": {
       "slots": [[0,0], [0,0], [0,0], [5,64], [0,0], ...],
       "selected_slot": 3
@@ -789,13 +789,13 @@ SECTIONS['observation-schema'] = {
   <tr><td><code>player.status</code></td><td>[health, food, saturation, armor, air]</td></tr>
   <tr><td><code>player.flags</code></td><td>[on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1)</td></tr>
   <tr><td><code>camera.fov</code></td><td>Góc nhìn hiện tại (30-110)</td></tr>
-  <tr><td><code>camera.matrix</code></td><td>Kích thước viewport [width=16, height=9, depth=32] = 4608 khối</td></tr>
+  <tr><td><code>camera.matrix</code></td><td>Lưới tia viewport [width=16, height=9] = 144 mẫu depth</td></tr>
   <tr><td><code>inventory.slots</code></td><td>41 slot cố định [item_id, count] (0 = rỗng)</td></tr>
   <tr><td><code>inventory.selected_slot</code></td><td>Slot hotbar đang cầm (0-8)</td></tr>
   <tr><td><code>target.block_id</code></td><td>ID khối đang ngắm</td></tr>
   <tr><td><code>target.distance</code></td><td>Khoảng cách tới khối đang ngắm</td></tr>
   <tr><td><code>target.face</code></td><td>Mặt của khối (0=Trên,1=Dưới,2=Bắc,3=Nam,4=Tây,5=Đông)</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>4608 ID khối (16×9×32)</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>Depth-map: 144 giá trị depth (16×9 tia), khoảng cách tới khối đặc gần nhất</td></tr>
   <tr><td><code>viewport_entities</code></td><td>Entity trong frustum (lọc FOV) [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
   <tr><td><code>screen</code></td><td>Thông tin màn hình UI (chỉ khi có màn hình mở)</td></tr>
 </table>
@@ -904,20 +904,8 @@ SECTIONS['observation-schema'] = {
   <tr><td>5</td><td>Đông</td></tr>
 </table>
 
-<h2 id="viewport-blocks">Viewport Blocks — Tầm Nhìn 3D</h2>
-<p>Mảng phẳng <strong>4608 số nguyên</strong> (16 ngang × 9 dọc × 32 sâu) đại diện ID khối trong tầm nhìn.</p>
-
-<h4>Công Thức Index</h4>
-<pre><code>index = depth * 144 + height * 16 + width</code></pre>
-<ul>
-  <li><code>depth</code>: 0 (gần) đến 31 (xa)</li>
-  <li><code>height</code>: 0 (đáy) đến 8 (đỉnh)</li>
-  <li><code>width</code>: 0 (trái) đến 15 (phải)</li>
-</ul>
-<ul>
-  <li>0 = không khí hoặc chunk chưa load</li>
-  <li>Giá trị khác = ID block từ <code>BuiltInRegistries.BLOCK</code></li>
-</ul>
+<h2 id="viewport-blocks">Viewport Blocks — Depth-Map</h2>
+<p>Mảng depth-map phẳng <strong>144 số nguyên</strong> (16 ngang × 9 dọc). Mỗi giá trị là khoảng cách (1–32 block) tới khối đặc đầu tiên trên tia đó. 32 = không có vật cản trong tầm.</p>
 
 <h2 id="viewport-entities">Viewport Entities — Sinh Vật Gần Đó</h2>
 <p>Tối đa <strong>16 entity</strong> trong view frustum (lọc theo FOV, không phải bán kính), mỗi entity 8 giá trị. Chỉ trả về entity thực tế (không pad rỗng):</p>
@@ -1086,7 +1074,7 @@ B5: QUAN SÁT → không còn screen (đã vào game!)</code></pre>
 <table>
   <tr><th>Vấn đề</th><th>Nguyên nhân</th><th>Cách sửa</th></tr>
   <tr><td><code>tick</code> không tăng</td><td>Game bị đứng</td><td>Ấn Esc, kiểm tra, Resume</td></tr>
-  <tr><td><code>viewport_blocks</code> toàn 0</td><td>Void/đang load</td><td>Di chuyển đến nơi đã load</td></tr>
+  <tr><td><code>viewport_blocks</code> toàn 32</td><td>Void/đang load</td><td>Di chuyển đến nơi đã load</td></tr>
   <tr><td><code>screen.id == "minecraft:death"</code></td><td>Bạn chết</td><td>Click "Respawn"</td></tr>
   <tr><td><code>target.block_id</code> luôn 0</td><td>Nhìn trời/xa</td><td>Nhìn xuống hoặc lại gần</td></tr>
   <tr><td>Inventory toàn [0,0]</td><td>Chưa vào game</td><td>Điều hướng từ title vào world</td></tr>
@@ -1239,9 +1227,9 @@ Bước 5: OBSERVE → đã vào game!</code></pre>
 <h3>Tìm Đường</h3>
 <p>Dùng <code>viewport_blocks</code> để tìm đường:</p>
 <ol>
-  <li>Kiểm tra cột giữa frustum (w=7,8, h=4) ở depth 0-10</li>
-  <li>Nếu toàn bộ là 0 (air) → đường thông</li>
-  <li>Nếu có số khác 0 → có chướng ngại</li>
+  <li>Kiểm tra tia giữa (index ~76, width=7-8, height=4)</li>
+  <li>Nếu giá trị &gt;= 8 → đường thông 8 blocks</li>
+  <li>Nếu giá trị &lt; 3 → có chướng ngại gần</li>
   <li>Xoay nhẹ và kiểm tra lại</li>
 </ol>
 
@@ -1294,7 +1282,7 @@ Bước 5: OBSERVE → đã vào game!</code></pre>
   <tr><td><code>target.block_id</code></td><td>int</td><td>Block đang ngắm (0=không có)</td></tr>
   <tr><td><code>target.distance</code></td><td>float</td><td>Khoảng cách tới mục tiêu</td></tr>
   <tr><td><code>target.face</code></td><td>int</td><td>Mặt của block bị ngắm</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>[4608]</td><td>Block IDs trong frustum 16×9×32</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>[144] Depth-map</td><td>Depth-map 16×9 tia, giá trị = khoảng cách tới block (1-32)</td></tr>
   <tr><td><code>viewport_entities[i]</code></td><td>[8 values]</td><td>Entity gần đó</td></tr>
   <tr><td><code>screen.id</code></td><td>string</td><td>Màn hình UI hiện tại (nếu có)</td></tr>
 </table>
@@ -1389,9 +1377,9 @@ SECTIONS['registry'] = {
 
 <h3>Viewport Blocks Array</h3>
 <ul>
-  <li>Kích thước: 4608 phần tử (16 ngang × 9 cao × 32 sâu)</li>
-  <li>Index: <code>depth * 144 + height * 16 + width</code></li>
-  <li>0 = không khí hoặc ngoài tầm</li>
+  <li>Kích thước: 144 phần tử (16 ngang × 9 dọc) depth-map</li>
+  <li>Mỗi giá trị: khoảng cách (1–32) tới khối đặc đầu tiên trên tia</li>
+  <li>32 = không có vật cản trong tầm</li>
 </ul>
 
 <h3>Viewport Entities Array</h3>

@@ -111,9 +111,9 @@ Bộ đếm game tick. **20 ticks = 1 giây.** Reset khi tải world mới.
 | Field | Kiểu | Khoảng | Mô tả |
 |-------|------|--------|-------|
 | `fov` | float | 30–110 | Trường nhìn (mặc định 70) |
-| `matrix` | [int,int,int] | [16, 9, 32] | Kích thước viewport_blocks: [width, height, depth] |
+| `matrix` | [int,int,int] | [16, 9] | Kích thước viewport_blocks: [width, height, depth] |
 
-`width × height × depth = 16 × 9 × 32 = 4608` blocks.
+`width × height = 16 × 9 = 144` tia depth.
 
 ---
 
@@ -164,24 +164,28 @@ Slot hotbar đang chọn.
 
 ---
 
-## 9. `viewport_blocks` — Tầm nhìn 3D
+## 9. `viewport_blocks` — Depth-Map
 
 ### Định dạng
 ```json
-[ block_id_0, block_id_1, ..., block_id_4607 ]   // 4608 số int
+[ depth_0, depth_1, ..., depth_143 ]   // 144 số int
 ```
+
+### Cấu trúc
+- **144 giá trị** (16 ngang × 9 dọc), mỗi giá trị = khoảng cách (1–32 block) tới khối đặc đầu tiên trên tia đó
+- `32` = không có vật cản trong tầm
 
 ### Công thức chỉ mục
 ```
-index = depth * 144 + height * 16 + width
+index = height * 16 + width
 ```
 với:
-- `depth`: 0 (gần nhất) đến 31 (xa nhất)
-- `height`: 0 (đáy hình chóp) đến 8 (đỉnh)
+- `height`: 0 (đáy) đến 8 (đỉnh)
 - `width`: 0 (trái) đến 15 (phải)
 
 ### Giá trị
-- `0` = air hoặc chunk chưa load/ngoài phạm vi
+- **1–31**: khoảng cách tới khối đặc đầu tiên
+- **32**: thông thoáng (không vật cản trong 32 block)
 - Giá trị khác = ID block số từ `BuiltInRegistries.BLOCK` (**thay đổi mỗi session**)
 
 ---
