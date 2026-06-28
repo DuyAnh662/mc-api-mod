@@ -1149,6 +1149,178 @@ B5: QUAN SÁT → không còn screen (đã vào game!)</code></pre>
   <tr><td><code>{"type":"key","keys":["e"]}</code></td><td>Mở/đóng inventory</td></tr>
 </table>
 `
+    },
+    {
+      id: 'ai-guide.workflows',
+      title: 'Workflows',
+      content: `
+<h2 id="workflows">Workflows Hoàn Chỉnh — Chinh Phục Minecraft</h2>
+
+<h3>Vào Game (Từ Màn Hình Title)</h3>
+<pre><code>Bước 1: OBSERVE → screen.id == "minecraft:title"
+Bước 2: ACT → click_button "singleplayer"
+Bước 3: OBSERVE → screen.id == "minecraft:select_world"
+Bước 4: ACT → click_button "My World" (tên world của bạn)
+Bước 5: OBSERVE → đã vào game!</code></pre>
+
+<h3>Sinh Tồn Cơ Bản — 5 Phút Đầu</h3>
+<pre><code>1. OBSERVE → kiểm tra status [20, 20, 20, 0, 300]
+2. ACT → look down (nhìn xuống đất)
+3. OBSERVE → target là cây/gỗ
+4. ACT → break (đập cây)
+5. LẶP lại bước 3-4 đến khi có 4+ khúc gỗ
+6. OBSERVE → inventory có gỗ
+7. ACT → craft "minecraft:crafting_table"
+8. Chế tạo cuốc gỗ, rồi tools bằng đá</code></pre>
+
+<h3>Chiến Thuật Đào</h3>
+<pre><code>1. Nhìn xuống, phá đất → tạo cầu thang xuống
+2. Ở y=11 (tầng diamond lý tưởng): đào hầm branch mining
+3. Mẫu: đào hầm cao 2, chừa 3 block giữa các hầm
+4. Nghe thấy lava: dừng lại, âm thanh = có hang động gần
+5. Kiểm tra target.block_id định kỳ để tìm quặng</code></pre>
+
+<h3>Chiến Thuật Chiến Đấu</h3>
+<p><strong>Chống lại melee (zombies, spiders):</strong></p>
+<pre><code>1. Giữ khoảng cách 3-4 block
+2. Di chuyển ngang (đổi a/d)
+3. Tấn công (swing) khi mob đến gần
+4. Nếu máu &lt; 5: chạy, ăn, hồi phục</code></pre>
+
+<p><strong>Chống lại tầm xa (skeletons):</strong></p>
+<pre><code>1. Tiếp cận zigzag (w + a rồi w + d)
+2. Áp sát nhanh
+3. Tấn công cận chiến</code></pre>
+
+<p><strong>Chống creeper:</strong></p>
+<pre><code>1. Lùi lại (s) khi nhìn vào nó
+2. Tấn công, lùi ngay
+3. Không để nó đến gần hơn 2 block</code></pre>
+
+<h3>Xây Nhà</h3>
+<pre><code>1. Tìm đất bằng gần spawn
+2. Kiểm tra inventory (đất, đá cuội, gỗ)
+3. Xây cấu trúc 5×5×3:
+   - Tường cao 2 block
+   - Cửa ra vào
+   - Đuốc bên trong
+4. Giường để đặt lại spawn</code></pre>
+
+<h3>Trang Trại & Tự Cung</h3>
+<pre><code>1. Chế tạo cuốc (2 que + 2 ván/đá cuội)
+2. Tìm nguồn nước
+3. Cuốc đất gần nước (chuột phải với cuốc)
+4. Trồng hạt (từ phá cỏ)
+5. Chờ cây trồng lớn (theo dõi day counter)</code></pre>
+
+<h2 id="navigation">Screen Navigation State Machine</h2>
+<pre><code>TITLE → chọn "Singleplayer"
+  → WORLD_SELECT → click tên world
+    → IN_GAME → chơi...
+      → ESC → PAUSE
+        → "Save & Exit" → TITLE
+        → "Resume" → IN_GAME
+      → DEATH → "Respawn" → IN_GAME
+    → ESC (từ chọn world) → TITLE</code></pre>
+
+<h2 id="error-recovery">Khắc Phục Lỗi</h2>
+<table>
+  <tr><th>Triệu chứng</th><th>Nguyên nhân</th><th>Xử lý</th></tr>
+  <tr><td><code>tick</code> không tăng</td><td>Game bị đóng băng/dừng</td><td>Nhấn Esc, kiểm tra màn hình, resume</td></tr>
+  <tr><td><code>viewport_blocks</code> toàn 0</td><td>Đang trong void/load</td><td>Di chuyển tới khu vực đã load</td></tr>
+  <tr><td><code>screen.id == "minecraft:death"</code></td><td>Bạn đã chết</td><td>Click "Respawn", nhặt đồ</td></tr>
+  <tr><td><code>target.block_id</code> luôn là 0</td><td>Nhìn lên trời/xa quá</td><td>Nhìn xuống hoặc tới gần</td></tr>
+  <tr><td>Inventory toàn [0,0]</td><td>Chưa vào game</td><td>Điều hướng từ title vào world</td></tr>
+  <tr><td>Action trả về "timeout"</td><td>Server bận</td><td>Thử lại sau 1 giây</td></tr>
+  <tr><td>Không kết nối được port 25566</td><td>Mod chưa load</td><td>Khởi động lại Minecraft</td></tr>
+</table>
+
+<h2 id="strategies">Chiến Thuật AI Nâng Cao</h2>
+
+<h3>Tìm Đường</h3>
+<p>Dùng <code>viewport_blocks</code> để tìm đường:</p>
+<ol>
+  <li>Kiểm tra cột giữa frustum (w=7,8, h=4) ở depth 0-10</li>
+  <li>Nếu toàn bộ là 0 (air) → đường thông</li>
+  <li>Nếu có số khác 0 → có chướng ngại</li>
+  <li>Xoay nhẹ và kiểm tra lại</li>
+</ol>
+
+<h3>Vị Trí Tài Nguyên</h3>
+<table>
+  <tr><th>Tài nguyên</th><th>Y Level</th></tr>
+  <tr><td>Sắt</td><td>y=15 đến y=32</td></tr>
+  <tr><td>Diamond</td><td>y=-64 đến y=16 (nhiều nhất ở y=-59)</td></tr>
+  <tr><td>Than</td><td>y=0 đến y=96</td></tr>
+  <tr><td>Ancient Debris (Nether)</td><td>y=8 đến y=22</td></tr>
+</table>
+
+<h3>Ưu Tiên Xử Lý</h3>
+<table>
+  <tr><th>Tình huống</th><th>Hành động ưu tiên</th></tr>
+  <tr><td>Máu &lt; 5</td><td>Chạy, ăn đồ</td></tr>
+  <tr><td>Đồ ăn &lt; 6</td><td>Ăn, kiếm/trồng đồ ăn</td></tr>
+  <tr><td>Đêm + không giường</td><td>Xây nhà, thắp sáng</td></tr>
+  <tr><td>Thấy quặng quý</td><td>Đánh dấu, đào</td></tr>
+  <tr><td>Thấy mob thù địch</td><td>Đánh giá: đánh được? Không thì chạy</td></tr>
+  <tr><td>Đồ đạc yếu</td><td>Chế tạo đồ mới</td></tr>
+  <tr><td>Đầy inventory</td><td>Về căn cứ, cất đồ</td></tr>
+  <tr><td>Gần lava</td><td>Đặt nước (nếu có), hoặc tránh</td></tr>
+</table>
+`
+    },
+    {
+      id: 'ai-guide.cheatsheet',
+      title: 'Tham Khảo Nhanh',
+      content: `
+<h2 id="cheatsheet">Tham Khảo Nhanh</h2>
+
+<h3>Observation Fields</h3>
+<table>
+  <tr><th>Path</th><th>Kiểu</th><th>Ý nghĩa</th></tr>
+  <tr><td><code>tick</code></td><td>int</td><td>Thời gian game (tick, ÷20 = giây)</td></tr>
+  <tr><td><code>world.time</code></td><td>int</td><td>0-24000 chu kỳ ngày-đêm</td></tr>
+  <tr><td><code>world.day</code></td><td>int</td><td>Tổng số ngày đã chơi</td></tr>
+  <tr><td><code>world.weather</code></td><td>string</td><td>clear / rain / thunder</td></tr>
+  <tr><td><code>world.dimension</code></td><td>int</td><td>0=Overworld, 1=Nether, 2=End</td></tr>
+  <tr><td><code>player.position</code></td><td>[x,y,z]</td><td>Vị trí hiện tại</td></tr>
+  <tr><td><code>player.rotation.yaw</code></td><td>float</td><td>Hướng nhìn ngang</td></tr>
+  <tr><td><code>player.rotation.pitch</code></td><td>float</td><td>Hướng nhìn dọc</td></tr>
+  <tr><td><code>player.status[0]</code></td><td>int</td><td>Máu (0-20)</td></tr>
+  <tr><td><code>player.status[1]</code></td><td>int</td><td>Đồ ăn (0-20)</td></tr>
+  <tr><td><code>player.status[4]</code></td><td>int</td><td>Khí (0-300)</td></tr>
+  <tr><td><code>player.flags[0]</code></td><td>0/1</td><td>Đang đứng trên mặt đất</td></tr>
+  <tr><td><code>inventory.slots[i]</code></td><td>[id,count]</td><td>Item trong slot i</td></tr>
+  <tr><td><code>inventory.selected_slot</code></td><td>int</td><td>Hotbar đang chọn (0-8)</td></tr>
+  <tr><td><code>target.block_id</code></td><td>int</td><td>Block đang ngắm (0=không có)</td></tr>
+  <tr><td><code>target.distance</code></td><td>float</td><td>Khoảng cách tới mục tiêu</td></tr>
+  <tr><td><code>target.face</code></td><td>int</td><td>Mặt của block bị ngắm</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>[4608]</td><td>Block IDs trong frustum 16×9×32</td></tr>
+  <tr><td><code>viewport_entities[i]</code></td><td>[8 values]</td><td>Entity gần đó</td></tr>
+  <tr><td><code>screen.id</code></td><td>string</td><td>Màn hình UI hiện tại (nếu có)</td></tr>
+</table>
+
+<h3>Hành Động Cơ Bản</h3>
+<table>
+  <tr><th>Mục đích</th><th>Hành động</th></tr>
+  <tr><td>Đi tới</td><td><code>{"type":"key","keys":["w"]}</code></td></tr>
+  <tr><td>Chạy</td><td><code>{"type":"key","keys":["w","ctrl"]}</code></td></tr>
+  <tr><td>Nhảy</td><td><code>{"type":"jump"}</code></td></tr>
+  <tr><td>Xoay</td><td><code>{"type":"look","deltaYaw":90}</code></td></tr>
+  <tr><td>Phá block</td><td><code>{"type":"break"}</code></td></tr>
+  <tr><td>Đặt block</td><td><code>{"type":"place","face":"up"}</code></td></tr>
+  <tr><td>Tương tác</td><td><code>{"type":"interact"}</code></td></tr>
+  <tr><td>Tấn công</td><td><code>{"type":"swing"}</code></td></tr>
+  <tr><td>Chọn slot</td><td><code>{"type":"select_slot","slot":2}</code></td></tr>
+  <tr><td>Chế tạo</td><td><code>{"type":"craft","recipe":"minecraft:chest"}</code></td></tr>
+  <tr><td>Chat</td><td><code>{"type":"chat","message":"hi"}</code></td></tr>
+  <tr><td>Lệnh</td><td><code>{"type":"command","command":"/time set day"}</code></td></tr>
+  <tr><td>Click UI</td><td><code>{"type":"click_button","button_text":"Singleplayer"}</code></td></tr>
+  <tr><td>Đóng màn hình</td><td><code>{"type":"key","keys":["esc"]}</code></td></tr>
+  <tr><td>Mở inventory</td><td><code>{"type":"key","keys":["e"]}</code></td></tr>
+  <tr><td>Nhìn xuống đất</td><td><code>{"type":"look","pitch":70}</code></td></tr>
+</table>
+`
     }
   ]
 };
@@ -1161,7 +1333,7 @@ SECTIONS['registry'] = {
       title: 'Cơ Bản',
       content: `
 <h2 id="registry-intro">Bảng Tra Cứu</h2>
-<div class="alert alert-warn"><strong>Quan trọng:</strong> ID số từ <code>BuiltInRegistries.getId()</code> có tính <strong>động</strong>. Dùng namespaced ID (<code>minecraft:stone</code>) để ổn định.</div>
+<div class="alert alert-warn"><strong>Quan trọng:</strong> ID số từ <code>BuiltInRegistries.getId()</code> có tính <strong>động</strong> (thay đổi theo thứ tự load). Dùng namespaced ID (<code>minecraft:stone</code>) để ổn định giữa các phiên.</div>
 
 <h3>ID Dimension</h3>
 <table>
@@ -1171,18 +1343,35 @@ SECTIONS['registry'] = {
   <tr><td>2</td><td>End</td></tr>
 </table>
 
-<h3>Block Face</h3>
+<h3>Hướng (Facing) theo Yaw</h3>
 <table>
-  <tr><th>ID</th><th>Mặt</th></tr>
-  <tr><td>0</td><td>Trên</td></tr>
-  <tr><td>1</td><td>Dưới</td></tr>
-  <tr><td>2</td><td>Bắc</td></tr>
-  <tr><td>3</td><td>Nam</td></tr>
-  <tr><td>4</td><td>Tây</td></tr>
-  <tr><td>5</td><td>Đông</td></tr>
+  <tr><th>Hướng</th><th>Khoảng Yaw</th></tr>
+  <tr><td>Nam</td><td>-45° đến 45°</td></tr>
+  <tr><td>Tây</td><td>45° đến 135°</td></tr>
+  <tr><td>Bắc</td><td>135° đến 225°</td></tr>
+  <tr><td>Đông</td><td>225° đến 315°</td></tr>
 </table>
 
-<h3>Weather</h3>
+<h3>Mặt Block</h3>
+<table>
+  <tr><th>ID</th><th>Mặt</th></tr>
+  <tr><td>0</td><td>Trên (up)</td></tr>
+  <tr><td>1</td><td>Dưới (down)</td></tr>
+  <tr><td>2</td><td>Bắc (north)</td></tr>
+  <tr><td>3</td><td>Nam (south)</td></tr>
+  <tr><td>4</td><td>Tây (west)</td></tr>
+  <tr><td>5</td><td>Đông (east)</td></tr>
+</table>
+
+<h3>Hướng Cardinal (cho action place)</h3>
+<pre><code>"up"    = dương Y
+"down"  = âm Y
+"north" = âm Z
+"south" = dương Z
+"west"  = âm X
+"east"  = dương X</code></pre>
+
+<h3>Giá Trị Thời Tiết</h3>
 <table>
   <tr><th>Giá trị</th><th>Ý nghĩa</th></tr>
   <tr><td><code>"clear"</code></td><td>Trời trong</td></tr>
@@ -1195,43 +1384,94 @@ SECTIONS['registry'] = {
   <tr><th>Index</th><th>Khu vực</th><th>SL</th></tr>
   <tr><td>0-8</td><td>Hotbar</td><td>9</td></tr>
   <tr><td>9-35</td><td>Túi chính</td><td>27</td></tr>
-  <tr><td>36-39</td><td>Giáp</td><td>4</td></tr>
-  <tr><td>40</td><td>Tay trái</td><td>1</td></tr>
+  <tr><td>36-39</td><td>Giáp (ủng→quần→giáp→mũ)</td><td>4</td></tr>
+  <tr><td>40</td><td>Tay trái (offhand)</td><td>1</td></tr>
 </table>
+
+<h3>Viewport Blocks Array</h3>
+<ul>
+  <li>Kích thước: 4608 phần tử (16 ngang × 9 cao × 32 sâu)</li>
+  <li>Index: <code>depth * 288 + height * 16 + width</code></li>
+  <li>0 = không khí hoặc ngoài tầm</li>
+</ul>
+
+<h3>Viewport Entities Array</h3>
+<ul>
+  <li>Tối đa 16 entity, mỗi entity: <code>[type_id, relX, relY, relZ, yaw, pitch, health, distance]</code></li>
+  <li>Trống: <code>[0, 0, 0, 0, 0, 0, 0, 0]</code></li>
+</ul>
 `
     },
     {
       id: 'registry.entities',
       title: 'Entity IDs',
       content: `
-<h2 id="entity-ids">Bảng Entity (Numeric ID)</h2>
+<h2 id="entity-ids">Entity Registry — Đầy Đủ 0–119</h2>
+<p>Entity type IDs ổn định giữa các phiên. ID 0–119, mỗi entity 8 giá trị <code>[type, rx, ry, rz, yaw, pitch, health, dist]</code>.</p>
 <table>
-  <tr><th>ID</th><th>Entity</th><th>Thù địch?</th></tr>
-  <tr><td>8</td><td><strong>Blaze</strong></td><td><strong>Có</strong></td></tr>
-  <tr><td>12</td><td>Breeze</td><td><strong>Có</strong></td></tr>
-  <tr><td>16</td><td>Cave Spider</td><td><strong>Có</strong></td></tr>
-  <tr><td>19</td><td>Chicken</td><td>Không</td></tr>
-  <tr><td>21</td><td>Cow</td><td>Không</td></tr>
-  <tr><td>22</td><td><strong>Creeper</strong></td><td><strong>Có</strong></td></tr>
-  <tr><td>30</td><td><strong>Ender Dragon</strong></td><td><strong>Có</strong> (Boss)</td></tr>
-  <tr><td>32</td><td>Enderman</td><td>Neutral</td></tr>
-  <tr><td>44</td><td><strong>Ghast</strong></td><td><strong>Có</strong></td></tr>
-  <tr><td>50</td><td><strong>Hoglin</strong></td><td><strong>Có</strong></td></tr>
-  <tr><td>52</td><td>Horse</td><td>Không</td></tr>
-  <tr><td>56</td><td>Iron Golem</td><td>Neutral</td></tr>
-  <tr><td>68</td><td>Panda</td><td>Không</td></tr>
-  <tr><td>70</td><td>Phantom</td><td><strong>Có</strong></td></tr>
-  <tr><td>71</td><td>Pig</td><td>Không</td></tr>
-  <tr><td>73</td><td>Piglin Brute</td><td><strong>Có</strong></td></tr>
-  <tr><td>74</td><td><strong>Pillager</strong></td><td><strong>Có</strong></td></tr>
-  <tr><td>81</td><td>Sheep</td><td>Không</td></tr>
-  <tr><td>85</td><td><strong>Skeleton</strong></td><td><strong>Có</strong></td></tr>
-  <tr><td>92</td><td>Spider</td><td><strong>Có</strong></td></tr>
-  <tr><td>105</td><td>Villager</td><td>Không</td></tr>
-  <tr><td>108</td><td><strong>Warden</strong></td><td><strong>Có</strong></td></tr>
-  <tr><td>111</td><td><strong>Wither</strong></td><td><strong>Có</strong> (Boss)</td></tr>
-  <tr><td>116</td><td><strong>Zombie</strong></td><td><strong>Có</strong></td></tr>
+  <tr><th>ID</th><th>Entity</th><th>Ghi chú</th><th>ID</th><th>Entity</th><th>Ghi chú</th></tr>
+  <tr><td>0</td><td>Allay</td><td>—</td><td>1</td><td>Area Effect Cloud</td><td>—</td></tr>
+  <tr><td>2</td><td>Armadillo</td><td>—</td><td>3</td><td>Armor Stand</td><td>—</td></tr>
+  <tr><td>4</td><td>Arrow</td><td>Đạn</td><td>5</td><td>Axolotl</td><td>—</td></tr>
+  <tr><td>6</td><td>Bat</td><td>—</td><td>7</td><td>Bee</td><td>Neutral</td></tr>
+  <tr><td>8</td><td><strong>Blaze</strong></td><td>Thù địch, Nether</td><td>9</td><td>Block Display</td><td>—</td></tr>
+  <tr><td>10</td><td>Boat</td><td>—</td><td>11</td><td><strong>Bogged</strong></td><td>Thù địch</td></tr>
+  <tr><td>12</td><td><strong>Breeze</strong></td><td>Thù địch</td><td>13</td><td>Breeze Wind Charge</td><td>—</td></tr>
+  <tr><td>14</td><td>Cat</td><td>—</td><td>15</td><td>Camel</td><td>—</td></tr>
+  <tr><td>16</td><td><strong>Cave Spider</strong></td><td>Thù địch</td><td>17</td><td>Chest Boat</td><td>—</td></tr>
+  <tr><td>18</td><td>Chest Minecart</td><td>—</td><td>19</td><td>Chicken</td><td>Thức ăn</td></tr>
+  <tr><td>20</td><td>Cod</td><td>—</td><td>21</td><td>Cow</td><td>Thức ăn/da</td></tr>
+  <tr><td>22</td><td><strong>Creeper</strong></td><td>Thù địch, nổ</td><td>23</td><td>Dolphin</td><td>—</td></tr>
+  <tr><td>24</td><td>Donkey</td><td>Cưỡi được</td><td>25</td><td>Dragon Fireball</td><td>—</td></tr>
+  <tr><td>26</td><td><strong>Drowned</strong></td><td>Thù địch</td><td>27</td><td>Egg</td><td>—</td></tr>
+  <tr><td>28</td><td><strong>Elder Guardian</strong></td><td>Thù địch</td><td>29</td><td>End Crystal</td><td>—</td></tr>
+  <tr><td>30</td><td><strong>Ender Dragon</strong></td><td><strong>Boss</strong></td><td>31</td><td>Ender Pearl</td><td>—</td></tr>
+  <tr><td>32</td><td>Enderman</td><td>Neutral</td><td>33</td><td>Endermite</td><td>Neutral</td></tr>
+  <tr><td>34</td><td><strong>Evoker</strong></td><td>Thù địch</td><td>35</td><td>Evoker Fangs</td><td>—</td></tr>
+  <tr><td>36</td><td>Experience Bottle</td><td>—</td><td>37</td><td>Experience Orb</td><td>—</td></tr>
+  <tr><td>38</td><td>Eye of Ender</td><td>—</td><td>39</td><td>Falling Block</td><td>—</td></tr>
+  <tr><td>40</td><td>Firework Rocket</td><td>—</td><td>41</td><td>Fox</td><td>—</td></tr>
+  <tr><td>42</td><td>Frog</td><td>—</td><td>43</td><td>Furnace Minecart</td><td>—</td></tr>
+  <tr><td>44</td><td><strong>Ghast</strong></td><td>Thù địch, Nether</td><td>45</td><td><strong>Giant</strong></td><td>Thù địch</td></tr>
+  <tr><td>46</td><td>Glow Item Frame</td><td>—</td><td>47</td><td>Glow Squid</td><td>—</td></tr>
+  <tr><td>48</td><td>Goat</td><td>—</td><td>49</td><td><strong>Guardian</strong></td><td>Thù địch, nước</td></tr>
+  <tr><td>50</td><td><strong>Hoglin</strong></td><td>Thù địch, Nether</td><td>51</td><td>Hopper Minecart</td><td>—</td></tr>
+  <tr><td>52</td><td>Horse</td><td>Cưỡi được</td><td>53</td><td><strong>Husk</strong></td><td>Thù địch</td></tr>
+  <tr><td>54</td><td><strong>Illusioner</strong></td><td>Thù địch</td><td>55</td><td>Interaction</td><td>—</td></tr>
+  <tr><td>56</td><td>Iron Golem</td><td>Neutral</td><td>57</td><td>Item (rơi)</td><td>—</td></tr>
+  <tr><td>58</td><td>Item Display</td><td>—</td><td>59</td><td>Item Frame</td><td>—</td></tr>
+  <tr><td>60</td><td>Llama</td><td>Mang rương</td><td>61</td><td><strong>Magma Cube</strong></td><td>Thù địch, Nether</td></tr>
+  <tr><td>62</td><td>Marker</td><td>—</td><td>63</td><td>Minecart</td><td>—</td></tr>
+  <tr><td>64</td><td>Mooshroom</td><td>—</td><td>65</td><td>Mule</td><td>Cưỡi được</td></tr>
+  <tr><td>66</td><td>Ocelot</td><td>—</td><td>67</td><td>Painting</td><td>—</td></tr>
+  <tr><td>68</td><td>Panda</td><td>—</td><td>69</td><td>Parrot</td><td>—</td></tr>
+  <tr><td>70</td><td><strong>Phantom</strong></td><td>Thù địch</td><td>71</td><td>Pig</td><td>Thức ăn</td></tr>
+  <tr><td>72</td><td>Piglin</td><td>Neutral</td><td>73</td><td><strong>Piglin Brute</strong></td><td>Thù địch, Nether</td></tr>
+  <tr><td>74</td><td><strong>Pillager</strong></td><td>Thù địch, cướp</td><td>75</td><td>Polar Bear</td><td>Neutral</td></tr>
+  <tr><td>76</td><td>Potion</td><td>—</td><td>77</td><td>Pufferfish</td><td>—</td></tr>
+  <tr><td>78</td><td>Rabbit</td><td>—</td><td>79</td><td><strong>Ravager</strong></td><td>Thù địch, cướp</td></tr>
+  <tr><td>80</td><td>Salmon</td><td>—</td><td>81</td><td>Sheep</td><td>Len/thịt</td></tr>
+  <tr><td>82</td><td><strong>Shulker</strong></td><td>Thù địch, End</td><td>83</td><td>Shulker Bullet</td><td>—</td></tr>
+  <tr><td>84</td><td><strong>Silverfish</strong></td><td>Thù địch</td><td>85</td><td><strong>Skeleton</strong></td><td>Thù địch, bắn</td></tr>
+  <tr><td>86</td><td>Skeleton Horse</td><td>—</td><td>87</td><td><strong>Slime</strong></td><td>Thù địch</td></tr>
+  <tr><td>88</td><td>Small Fireball</td><td>—</td><td>89</td><td>Sniffer</td><td>—</td></tr>
+  <tr><td>90</td><td>Snow Golem</td><td>—</td><td>91</td><td>Snowball</td><td>—</td></tr>
+  <tr><td>92</td><td><strong>Spider</strong></td><td>Thù địch</td><td>93</td><td>Spectral Arrow</td><td>—</td></tr>
+  <tr><td>94</td><td>Squid</td><td>—</td><td>95</td><td><strong>Stray</strong></td><td>Thù địch</td></tr>
+  <tr><td>96</td><td>Strider</td><td>Nether, cưỡi được</td><td>97</td><td>Tadpole</td><td>—</td></tr>
+  <tr><td>98</td><td>Text Display</td><td>—</td><td>99</td><td>TNT</td><td>Đã kích hoạt</td></tr>
+  <tr><td>100</td><td>Trader Llama</td><td>—</td><td>101</td><td>Trident</td><td>—</td></tr>
+  <tr><td>102</td><td>Tropical Fish</td><td>—</td><td>103</td><td>Turtle</td><td>—</td></tr>
+  <tr><td>104</td><td><strong>Vex</strong></td><td>Thù địch</td><td>105</td><td>Villager</td><td>Giao dịch</td></tr>
+  <tr><td>106</td><td><strong>Vindicator</strong></td><td>Thù địch</td><td>107</td><td>Wandering Trader</td><td>—</td></tr>
+  <tr><td>108</td><td><strong>Warden</strong></td><td>Thù địch, mù</td><td>109</td><td>Wind Charge</td><td>—</td></tr>
+  <tr><td>110</td><td><strong>Witch</strong></td><td>Thù địch</td><td>111</td><td><strong>Wither</strong></td><td><strong>Boss</strong></td></tr>
+  <tr><td>112</td><td><strong>Wither Skeleton</strong></td><td>Thù địch, Nether</td><td>113</td><td>Wither Skull</td><td>—</td></tr>
+  <tr><td>114</td><td>Wolf</td><td>Neutral</td><td>115</td><td><strong>Zoglin</strong></td><td>Thù địch</td></tr>
+  <tr><td>116</td><td><strong>Zombie</strong></td><td>Thù địch, phổ biến</td><td>117</td><td>Zombie Horse</td><td>—</td></tr>
+  <tr><td>118</td><td><strong>Zombie Villager</strong></td><td>Thù địch</td><td>119</td><td>Zombified Piglin</td><td>Neutral, Nether</td></tr>
 </table>
+<p>Ô trống = toàn 0 <code>[0, 0, 0, 0, 0, 0, 0, 0]</code>. Đậm = thù địch.</p>
 `
     },
     {
@@ -1305,6 +1545,162 @@ SECTIONS['registry'] = {
   <tr><td>minecraft:cooked_porkchop</td><td>Thịt heo chín</td></tr>
   <tr><td>minecraft:cooked_chicken</td><td>Gà chín</td></tr>
   <tr><td>minecraft:carrot</td><td>Cà rốt</td></tr>
+</table>
+`
+    },
+    {
+      id: 'registry.screens',
+      title: 'Màn Hình UI',
+      content: `
+<h2 id="screen-ids">Danh Sách Màn Hình UI</h2>
+<p>Giá trị trả về trong <code>screen.id</code> khi UI đang mở.</p>
+
+<table>
+  <tr><th>Screen ID</th><th>Màn hình</th></tr>
+  <tr><td><code>minecraft:title</code></td><td>Màn hình tiêu đề</td></tr>
+  <tr><td><code>minecraft:select_world</code></td><td>Chọn world</td></tr>
+  <tr><td><code>minecraft:multiplayer</code></td><td>Danh sách server</td></tr>
+  <tr><td><code>minecraft:inventory</code></td><td>Túi đồ</td></tr>
+  <tr><td><code>minecraft:creative_inventory</code></td><td>Creative menu</td></tr>
+  <tr><td><code>minecraft:crafting</code></td><td>Bàn chế tạo</td></tr>
+  <tr><td><code>minecraft:furnace</code></td><td>Lò nung</td></tr>
+  <tr><td><code>minecraft:blast_furnace</code></td><td>Lò luyện</td></tr>
+  <tr><td><code>minecraft:smoker</code></td><td>Lò xông khói</td></tr>
+  <tr><td><code>minecraft:brewing_stand</code></td><td>Bàn pha chế</td></tr>
+  <tr><td><code>minecraft:enchantment</code></td><td>Bàn phù phép</td></tr>
+  <tr><td><code>minecraft:anvil</code></td><td>Đe</td></tr>
+  <tr><td><code>minecraft:grindstone</code></td><td>Đá mài</td></tr>
+  <tr><td><code>minecraft:cartography_table</code></td><td>Bàn bản đồ</td></tr>
+  <tr><td><code>minecraft:stonecutter</code></td><td>Máy cắt đá</td></tr>
+  <tr><td><code>minecraft:loom</code></td><td>Khung dệt</td></tr>
+  <tr><td><code>minecraft:smithing</code></td><td>Bàn rèn</td></tr>
+  <tr><td><code>minecraft:villager_trades</code></td><td>Trao đổi với dân</td></tr>
+  <tr><td><code>minecraft:horse_inventory</code></td><td>Túi ngựa</td></tr>
+  <tr><td><code>minecraft:container</code></td><td>Rương/thùng/shulker</td></tr>
+  <tr><td><code>minecraft:pause</code></td><td>Menu tạm dừng</td></tr>
+  <tr><td><code>minecraft:death</code></td><td>Màn hình chết</td></tr>
+  <tr><td><code>minecraft:options</code></td><td>Tùy chọn</td></tr>
+  <tr><td><code>minecraft:video_settings</code></td><td>Cài đặt video</td></tr>
+  <tr><td><code>minecraft:sound_settings</code></td><td>Cài đặt âm thanh</td></tr>
+  <tr><td><code>minecraft:controls</code></td><td>Điều khiển</td></tr>
+  <tr><td><code>minecraft:keybinds</code></td><td>Phím tắt</td></tr>
+  <tr><td><code>minecraft:language</code></td><td>Ngôn ngữ</td></tr>
+  <tr><td><code>minecraft:advancements</code></td><td>Tiến trình</td></tr>
+  <tr><td><code>minecraft:recipe_book</code></td><td>Sổ công thức</td></tr>
+  <tr><td><code>minecraft:credits</code></td><td>Credit cuối game</td></tr>
+  <tr><td><code>minecraft:create_world</code></td><td>Tạo world mới</td></tr>
+  <tr><td><code>minecraft:edit_world</code></td><td>Sửa world</td></tr>
+  <tr><td><code>minecraft:realms</code></td><td>Realms</td></tr>
+  <tr><td><code>minecraft:world_loading</code></td><td>Đang tải world</td></tr>
+  <tr><td><code>minecraft:jigsaw</code></td><td>Block jigsaw</td></tr>
+  <tr><td><code>minecraft:structure_block</code></td><td>Block cấu trúc</td></tr>
+</table>
+`
+    },
+    {
+      id: 'registry.keys',
+      title: 'Danh Sách Phím',
+      content: `
+<h2 id="key-aliases">Danh Sách Phím (Key Aliases)</h2>
+<p>Dùng trong action <code>{"type":"key","keys":["bí_danh1","bí_danh2"]}</code>. Có thể gửi nhiều phím cùng lúc (VD: <code>["w","ctrl"]</code> để chạy).</p>
+
+<h3>Chữ & Số</h3>
+<table>
+  <tr><th>Bí danh</th><th>Phím</th></tr>
+  <tr><td><code>a</code>–<code>z</code></td><td>Chữ cái thường</td></tr>
+  <tr><td><code>0</code>–<code>9</code></td><td>Phím số trên hàng trên</td></tr>
+  <tr><td><code>1</code>–<code>9</code></td><td>Ô nóng (hotbar) 1–9</td></tr>
+</table>
+
+<h3>Di Chuyển</h3>
+<table>
+  <tr><th>Bí danh</th><th>Tác dụng</th></tr>
+  <tr><td><code>w</code></td><td>Đi tới</td></tr>
+  <tr><td><code>s</code></td><td>Đi lùi</td></tr>
+  <tr><td><code>a</code></td><td>Trái</td></tr>
+  <tr><td><code>d</code></td><td>Phải</td></tr>
+  <tr><td><code>space</code></td><td>Nhảy</td></tr>
+  <tr><td><code>shift</code></td><td>Ngồi (sneak)</td></tr>
+  <tr><td><code>ctrl</code></td><td>Chạy (sprint)</td></tr>
+  <tr><td><code>q</code></td><td>Ném/vứt đồ đang cầm</td></tr>
+  <tr><td><code>e</code></td><td>Mở/đóng túi đồ</td></tr>
+  <tr><td><code>f</code></td><td>Đổi tay / đặt block</td></tr>
+</table>
+
+<h3>Bổ Trợ (Modifier)</h3>
+<table>
+  <tr><th>Bí danh</th><th>Phím</th></tr>
+  <tr><td><code>shift</code></td><td>Shift (ngồi)</td></tr>
+  <tr><td><code>ctrl</code></td><td>Control (chạy)</td></tr>
+  <tr><td><code>alt</code></td><td>Alt</td></tr>
+</table>
+
+<h3>Phím Chức Năng (F-keys)</h3>
+<table>
+  <tr><th>Bí danh</th><th>Tác dụng</th></tr>
+  <tr><td><code>f1</code>–<code>f25</code></td><td>Tất cả phím chức năng F1–F25</td></tr>
+  <tr><td><code>f2</code></td><td>Chụp màn hình</td></tr>
+  <tr><td><code>f3</code></td><td>Màn hình debug</td></tr>
+  <tr><td><code>f5</code></td><td>Đổi góc nhìn</td></tr>
+  <tr><td><code>f11</code></td><td>Toàn màn hình</td></tr>
+</table>
+
+<h3>Chuột</h3>
+<table>
+  <tr><th>Bí danh</th><th>Nút</th></tr>
+  <tr><td><code>mouse_left</code></td><td>Trái (tấn công/phá)</td></tr>
+  <tr><td><code>mouse_right</code></td><td>Phải (tương tác/dùng)</td></tr>
+  <tr><td><code>mouse_middle</code></td><td>Giữa (pick block)</td></tr>
+</table>
+
+<h3>Điều Hướng</h3>
+<table>
+  <tr><th>Bí danh</th><th>Phím</th></tr>
+  <tr><td><code>esc</code></td><td>Thoát / đóng màn hình</td></tr>
+  <tr><td><code>tab</code></td><td>Tab (chuyển ô)</td></tr>
+  <tr><td><code>enter</code></td><td>Enter / Xuống dòng</td></tr>
+  <tr><td><code>backspace</code></td><td>Xóa lùi</td></tr>
+  <tr><td><code>delete</code></td><td>Xóa</td></tr>
+  <tr><td><code>up</code></td><td>Mũi tên Lên</td></tr>
+  <tr><td><code>down</code></td><td>Mũi tên Xuống</td></tr>
+  <tr><td><code>left</code></td><td>Mũi tên Trái</td></tr>
+  <tr><td><code>right</code></td><td>Mũi tên Phải</td></tr>
+</table>
+
+<h3>Numpad</h3>
+<table>
+  <tr><th>Bí danh</th><th>Phím</th></tr>
+  <tr><td><code>numpad0</code>–<code>numpad9</code></td><td>Số trên numpad</td></tr>
+  <tr><td><code>numpad_add</code></td><td>Numpad +</td></tr>
+  <tr><td><code>numpad_sub</code></td><td>Numpad -</td></tr>
+  <tr><td><code>numpad_mul</code></td><td>Numpad *</td></tr>
+  <tr><td><code>numpad_div</code></td><td>Numpad /</td></tr>
+  <tr><td><code>numpad_enter</code></td><td>Numpad Enter</td></tr>
+</table>
+<p><strong>Lưu ý:</strong> Tên phím không phân biệt hoa thường. Thêm <code>duration</code> (ms) để giữ phím.</p>
+`
+    },
+    {
+      id: 'registry.actions',
+      title: 'Loại Hành Động',
+      content: `
+<h2 id="action-types">Tất Cả Loại Hành Động</h2>
+<p>12 loại action cho <code>POST /action</code> và <code>POST /step</code>.</p>
+
+<table>
+  <tr><th>Type</th><th>Bắt buộc</th><th>Tùy chọn</th><th>Tác dụng</th></tr>
+  <tr><td><code>key</code></td><td><code>keys: string[]</code></td><td><code>duration: int</code> (ms)</td><td>Nhấn phím (tap nếu không có duration, giữ+nả nếu có). Có thể nhấn nhiều phím cùng lúc.</td></tr>
+  <tr><td><code>select_slot</code></td><td><code>slot: int</code> (0–8)</td><td>—</td><td>Chuyển ô hotbar.</td></tr>
+  <tr><td><code>place</code></td><td>—</td><td><code>face: string</code> (up/down/north/south/west/east)</td><td>Đặt block vào mặt của block đang nhắm. Mặc định: up.</td></tr>
+  <tr><td><code>break</code></td><td>—</td><td>—</td><td>Đào block đang nhắm (survival: gửi gói start destroy).</td></tr>
+  <tr><td><code>interact</code></td><td>—</td><td>—</td><td>Click phải vào block (mở rương, bấm nút, v.v.).</td></tr>
+  <tr><td><code>jump</code></td><td>—</td><td>—</td><td>Nhảy.</td></tr>
+  <tr><td><code>swing</code></td><td>—</td><td>—</td><td>Vung tay (chỉ hiển thị, không tương tác).</td></tr>
+  <tr><td><code>look</code></td><td>—</td><td><code>yaw</code>/<code>pitch</code> (tuyệt đối) hoặc <code>deltaYaw</code>/<code>deltaPitch</code> (tương đối)</td><td>Xoay camera. Giá trị tuyệt đối ghi đè tương đối; pitch bị kẹp ±90.</td></tr>
+  <tr><td><code>craft</code></td><td><code>recipe: string</code></td><td><code>mode: string</code> (dự trữ)</td><td>Mở khóa và nhận công thức qua <code>/recipe give</code>.</td></tr>
+  <tr><td><code>chat</code></td><td><code>message: string</code></td><td>—</td><td>Phát sóng tin nhắn hệ thống tới toàn bộ người chơi.</td></tr>
+  <tr><td><code>command</code></td><td><code>command: string</code></td><td>—</td><td>Chạy lệnh server (không có dấu <code>/</code> ở đầu).</td></tr>
+  <tr><td><code>click_button</code></td><td><code>button_text: string</code></td><td>—</td><td>Click vào nút trên màn hình có chứa chữ.</td></tr>
 </table>
 `
     }

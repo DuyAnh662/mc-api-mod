@@ -1452,49 +1452,72 @@ SECTIONS['registry'] = {
       id: 'registry.entities',
       title: 'Entity IDs',
       content: `
-<h2 id="entity-ids">Entity Registry (Numeric IDs)</h2>
+<h2 id="entity-ids">Entity Registry — Complete 0–119</h2>
+<p>Entity type IDs are stable across sessions (unlike block/item IDs). Values from 0 (empty) to 119.</p>
 <table>
-  <tr><th>ID</th><th>Entity</th><th>Hostile?</th></tr>
-  <tr><td>0</td><td>Allay</td><td>No</td></tr>
-  <tr><td>4</td><td>Arrow</td><td>No</td></tr>
-  <tr><td>8</td><td><strong>Blaze</strong></td><td><strong>Yes</strong></td></tr>
-  <tr><td>12</td><td>Breeze</td><td><strong>Yes</strong></td></tr>
-  <tr><td>14</td><td>Cat</td><td>No</td></tr>
-  <tr><td>16</td><td>Cave Spider</td><td><strong>Yes</strong></td></tr>
-  <tr><td>19</td><td>Chicken</td><td>No</td></tr>
-  <tr><td>21</td><td>Cow</td><td>No</td></tr>
-  <tr><td>22</td><td><strong>Creeper</strong></td><td><strong>Yes</strong></td></tr>
-  <tr><td>26</td><td>Drowned</td><td><strong>Yes</strong></td></tr>
-  <tr><td>30</td><td><strong>Ender Dragon</strong></td><td><strong>Yes</strong> (Boss)</td></tr>
-  <tr><td>32</td><td>Enderman</td><td>Neutral</td></tr>
-  <tr><td>44</td><td><strong>Ghast</strong></td><td><strong>Yes</strong></td></tr>
-  <tr><td>49</td><td>Guardian</td><td><strong>Yes</strong></td></tr>
-  <tr><td>50</td><td><strong>Hoglin</strong></td><td><strong>Yes</strong></td></tr>
-  <tr><td>52</td><td>Horse</td><td>No</td></tr>
-  <tr><td>56</td><td>Iron Golem</td><td>Neutral</td></tr>
-  <tr><td>60</td><td>Item Frame</td><td>No</td></tr>
-  <tr><td>64</td><td>Mooshroom</td><td>No</td></tr>
-  <tr><td>68</td><td>Panda</td><td>No</td></tr>
-  <tr><td>70</td><td>Phantom</td><td><strong>Yes</strong></td></tr>
-  <tr><td>71</td><td>Pig</td><td>No</td></tr>
-  <tr><td>72</td><td>Piglin</td><td>Neutral</td></tr>
-  <tr><td>73</td><td>Piglin Brute</td><td><strong>Yes</strong></td></tr>
-  <tr><td>74</td><td><strong>Pillager</strong></td><td><strong>Yes</strong></td></tr>
-  <tr><td>78</td><td>Rabbit</td><td>No</td></tr>
-  <tr><td>81</td><td>Sheep</td><td>No</td></tr>
-  <tr><td>85</td><td><strong>Skeleton</strong></td><td><strong>Yes</strong></td></tr>
-  <tr><td>87</td><td>Slime</td><td><strong>Yes</strong></td></tr>
-  <tr><td>92</td><td>Spider</td><td><strong>Yes</strong></td></tr>
-  <tr><td>95</td><td>Stray</td><td><strong>Yes</strong></td></tr>
-  <tr><td>96</td><td>Strider</td><td>No</td></tr>
-  <tr><td>105</td><td>Villager</td><td>No</td></tr>
-  <tr><td>108</td><td><strong>Warden</strong></td><td><strong>Yes</strong></td></tr>
-  <tr><td>110</td><td>Witch</td><td><strong>Yes</strong></td></tr>
-  <tr><td>111</td><td><strong>Wither</strong></td><td><strong>Yes</strong> (Boss)</td></tr>
-  <tr><td>116</td><td><strong>Zombie</strong></td><td><strong>Yes</strong></td></tr>
-  <tr><td>119</td><td>Zombified Piglin</td><td>Neutral</td></tr>
+  <tr><th>ID</th><th>Entity</th><th>Notes</th><th>ID</th><th>Entity</th><th>Notes</th></tr>
+  <tr><td>0</td><td>Allay</td><td>—</td><td>1</td><td>Area Effect Cloud</td><td>—</td></tr>
+  <tr><td>2</td><td>Armadillo</td><td>—</td><td>3</td><td>Armor Stand</td><td>—</td></tr>
+  <tr><td>4</td><td>Arrow</td><td>Projectile</td><td>5</td><td>Axolotl</td><td>—</td></tr>
+  <tr><td>6</td><td>Bat</td><td>—</td><td>7</td><td>Bee</td><td>Neutral</td></tr>
+  <tr><td>8</td><td><strong>Blaze</strong></td><td>Hostile, Nether</td><td>9</td><td>Block Display</td><td>—</td></tr>
+  <tr><td>10</td><td>Boat</td><td>—</td><td>11</td><td><strong>Bogged</strong></td><td>Hostile</td></tr>
+  <tr><td>12</td><td><strong>Breeze</strong></td><td>Hostile</td><td>13</td><td>Breeze Wind Charge</td><td>—</td></tr>
+  <tr><td>14</td><td>Cat</td><td>—</td><td>15</td><td>Camel</td><td>—</td></tr>
+  <tr><td>16</td><td><strong>Cave Spider</strong></td><td>Hostile</td><td>17</td><td>Chest Boat</td><td>—</td></tr>
+  <tr><td>18</td><td>Chest Minecart</td><td>—</td><td>19</td><td>Chicken</td><td>Food source</td></tr>
+  <tr><td>20</td><td>Cod</td><td>—</td><td>21</td><td>Cow</td><td>Food/leather</td></tr>
+  <tr><td>22</td><td><strong>Creeper</strong></td><td>Hostile, explodes</td><td>23</td><td>Dolphin</td><td>—</td></tr>
+  <tr><td>24</td><td>Donkey</td><td>Rideable</td><td>25</td><td>Dragon Fireball</td><td>—</td></tr>
+  <tr><td>26</td><td><strong>Drowned</strong></td><td>Hostile</td><td>27</td><td>Egg</td><td>—</td></tr>
+  <tr><td>28</td><td><strong>Elder Guardian</strong></td><td>Hostile</td><td>29</td><td>End Crystal</td><td>—</td></tr>
+  <tr><td>30</td><td><strong>Ender Dragon</strong></td><td><strong>Boss</strong></td><td>31</td><td>Ender Pearl</td><td>—</td></tr>
+  <tr><td>32</td><td>Enderman</td><td>Neutral</td><td>33</td><td>Endermite</td><td>Neutral</td></tr>
+  <tr><td>34</td><td><strong>Evoker</strong></td><td>Hostile</td><td>35</td><td>Evoker Fangs</td><td>—</td></tr>
+  <tr><td>36</td><td>Experience Bottle</td><td>—</td><td>37</td><td>Experience Orb</td><td>—</td></tr>
+  <tr><td>38</td><td>Eye of Ender</td><td>—</td><td>39</td><td>Falling Block</td><td>—</td></tr>
+  <tr><td>40</td><td>Firework Rocket</td><td>—</td><td>41</td><td>Fox</td><td>—</td></tr>
+  <tr><td>42</td><td>Frog</td><td>—</td><td>43</td><td>Furnace Minecart</td><td>—</td></tr>
+  <tr><td>44</td><td><strong>Ghast</strong></td><td>Hostile, Nether</td><td>45</td><td><strong>Giant</strong></td><td>Hostile</td></tr>
+  <tr><td>46</td><td>Glow Item Frame</td><td>—</td><td>47</td><td>Glow Squid</td><td>—</td></tr>
+  <tr><td>48</td><td>Goat</td><td>—</td><td>49</td><td><strong>Guardian</strong></td><td>Hostile, water</td></tr>
+  <tr><td>50</td><td><strong>Hoglin</strong></td><td>Hostile, Nether</td><td>51</td><td>Hopper Minecart</td><td>—</td></tr>
+  <tr><td>52</td><td>Horse</td><td>Rideable</td><td>53</td><td><strong>Husk</strong></td><td>Hostile</td></tr>
+  <tr><td>54</td><td><strong>Illusioner</strong></td><td>Hostile</td><td>55</td><td>Interaction</td><td>—</td></tr>
+  <tr><td>56</td><td>Iron Golem</td><td>Neutral</td><td>57</td><td>Item (dropped)</td><td>—</td></tr>
+  <tr><td>58</td><td>Item Display</td><td>—</td><td>59</td><td>Item Frame</td><td>—</td></tr>
+  <tr><td>60</td><td>Llama</td><td>Carries chests</td><td>61</td><td><strong>Magma Cube</strong></td><td>Hostile, Nether</td></tr>
+  <tr><td>62</td><td>Marker</td><td>—</td><td>63</td><td>Minecart</td><td>—</td></tr>
+  <tr><td>64</td><td>Mooshroom</td><td>—</td><td>65</td><td>Mule</td><td>Rideable</td></tr>
+  <tr><td>66</td><td>Ocelot</td><td>—</td><td>67</td><td>Painting</td><td>—</td></tr>
+  <tr><td>68</td><td>Panda</td><td>—</td><td>69</td><td>Parrot</td><td>—</td></tr>
+  <tr><td>70</td><td><strong>Phantom</strong></td><td>Hostile</td><td>71</td><td>Pig</td><td>Food source</td></tr>
+  <tr><td>72</td><td>Piglin</td><td>Neutral</td><td>73</td><td><strong>Piglin Brute</strong></td><td>Hostile, Nether</td></tr>
+  <tr><td>74</td><td><strong>Pillager</strong></td><td>Hostile, raids</td><td>75</td><td>Polar Bear</td><td>Neutral</td></tr>
+  <tr><td>76</td><td>Potion</td><td>—</td><td>77</td><td>Pufferfish</td><td>—</td></tr>
+  <tr><td>78</td><td>Rabbit</td><td>—</td><td>79</td><td><strong>Ravager</strong></td><td>Hostile, raids</td></tr>
+  <tr><td>80</td><td>Salmon</td><td>—</td><td>81</td><td>Sheep</td><td>Wool/mutton</td></tr>
+  <tr><td>82</td><td><strong>Shulker</strong></td><td>Hostile, End</td><td>83</td><td>Shulker Bullet</td><td>—</td></tr>
+  <tr><td>84</td><td><strong>Silverfish</strong></td><td>Hostile</td><td>85</td><td><strong>Skeleton</strong></td><td>Hostile, ranged</td></tr>
+  <tr><td>86</td><td>Skeleton Horse</td><td>—</td><td>87</td><td><strong>Slime</strong></td><td>Hostile</td></tr>
+  <tr><td>88</td><td>Small Fireball</td><td>—</td><td>89</td><td>Sniffer</td><td>—</td></tr>
+  <tr><td>90</td><td>Snow Golem</td><td>—</td><td>91</td><td>Snowball</td><td>—</td></tr>
+  <tr><td>92</td><td><strong>Spider</strong></td><td>Hostile</td><td>93</td><td>Spectral Arrow</td><td>—</td></tr>
+  <tr><td>94</td><td>Squid</td><td>—</td><td>95</td><td><strong>Stray</strong></td><td>Hostile</td></tr>
+  <tr><td>96</td><td>Strider</td><td>Nether, rideable</td><td>97</td><td>Tadpole</td><td>—</td></tr>
+  <tr><td>98</td><td>Text Display</td><td>—</td><td>99</td><td>TNT</td><td>Primed</td></tr>
+  <tr><td>100</td><td>Trader Llama</td><td>—</td><td>101</td><td>Trident</td><td>—</td></tr>
+  <tr><td>102</td><td>Tropical Fish</td><td>—</td><td>103</td><td>Turtle</td><td>—</td></tr>
+  <tr><td>104</td><td><strong>Vex</strong></td><td>Hostile</td><td>105</td><td>Villager</td><td>Trading</td></tr>
+  <tr><td>106</td><td><strong>Vindicator</strong></td><td>Hostile</td><td>107</td><td>Wandering Trader</td><td>—</td></tr>
+  <tr><td>108</td><td><strong>Warden</strong></td><td>Hostile, blind</td><td>109</td><td>Wind Charge</td><td>—</td></tr>
+  <tr><td>110</td><td><strong>Witch</strong></td><td>Hostile</td><td>111</td><td><strong>Wither</strong></td><td><strong>Boss</strong></td></tr>
+  <tr><td>112</td><td><strong>Wither Skeleton</strong></td><td>Hostile, Nether</td><td>113</td><td>Wither Skull</td><td>—</td></tr>
+  <tr><td>114</td><td>Wolf</td><td>Neutral</td><td>115</td><td><strong>Zoglin</strong></td><td>Hostile</td></tr>
+  <tr><td>116</td><td><strong>Zombie</strong></td><td>Hostile, common</td><td>117</td><td>Zombie Horse</td><td>—</td></tr>
+  <tr><td>118</td><td><strong>Zombie Villager</strong></td><td>Hostile</td><td>119</td><td>Zombified Piglin</td><td>Neutral, Nether</td></tr>
 </table>
-<p>Full 0-127 entity list available in the <code>MC_1.21.11_REGISTRY_REFERENCE.md</code> file.</p>
+<p>Empty slot = all zeros <code>[0, 0, 0, 0, 0, 0, 0, 0]</code>. Bold = hostile toward player.</p>
 `
     },
     {
@@ -1594,6 +1617,162 @@ SECTIONS['registry'] = {
   <tr><td>minecraft:cooked_chicken</td><td>Cooked Chicken</td></tr>
   <tr><td>minecraft:carrot</td><td>Carrot</td></tr>
   <tr><td>minecraft:baked_potato</td><td>Baked Potato</td></tr>
+</table>
+`
+    },
+    {
+      id: 'registry.screens',
+      title: 'Screen IDs',
+      content: `
+<h2 id="screen-ids">Screen ID Reference</h2>
+<p>Identifiers returned in <code>screen.id</code> when a UI is open.</p>
+
+<table>
+  <tr><th>Screen ID</th><th>Screen</th></tr>
+  <tr><td><code>minecraft:title</code></td><td>Title screen</td></tr>
+  <tr><td><code>minecraft:select_world</code></td><td>World selection</td></tr>
+  <tr><td><code>minecraft:multiplayer</code></td><td>Server list</td></tr>
+  <tr><td><code>minecraft:inventory</code></td><td>Player inventory</td></tr>
+  <tr><td><code>minecraft:creative_inventory</code></td><td>Creative menu</td></tr>
+  <tr><td><code>minecraft:crafting</code></td><td>Crafting table</td></tr>
+  <tr><td><code>minecraft:furnace</code></td><td>Furnace</td></tr>
+  <tr><td><code>minecraft:blast_furnace</code></td><td>Blast furnace</td></tr>
+  <tr><td><code>minecraft:smoker</code></td><td>Smoker</td></tr>
+  <tr><td><code>minecraft:brewing_stand</code></td><td>Brewing stand</td></tr>
+  <tr><td><code>minecraft:enchantment</code></td><td>Enchantment table</td></tr>
+  <tr><td><code>minecraft:anvil</code></td><td>Anvil</td></tr>
+  <tr><td><code>minecraft:grindstone</code></td><td>Grindstone</td></tr>
+  <tr><td><code>minecraft:cartography_table</code></td><td>Cartography table</td></tr>
+  <tr><td><code>minecraft:stonecutter</code></td><td>Stonecutter</td></tr>
+  <tr><td><code>minecraft:loom</code></td><td>Loom</td></tr>
+  <tr><td><code>minecraft:smithing</code></td><td>Smithing table</td></tr>
+  <tr><td><code>minecraft:villager_trades</code></td><td>Villager trading</td></tr>
+  <tr><td><code>minecraft:horse_inventory</code></td><td>Horse inventory</td></tr>
+  <tr><td><code>minecraft:container</code></td><td>Chest/barrel/shulker</td></tr>
+  <tr><td><code>minecraft:pause</code></td><td>Pause menu</td></tr>
+  <tr><td><code>minecraft:death</code></td><td>Death screen</td></tr>
+  <tr><td><code>minecraft:options</code></td><td>Options</td></tr>
+  <tr><td><code>minecraft:video_settings</code></td><td>Video settings</td></tr>
+  <tr><td><code>minecraft:sound_settings</code></td><td>Sound settings</td></tr>
+  <tr><td><code>minecraft:controls</code></td><td>Controls</td></tr>
+  <tr><td><code>minecraft:keybinds</code></td><td>Key binds</td></tr>
+  <tr><td><code>minecraft:language</code></td><td>Language</td></tr>
+  <tr><td><code>minecraft:advancements</code></td><td>Advancements</td></tr>
+  <tr><td><code>minecraft:recipe_book</code></td><td>Recipe book</td></tr>
+  <tr><td><code>minecraft:credits</code></td><td>End credits</td></tr>
+  <tr><td><code>minecraft:create_world</code></td><td>Create new world</td></tr>
+  <tr><td><code>minecraft:edit_world</code></td><td>Edit world settings</td></tr>
+  <tr><td><code>minecraft:realms</code></td><td>Realms</td></tr>
+  <tr><td><code>minecraft:world_loading</code></td><td>World loading screen</td></tr>
+  <tr><td><code>minecraft:jigsaw</code></td><td>Jigsaw block</td></tr>
+  <tr><td><code>minecraft:structure_block</code></td><td>Structure block</td></tr>
+</table>
+`
+    },
+    {
+      id: 'registry.keys',
+      title: 'Key Aliases',
+      content: `
+<h2 id="key-aliases">Key Alias Reference</h2>
+<p>Use in <code>{"type":"key","keys":["alias1","alias2"]}</code>. Supports multi-key (e.g. <code>["w","ctrl"]</code> for sprint).</p>
+
+<h3>Letters & Numbers</h3>
+<table>
+  <tr><th>Alias</th><th>Key</th></tr>
+  <tr><td><code>a</code>–<code>z</code></td><td>Letter keys (lowercase)</td></tr>
+  <tr><td><code>0</code>–<code>9</code></td><td>Number row keys</td></tr>
+  <tr><td><code>1</code>–<code>9</code></td><td>Hotbar slots 1–9</td></tr>
+</table>
+
+<h3>Movement</h3>
+<table>
+  <tr><th>Alias</th><th>Action</th></tr>
+  <tr><td><code>w</code></td><td>Walk forward</td></tr>
+  <tr><td><code>s</code></td><td>Walk backward</td></tr>
+  <tr><td><code>a</code></td><td>Strafe left</td></tr>
+  <tr><td><code>d</code></td><td>Strafe right</td></tr>
+  <tr><td><code>space</code></td><td>Jump</td></tr>
+  <tr><td><code>shift</code></td><td>Sneak</td></tr>
+  <tr><td><code>ctrl</code></td><td>Sprint</td></tr>
+  <tr><td><code>q</code></td><td>Drop held item</td></tr>
+  <tr><td><code>e</code></td><td>Open/close inventory</td></tr>
+  <tr><td><code>f</code></td><td>Swap offhand / place</td></tr>
+</table>
+
+<h3>Modifier</h3>
+<table>
+  <tr><th>Alias</th><th>Modifier</th></tr>
+  <tr><td><code>shift</code></td><td>Shift (sneak)</td></tr>
+  <tr><td><code>ctrl</code></td><td>Control (sprint)</td></tr>
+  <tr><td><code>alt</code></td><td>Alt</td></tr>
+</table>
+
+<h3>Function Keys</h3>
+<table>
+  <tr><th>Alias</th><th>Action</th></tr>
+  <tr><td><code>f1</code>–<code>f25</code></td><td>Function keys F1 through F25</td></tr>
+  <tr><td><code>f2</code></td><td>Screenshot</td></tr>
+  <tr><td><code>f3</code></td><td>Debug screen</td></tr>
+  <tr><td><code>f5</code></td><td>Toggle perspective</td></tr>
+  <tr><td><code>f11</code></td><td>Toggle fullscreen</td></tr>
+</table>
+
+<h3>Mouse</h3>
+<table>
+  <tr><th>Alias</th><th>Button</th></tr>
+  <tr><td><code>mouse_left</code></td><td>Left click (attack/break)</td></tr>
+  <tr><td><code>mouse_right</code></td><td>Right click (use/interact)</td></tr>
+  <tr><td><code>mouse_middle</code></td><td>Middle click (pick block)</td></tr>
+</table>
+
+<h3>Navigation</h3>
+<table>
+  <tr><th>Alias</th><th>Key</th></tr>
+  <tr><td><code>esc</code></td><td>Escape / close screen</td></tr>
+  <tr><td><code>tab</code></td><td>Tab (cycle focus)</td></tr>
+  <tr><td><code>enter</code></td><td>Enter / Return</td></tr>
+  <tr><td><code>backspace</code></td><td>Backspace</td></tr>
+  <tr><td><code>delete</code></td><td>Delete</td></tr>
+  <tr><td><code>up</code></td><td>Arrow up</td></tr>
+  <tr><td><code>down</code></td><td>Arrow down</td></tr>
+  <tr><td><code>left</code></td><td>Arrow left</td></tr>
+  <tr><td><code>right</code></td><td>Arrow right</td></tr>
+</table>
+
+<h3>Numpad</h3>
+<table>
+  <tr><th>Alias</th><th>Key</th></tr>
+  <tr><td><code>numpad0</code>–<code>numpad9</code></td><td>Numpad digits</td></tr>
+  <tr><td><code>numpad_add</code></td><td>Numpad +</td></tr>
+  <tr><td><code>numpad_sub</code></td><td>Numpad -</td></tr>
+  <tr><td><code>numpad_mul</code></td><td>Numpad *</td></tr>
+  <tr><td><code>numpad_div</code></td><td>Numpad /</td></tr>
+  <tr><td><code>numpad_enter</code></td><td>Numpad Enter</td></tr>
+</table>
+<p><strong>Note:</strong> Key names are case-insensitive. Use <code>duration</code> (ms) to hold a key down.</p>
+`
+    },
+    {
+      id: 'registry.actions',
+      title: 'Action Types',
+      content: `
+<h2 id="action-types">Action Types Reference</h2>
+<p>All 12 action types for <code>POST /action</code> and <code>POST /step</code>.</p>
+
+<table>
+  <tr><th>Type</th><th>Required</th><th>Optional</th><th>Effect</th></tr>
+  <tr><td><code>key</code></td><td><code>keys: string[]</code></td><td><code>duration: int</code> (ms)</td><td>Press keys (tap if no duration, hold-and-release if duration set). Supports multi-key combos.</td></tr>
+  <tr><td><code>select_slot</code></td><td><code>slot: int</code> (0–8)</td><td>—</td><td>Switch hotbar slot.</td></tr>
+  <tr><td><code>place</code></td><td>—</td><td><code>face: string</code> (up/down/north/south/west/east)</td><td>Place block on the targeted block's face. Default: up.</td></tr>
+  <tr><td><code>break</code></td><td>—</td><td>—</td><td>Mine the targeted block (survival: sends start destroy packet).</td></tr>
+  <tr><td><code>interact</code></td><td>—</td><td>—</td><td>Right-click the targeted block (open chest, button, etc.).</td></tr>
+  <tr><td><code>jump</code></td><td>—</td><td>—</td><td>Player jumps from ground.</td></tr>
+  <tr><td><code>swing</code></td><td>—</td><td>—</td><td>Swing arm (visual only, no block interaction).</td></tr>
+  <tr><td><code>look</code></td><td>—</td><td><code>yaw</code>/<code>pitch</code> (absolute) or <code>deltaYaw</code>/<code>deltaPitch</code> (relative)</td><td>Set camera direction. Absolute overrides relative; pitch clamped ±90.</td></tr>
+  <tr><td><code>craft</code></td><td><code>recipe: string</code></td><td><code>mode: string</code> (reserved)</td><td>Unlock and give the recipe via <code>/recipe give</code>.</td></tr>
+  <tr><td><code>chat</code></td><td><code>message: string</code></td><td>—</td><td>Broadcast system message to all players.</td></tr>
+  <tr><td><code>command</code></td><td><code>command: string</code></td><td>—</td><td>Execute server command (without leading <code>/</code>).</td></tr>
+  <tr><td><code>click_button</code></td><td><code>button_text: string</code></td><td>—</td><td>Click any on-screen button whose text contains the string.</td></tr>
 </table>
 `
     }
