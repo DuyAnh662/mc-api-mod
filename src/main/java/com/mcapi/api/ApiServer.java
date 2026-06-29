@@ -94,6 +94,7 @@ public class ApiServer {
             server.createContext("/api/cancel", new CancelHandler());
             server.createContext("/api/registry/entities", new RegistryHandler.EntitiesHandler());
             server.createContext("/api/registry/items", new RegistryHandler.ItemsHandler());
+            server.createContext("/api/client/screenshot", new ScreenshotHandler());
 
             // AI-friendly endpoints (OpenAI Gym style)
             server.createContext("/session", new SessionHandler());
@@ -257,6 +258,7 @@ public class ApiServer {
                 endpoints.addProperty("client/input", "POST - Send key inputs (supports all keys)");
                 endpoints.addProperty("client/click_button", "POST - Click a UI button by text");
                 endpoints.addProperty("client/settings", "POST - Change client settings");
+                endpoints.addProperty("client/screenshot", "GET - Capture game screenshot (resizable, returns base64 JPEG)");
                 endpoints.addProperty("client/debug", "GET - Get F3 debug info (fps, biome, xyz, etc.)");
                 endpoints.addProperty("script", "POST - Run multiple commands as a macro script");
                 endpoints.addProperty("cancel", "POST - Cancel all running tasks and held keys");

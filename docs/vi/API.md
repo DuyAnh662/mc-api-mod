@@ -164,6 +164,51 @@ curl -H "Authorization: Bearer <token>" -X GET "http://localhost:25566/api/clien
 curl -X GET "http://localhost:25566/api/client/debug?fields=xyz,biome"
 ```
 
+### 2.5 Chụp màn hình (`GET /api/client/screenshot`)
+Chụp cửa sổ game hiện tại, nén thành JPEG base64, tối ưu cho YOLO object detection.
+
+**Tham số query:**
+| Tham số | Kiểu | Mặc định | Mô tả |
+|---------|------|----------|-------|
+| `width` | int | 640 | Chiều rộng đích (64-1920) |
+| `height` | int | 360 | Chiều cao đích (36-1080) |
+| `quality` | int | 85 | Chất lượng JPEG (10-100) |
+
+**Ví dụ:**
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:25566/api/client/screenshot
+```
+
+**Phản hồi:**
+```json
+{
+  "success": true,
+  "data": {
+    "width": 640,
+    "height": 360,
+    "original_width": 1920,
+    "original_height": 1080,
+    "format": "jpeg",
+    "quality": 85,
+    "image": "/9j/4AAQSkZJRg...base64..."
+  }
+}
+```
+
+Trường `image` là chuỗi JPEG base64. Mặc định (640×360, quality 85) ~30-60 KB (40-80 KB base64).
+
+**Dùng với YOLO bên ngoài (Python):**
+```python
+import requests, base64, cv2, numpy as np
+
+r = requests.get("http://localhost:25566/api/client/screenshot",
+                 headers={"Authorization": "Bearer <token>"})
+img_b64 = r.json()["data"]["image"]
+img_bytes = base64.b64decode(img_b64)
+img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+# Chạy YOLO detection trên img
+```
+
 ---
 
 ## 3. Nhóm Lệnh Player (Điều Khiển Người Chơi)
