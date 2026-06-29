@@ -19,7 +19,7 @@
     "accessWidener": "mcapi.accesswidener",
     "depends": {
         "fabricloader": ">=${loader_version}",
-        "minecraft": ">=1.21.9 <=1.21.11",
+        "minecraft": ">=1.21.6 <=1.21.8",
         "java": ">=21",
         "fabric-api": "*"
     }

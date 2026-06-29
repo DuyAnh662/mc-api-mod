@@ -54,7 +54,7 @@ public class ClientUIHandler implements HttpHandler {
                 if (element instanceof Button button) {
                     String btnText = button.getMessage().getString();
                     if (btnText.contains(targetText)) {
-                        button.onPress(new net.minecraft.client.input.MouseButtonInfo(0, 0));
+                        button.onPress();
                         break;
                     }
                 }

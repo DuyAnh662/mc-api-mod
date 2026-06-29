@@ -43,7 +43,7 @@ public class ClientInputHandler implements HttpHandler {
                 for (InputConstants.Key key : keysToPress) {
                     com.mcapi.api.TaskManager.getInstance().trackKey(key);
                     KeyMapping.set(key, true);
-                    client.keyboardHandler.keyPress(client.getWindow().handle(), 1, new net.minecraft.client.input.KeyEvent(key.getValue(), 0, 0));
+                    client.keyboardHandler.keyPress(client.getWindow().getWindow(), key.getValue(), 0, 1, 0);
                 }
             });
             
@@ -53,7 +53,7 @@ public class ClientInputHandler implements HttpHandler {
                         for (InputConstants.Key key : keysToPress) {
                             com.mcapi.api.TaskManager.getInstance().untrackKey(key);
                             KeyMapping.set(key, false);
-                            client.keyboardHandler.keyPress(client.getWindow().handle(), 0, new net.minecraft.client.input.KeyEvent(key.getValue(), 0, 0));
+                            client.keyboardHandler.keyPress(client.getWindow().getWindow(), key.getValue(), 0, 0, 0);
                         }
                     });
                 }, duration);
@@ -62,7 +62,7 @@ public class ClientInputHandler implements HttpHandler {
                     for (InputConstants.Key key : keysToPress) {
                         com.mcapi.api.TaskManager.getInstance().untrackKey(key);
                         KeyMapping.set(key, false);
-                        client.keyboardHandler.keyPress(client.getWindow().handle(), 0, new net.minecraft.client.input.KeyEvent(key.getValue(), 0, 0));
+                        client.keyboardHandler.keyPress(client.getWindow().getWindow(), key.getValue(), 0, 0, 0);
                     }
                 });
             }

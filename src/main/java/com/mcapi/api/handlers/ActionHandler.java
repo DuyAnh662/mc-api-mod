@@ -82,8 +82,7 @@ public class ActionHandler implements HttpHandler {
             for (InputConstants.Key key : keys) {
                 TaskManager.getInstance().trackKey(key);
                 KeyMapping.set(key, true);
-                client.keyboardHandler.keyPress(client.getWindow().handle(), 1,
-                        new net.minecraft.client.input.KeyEvent(key.getValue(), 0, 0));
+                client.keyboardHandler.keyPress(client.getWindow().getWindow(), key.getValue(), 0, 1, 0);
             }
         });
 
@@ -93,8 +92,7 @@ public class ActionHandler implements HttpHandler {
                     for (InputConstants.Key key : keys) {
                         TaskManager.getInstance().untrackKey(key);
                         KeyMapping.set(key, false);
-                        client.keyboardHandler.keyPress(client.getWindow().handle(), 0,
-                                new net.minecraft.client.input.KeyEvent(key.getValue(), 0, 0));
+                        client.keyboardHandler.keyPress(client.getWindow().getWindow(), key.getValue(), 0, 0, 0);
                     }
                 });
             }, duration);
@@ -103,8 +101,7 @@ public class ActionHandler implements HttpHandler {
                 for (InputConstants.Key key : keys) {
                     TaskManager.getInstance().untrackKey(key);
                     KeyMapping.set(key, false);
-                    client.keyboardHandler.keyPress(client.getWindow().handle(), 0,
-                            new net.minecraft.client.input.KeyEvent(key.getValue(), 0, 0));
+                    client.keyboardHandler.keyPress(client.getWindow().getWindow(), key.getValue(), 0, 0, 0);
                 }
             });
         }
@@ -273,7 +270,7 @@ public class ActionHandler implements HttpHandler {
                 if (element instanceof net.minecraft.client.gui.components.Button button) {
                     String btnText = button.getMessage().getString();
                     if (btnText.contains(buttonText)) {
-                        button.onPress(new net.minecraft.client.input.MouseButtonInfo(0, 0));
+                        button.onPress();
                         break;
                     }
                 }

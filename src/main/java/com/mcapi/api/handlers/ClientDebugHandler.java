@@ -56,11 +56,11 @@ public class ClientDebugHandler implements HttpHandler {
                     data.addProperty("chunkZ", pos.getZ() >> 4);
                 }
                 if (all || contains(requestedFields, "dimension")) {
-                    data.addProperty("dimension", client.level.dimension().identifier().toString());
+                    data.addProperty("dimension", client.level.dimension().location().toString());
                 }
                 if (all || contains(requestedFields, "biome")) {
                     var biomeEntry = client.level.getBiome(pos);
-                    biomeEntry.unwrapKey().ifPresent(key -> data.addProperty("biome", key.identifier().toString()));
+                    biomeEntry.unwrapKey().ifPresent(key -> data.addProperty("biome", key.location().toString()));
                 }
             }
 
