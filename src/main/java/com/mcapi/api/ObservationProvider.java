@@ -123,7 +123,7 @@ public class ObservationProvider {
 
     private static JsonArray emptyViewportBlocks() {
         JsonArray arr = new JsonArray();
-        for (int i = 0; i < VIEWPORT_RAYS; i++) arr.add(0);
+        for (int i = 0; i < VIEWPORT_RAYS; i++) { arr.add(0); arr.add(0); }
         return arr;
     }
 
@@ -317,6 +317,7 @@ public class ObservationProvider {
                 double widthOffset = (w - halfW) * 0.5;
 
                 int depthVal = VIEWPORT_DEPTH;
+                int blockId = 0;
                 for (int d = 0; d < VIEWPORT_DEPTH; d++) {
                     double depth = d + 1;
                     Vec3 samplePos = eyePos
@@ -329,11 +330,13 @@ public class ObservationProvider {
                         BlockState state = level.getBlockState(bp);
                         if (!state.isAir()) {
                             depthVal = d + 1;
+                            blockId = BuiltInRegistries.BLOCK.getId(state.getBlock());
                             break;
                         }
                     }
                 }
                 arr.add(depthVal);
+                arr.add(blockId);
             }
         }
 

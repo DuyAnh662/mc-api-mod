@@ -141,7 +141,7 @@ Số tick game. **20 ticks = 1 giây.** Dùng để:
 ```
 
 - `fov`: góc nhìn hiện tại
-- `matrix`: lưới tia depth-map `viewport_blocks` = `[width=16, height=9]` (144 tia)
+- `matrix`: lưới tia depth-map `viewport_blocks` = `[width=16, height=9]` (288 giá trị = 144 cặp [depth, blockId])
 
 ### 2.7 `inventory` — Đồ Trong Người
 
@@ -198,18 +198,23 @@ Mỗi slot là `[item_id, count]`:
 
 ### 2.9 `viewport_blocks` — Depth-Map
 
-Mảng **144 số nguyên** (16×9 tia). Mỗi giá trị là khoảng cách (1–32 block) tới khối đặc đầu tiên. 32 = không vật cản.
+Mảng **288 số nguyên** = 144 cặp [depth, blockId] (16×9 tia). Mỗi tia output 2 giá trị:
 
-**Thứ tự:** height → width:
 ```
-arr[h * 16 + w] = depth
+arr[(h * 16 + w) * 2]     = depth     (1-32)
+arr[(h * 16 + w) * 2 + 1] = blockId   (ID block, 0 nếu depth=32)
 ```
+
+- **depth 1–31**: khoảng cách tới khối đặc đầu tiên
+- **depth 32**: không vật cản trong tầm (blockId = 0)
+- **blockId ≠ 0**: ID block bề mặt từ `BuiltInRegistries.BLOCK`
 
 **Logic AI:**
-- Giá trị nhỏ (1–3) = tường/va chạm gần → không đi được hướng đó
-- Giá trị lớn (20–32) = đường thoáng → có thể đi
-- Nhiều tia liền kề có giá trị nhỏ → tường/vách đá
-- Giá trị 32 ở trung tâm → đường đi thẳng phía trước
+- depth nhỏ (1–3) = tường/va chạm gần → không đi được hướng đó
+- depth lớn (20–32) = đường thoáng → có thể đi
+- Nhiều tia liền kề có depth nhỏ → tường/vách đá
+- depth 32 ở trung tâm → đường đi thẳng phía trước
+- blockId giúp AI nhận biết loại block (đất, đá, quặng, nước...)
 
 ### 2.10 `viewport_entities` — Sinh Vật Gần Đó
 

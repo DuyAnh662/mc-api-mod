@@ -152,7 +152,7 @@ Minecraft game tick counter. **20 ticks = 1 second.** Use this to:
 - `fov`: current field of view (default 70, can be 30-110)
 - `matrix`: depth-map ray grid of `viewport_blocks` = `[width=16, height=9]` (144 rays)
 
-**AI logic:** The `matrix` tells you the ray grid dimensions. `16×9 = 144` depth rays from your eye position in the direction you're looking.
+**AI logic:** The `matrix` tells you the ray grid dimensions. `16×9 = 144` rays (288 ints = 144 [depth, blockId] pairs) from your eye position.
 
 ### 2.7 `inventory` — What You Carry
 
@@ -234,24 +234,26 @@ Item IDs are numeric (from `BuiltInRegistries.ITEM`). Key item IDs to recognize:
 
 ### 2.9 `viewport_blocks` — Depth-Map Vision
 
-A flat depth-map of **144 integers** (16×9 rays). Each value is the distance in blocks (1–32) to the first non-air block along that ray. 32 means no solid within range.
+A flat array of **288 integers** = 144 [depth, blockId] pairs (16×9 rays). For each ray: depth = distance in blocks (1–32) to first non-air block, blockId = numeric block ID of that surface block (0 if depth = 32).
 
 #### How to read it mentally
 
-The array is ordered: **height-first, then width:**
+The array interleaves depth and blockId per ray:
 ```
 for h = 0..8 (height):
   for w = 0..15 (width):
-      arr[h * 16 + w] = depth
+      arr[(h * 16 + w) * 2]     = depth     (1-32)
+      arr[(h * 16 + w) * 2 + 1] = blockId   (block ID, 0 if depth=32)
 ```
 
 - Height = vertical offset (0 = bottom of frustum, 8 = top)
 - Width = horizontal offset (0 = left edge, 15 = right edge)
 
 #### Practical AI logic:
-1. **Check for walls:** Small values (1–3) across many adjacent rays → wall or cliff ahead
-2. **Find paths:** Rays with large values (20–32) at center → clear path forward
-3. **Avoid danger:** If all values are small → you're boxed in, turn around
+1. **Check for walls:** Small depth values (1–3) across many adjacent rays → wall or cliff ahead
+2. **Identify surface:** Check blockId to know if it's stone (pickaxe), dirt (shovel), water (swim through), etc.
+3. **Find paths:** Rays with depth 20–32 at center → clear path forward
+4. **Avoid danger:** If all depth values are small → you're boxed in, turn around
 2. **Find paths:** Look for columns of air (0) extending from center through all depths → that's an open path
 3. **Detect resources:** Scan for valuable block IDs
 4. **Avoid danger:** If lava blocks (ID ~11) appear up close → move away
@@ -666,7 +668,7 @@ TITLE → select "Singleplayer"
 | `target.block_id` | int | Block I'm aiming at (0=none) |
 | `target.distance` | float | Distance to target |
 | `target.face` | int | Face of targeted block |
-| `viewport_blocks` | [144] | Depth-map: distance (1–32) to nearest solid per ray |
+| `viewport_blocks` | [288] | 144 [depth,blockId] pairs: depth (1–32), blockId of surface (0 if clear) |
 | `viewport_entities[i]` | [type,x,y,z,yaw,pitch,hp,dist] | Nearby entities |
 | `screen.id` | string | Current UI screen (if any) |
 

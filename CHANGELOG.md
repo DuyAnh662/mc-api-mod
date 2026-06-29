@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.2.2 — Depth-Map with Surface Block IDs
+
+### ✨ Enhancements
+
+- **`viewport_blocks` now returns `[depth, blockId]` pairs** — Previously a flat depth-only array (144 ints). Now each of the 144 rays produces two values: depth (1–32 = distance to nearest solid) and the numeric block ID of that surface block (0 if clear). Total 288 ints.
+- AI can now distinguish stone vs. dirt vs. water at each ray without a separate API call.
+
+### 🐛 Bug Fixes
+
+- **Fixed stride in viewport_blocks doc** — Index formula corrected from `depth * 288` to `depth * 144` (each depth layer has 16×9 = 144 cells, not 288).
+- **`viewport_entities` no longer pads empty slots** — Removed 16-slot fixed-size padding. Returns only actual visible entities (0–16 elements).
+
 ## v1.2.1 — Registry Endpoints + Bug Fixes
 
 ### ✨ New Features

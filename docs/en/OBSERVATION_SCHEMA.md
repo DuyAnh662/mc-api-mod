@@ -168,25 +168,25 @@ Currently held hotbar slot.
 
 ### Format
 ```json
-[ depth_0, depth_1, ..., depth_143 ]   // 144 ints
+[ depth_0, blockId_0, depth_1, blockId_1, ..., depth_143, blockId_143 ]   // 288 ints
 ```
 
 ### Structure
-- **144 values** (16 wide × 9 tall), one per ray
-- Each value = distance in blocks (1–32) to the first non-air block along that ray
-- `32` = no solid block within range (clear path)
+- **288 values** = 144 [depth, blockId] pairs (16 wide × 9 tall)
+- Each ray outputs 2 values: depth + blockId of the surface block
 
 ### Index
 ```
-index = height * 16 + width
+depth_index  = (height * 16 + width) * 2
+blockId_index = (height * 16 + width) * 2 + 1
 ```
 where:
 - `height`: 0 (bottom of frustum) to 8 (top)
 - `width`: 0 (left) to 15 (right)
 
 ### Values
-- **1–31**: distance to first solid block
-- **32**: all clear (no solid within 32 blocks) (**dynamic per session**)
+- `depth`: 1–31 = distance to first solid block; 32 = clear
+- `blockId`: numeric block ID at surface (0 if depth = 32) (**dynamic per session**)
 
 ---
 

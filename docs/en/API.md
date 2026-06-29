@@ -553,7 +553,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
 | `target.block_id` | Block ID the crosshair is pointing at |
 | `target.distance` | Distance to targeted block |
 | `target.face` | Face of targeted block (0=Up,1=Down,2=North,3=South,4=East,5=West) |
-| `viewport_blocks` | 144 depth values (16×9 depth-map, 1–32 = distance to nearest solid) |
+| `viewport_blocks` | 288 values = 144 [depth, blockId] pairs (16×9 depth-map) |
 | `viewport_entities` | Visible entities [type_id, relX, relY, relZ, yaw, pitch, health, distance] |
 | `screen` | Current UI screen info (only present when a screen is open) |
 
@@ -692,7 +692,7 @@ Empty slots are represented as `[0, 0]`. This fixed-size design allows direct ma
 
 ### Viewport Blocks
 
-A flat depth-map of **144 integers** (16 wide × 9 tall). Each value is the distance in blocks (1–32) to the first non-air block along that ray. 32 means no solid within range.
+A flat array of **288 integers** = 144 [depth, blockId] pairs (16 wide × 9 tall). For each ray: depth = distance in blocks (1–32) to first non-air block, blockId = numeric block ID of that surface block (0 if depth = 32).
 
 ### Viewport Entities
 

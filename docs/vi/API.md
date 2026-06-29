@@ -549,7 +549,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
 | `target.block_id` | ID khối đang ngắm |
 | `target.distance` | Khoảng cách tới khối đang ngắm |
 | `target.face` | Mặt của khối (0=Trên,1=Dưới,2=Bắc,3=Nam,4=Đông,5=Tây) |
-| `viewport_blocks` | 144 giá trị depth (16×9 depth-map, 1–32 = khoảng cách tới khối đặc) |
+| `viewport_blocks` | 288 giá trị (144 cặp [depth, blockId]). Depth=1-32 (khoảng cách), blockId=ID block bề mặt (0 nếu depth=32) |
 | `viewport_entities` | Thực thể nhìn thấy [type_id, relX, relY, relZ, yaw, pitch, health, distance] |
 | `screen` | Thông tin màn hình UI (chỉ xuất hiện khi có màn hình đang mở) |
 
@@ -688,7 +688,7 @@ Slot rỗng là `[0, 0]`. Thiết kế kích thước cố định cho phép án
 
 ### Viewport Blocks
 
-Mảng depth-map phẳng **144 số nguyên** (16 ngang × 9 dọc). Mỗi giá trị là khoảng cách (1–32 block) tới khối đặc đầu tiên. 32 = không vật cản.
+Mảng **288 số nguyên** = 144 cặp [depth, blockId] (16 ngang × 9 dọc). depth: 1-32 (khoảng cách tới khối đặc), blockId: ID block bề mặt (0 nếu depth=32 = không vật cản).
 
 ### Viewport Entities
 

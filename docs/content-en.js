@@ -797,13 +797,13 @@ SECTIONS['observation-schema'] = {
   <tr><td><code>player.status</code></td><td>[health, food, saturation, armor, air]</td></tr>
   <tr><td><code>player.flags</code></td><td>[on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1)</td></tr>
   <tr><td><code>camera.fov</code></td><td>Current field of view (30-110)</td></tr>
-  <tr><td><code>camera.matrix</code></td><td>Viewport ray grid [width=16, height=9] = 144 depth samples</td></tr>
+  <tr><td><code>camera.matrix</code></td><td>Viewport ray grid [width=16, height=9] = 144 rays (288 values as [depth, blockId] pairs)</td></tr>
   <tr><td><code>inventory.slots</code></td><td>41 fixed slots as [item_id, count] pairs (0 = empty)</td></tr>
   <tr><td><code>inventory.selected_slot</code></td><td>Currently held hotbar slot (0-8)</td></tr>
   <tr><td><code>target.block_id</code></td><td>Block ID the crosshair is pointing at</td></tr>
   <tr><td><code>target.distance</code></td><td>Distance to targeted block</td></tr>
   <tr><td><code>target.face</code></td><td>Face of targeted block (0=Up,1=Down,2=North,3=South,4=West,5=East)</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>144 depth values (16×9 depth-map)</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>288 values (144 [depth, blockId] pairs). Depth=1-32 (distance to nearest solid), blockId=numeric block ID of that block (0 if no block found)</td></tr>
   <tr><td><code>viewport_entities</code></td><td>Visible entities in frustum (FOV-filtered) [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
   <tr><td><code>screen</code></td><td>Current UI screen info (only present when a screen is open)</td></tr>
 </table>
@@ -916,7 +916,7 @@ SECTIONS['observation-schema'] = {
 </table>
 
 <h2 id="viewport-blocks">Viewport Blocks — Depth-Map Vision</h2>
-<p>A flat depth-map of <strong>144 integers</strong> (16 wide × 9 tall). Each value is the distance in blocks (1–32) to the first non-air block along that ray. 32 means no solid within range.</p>
+<p>A flat depth-map of <strong>288 integers</strong> (144 [depth, blockId] pairs, 16 wide × 9 tall). Each pair: depth=distance in blocks (1–32) to the first non-air block (32=no solid within range), blockId=numeric block ID of that surface block (0 if depth=32).</p>
 <ul>
   <li><code>width</code>: 0 (left) to 15 (right)</li>
   <li><code>height</code>: 0 (bottom of frustum) to 8 (top)</li>
@@ -1095,7 +1095,7 @@ SECTIONS['ai-guide'] = {
 
 <h3 id="viewport-interp">viewport_blocks — Depth-Map Vision</h3>
 <ul>
-  <li><strong>Depth perception:</strong> Each value is the distance to the nearest solid block. Small values (1–3) mean a nearby wall or obstacle. Large values (20–32) mean open space. Low values across many adjacent rays indicate walls or cliffs.</li>
+  <li><strong>Depth perception:</strong> Each ray has depth (distance to surface) + blockId (what surface is made of). Small depth values (1–3) = nearby wall. Check blockId to pick the right tool (pickaxe for stone, shovel for dirt). Large depth values (20–32) = open space.</li>
   <li><strong>Find paths:</strong> Look for rays with large depth values (20+) at center — these are clear paths</li>
   <li><strong>Avoid danger:</strong> If all rays in a region show small values (1–3), you're boxed in — turn around</li>
 </ul>
@@ -1331,7 +1331,7 @@ Step 5: OBSERVE → screen is gone (in-game!)</code></pre>
   <tr><td><code>target.block_id</code></td><td>int</td><td>Block I'm aiming at (0=none)</td></tr>
   <tr><td><code>target.distance</code></td><td>float</td><td>Distance to target</td></tr>
   <tr><td><code>target.face</code></td><td>int</td><td>Face of targeted block</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>[144]</td><td>Depth-map (16×9 rays, value = distance to solid)</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>[288]</td><td>Depth-map (144 [depth, blockId] pairs, 16×9 rays)</td></tr>
   <tr><td><code>viewport_entities[i]</code></td><td>[8 vals]</td><td>Nearby entities</td></tr>
   <tr><td><code>screen.id</code></td><td>string</td><td>Current UI screen (if any)</td></tr>
 </table>
@@ -1426,9 +1426,9 @@ SECTIONS['registry'] = {
 
 <h3>Viewport Blocks Array</h3>
 <ul>
-  <li>Size: 144 elements (16 wide × 9 tall)</li>
-  <li>Index: <code>height * 16 + width</code></li>
-  <li>Value = distance in blocks (1–32) to nearest solid; 32 = clear</li>
+  <li>Size: 288 values = 144 [depth, blockId] pairs (16 wide × 9 tall)</li>
+  <li>Index: depth at <code>(height * 16 + width) * 2</code>, blockId at <code>(height * 16 + width) * 2 + 1</code></li>
+  <li>depth = 1–32 (distance to nearest solid), blockId = surface block ID (0 if depth=32)</li>
 </ul>
 
 <h3>Viewport Entities Array</h3>
@@ -1777,6 +1777,21 @@ SECTIONS['changelog'] = {
   title: 'Changelog',
   content: `
 <h1 id="changelog">Changelog</h1>
+
+<h2 id="v122">v1.2.2 — Depth-Map with Surface Block IDs</h2>
+
+<h3>Enhancements</h3>
+<ul>
+  <li><strong>viewport_blocks now returns [depth, blockId] pairs</strong> — Previously a flat depth-only array (144 ints). Now each of the 144 rays produces two values: depth (1-32 = distance to nearest solid) and the numeric block ID of that surface block (0 if clear). Total 288 ints.
+  </li>
+  <li>AI can now distinguish stone vs. dirt vs. water at each ray without a separate API call.</li>
+</ul>
+
+<h3>Bug Fixes</h3>
+<ul>
+  <li><strong>Fixed stride in viewport_blocks doc</strong> — Index formula corrected from depth * 288 to depth * 144 (each depth layer has 16×9 = 144 cells, not 288).</li>
+  <li><strong>viewport_entities no longer pads empty slots</strong> — Removed 16-slot fixed-size padding. Returns only actual visible entities (0-16 elements).</li>
+</ul>
 
 <h2 id="v121">v1.2.1 — Registry Endpoints + Bug Fixes + Doc Sync</h2>
 

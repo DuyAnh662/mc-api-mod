@@ -789,13 +789,13 @@ SECTIONS['observation-schema'] = {
   <tr><td><code>player.status</code></td><td>[health, food, saturation, armor, air]</td></tr>
   <tr><td><code>player.flags</code></td><td>[on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1)</td></tr>
   <tr><td><code>camera.fov</code></td><td>Góc nhìn hiện tại (30-110)</td></tr>
-  <tr><td><code>camera.matrix</code></td><td>Lưới tia viewport [width=16, height=9] = 144 mẫu depth</td></tr>
+  <tr><td><code>camera.matrix</code></td><td>Lưới tia viewport [width=16, height=9] = 288 giá trị (144 cặp [depth, blockId])</td></tr>
   <tr><td><code>inventory.slots</code></td><td>41 slot cố định [item_id, count] (0 = rỗng)</td></tr>
   <tr><td><code>inventory.selected_slot</code></td><td>Slot hotbar đang cầm (0-8)</td></tr>
   <tr><td><code>target.block_id</code></td><td>ID khối đang ngắm</td></tr>
   <tr><td><code>target.distance</code></td><td>Khoảng cách tới khối đang ngắm</td></tr>
   <tr><td><code>target.face</code></td><td>Mặt của khối (0=Trên,1=Dưới,2=Bắc,3=Nam,4=Tây,5=Đông)</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>Depth-map: 144 giá trị depth (16×9 tia), khoảng cách tới khối đặc gần nhất</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>288 giá trị (144 cặp [depth, blockId]). Depth=1-32 (khoảng cách), blockId=ID block bề mặt (0 nếu depth=32)</td></tr>
   <tr><td><code>viewport_entities</code></td><td>Entity trong frustum (lọc FOV) [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
   <tr><td><code>screen</code></td><td>Thông tin màn hình UI (chỉ khi có màn hình mở)</td></tr>
 </table>
@@ -905,7 +905,7 @@ SECTIONS['observation-schema'] = {
 </table>
 
 <h2 id="viewport-blocks">Viewport Blocks — Depth-Map</h2>
-<p>Mảng depth-map phẳng <strong>144 số nguyên</strong> (16 ngang × 9 dọc). Mỗi giá trị là khoảng cách (1–32 block) tới khối đặc đầu tiên trên tia đó. 32 = không có vật cản trong tầm.</p>
+<p>Mảng <strong>288 số nguyên</strong> (16 ngang × 9 dọc = 144 cặp [depth, blockId]). Mỗi tia output 2 giá trị: depth (1-32) = khoảng cách tới khối đặc, blockId = ID block bề mặt (0 nếu depth=32 = không vật cản trong tầm).</p>
 
 <h2 id="viewport-entities">Viewport Entities — Sinh Vật Gần Đó</h2>
 <p>Tối đa <strong>16 entity</strong> trong view frustum (lọc theo FOV, không phải bán kính), mỗi entity 8 giá trị. Chỉ trả về entity thực tế (không pad rỗng):</p>
@@ -1282,7 +1282,7 @@ Bước 5: OBSERVE → đã vào game!</code></pre>
   <tr><td><code>target.block_id</code></td><td>int</td><td>Block đang ngắm (0=không có)</td></tr>
   <tr><td><code>target.distance</code></td><td>float</td><td>Khoảng cách tới mục tiêu</td></tr>
   <tr><td><code>target.face</code></td><td>int</td><td>Mặt của block bị ngắm</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>[144] Depth-map</td><td>Depth-map 16×9 tia, giá trị = khoảng cách tới block (1-32)</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>[288] Depth-blockId pairs</td><td>Depth-map 16×9 tia = 288 giá trị (144 cặp [depth, blockId]). Depth 1-32, blockId=ID block (0 nếu depth=32)</td></tr>
   <tr><td><code>viewport_entities[i]</code></td><td>[8 values]</td><td>Entity gần đó</td></tr>
   <tr><td><code>screen.id</code></td><td>string</td><td>Màn hình UI hiện tại (nếu có)</td></tr>
 </table>
@@ -1377,9 +1377,9 @@ SECTIONS['registry'] = {
 
 <h3>Viewport Blocks Array</h3>
 <ul>
-  <li>Kích thước: 144 phần tử (16 ngang × 9 dọc) depth-map</li>
-  <li>Mỗi giá trị: khoảng cách (1–32) tới khối đặc đầu tiên trên tia</li>
-  <li>32 = không có vật cản trong tầm</li>
+  <li>Kích thước: 288 phần tử = 144 cặp [depth, blockId] (16 ngang × 9 dọc)</li>
+  <li>depth: 1-32 (khoảng cách tới khối đặc đầu tiên trên tia)</li>
+  <li>blockId: ID block bề mặt (0 nếu depth=32 = không vật cản)</li>
 </ul>
 
 <h3>Viewport Entities Array</h3>
@@ -1702,6 +1702,20 @@ SECTIONS['changelog'] = {
   title: 'Changelog',
   content: `
 <h1 id="changelog">Lịch Sử Thay Đổi</h1>
+
+<h2 id="v122">v1.2.2 — Depth-Map kèm Block ID bề mặt</h2>
+
+<h3>Cải Tiến</h3>
+<ul>
+  <li><strong>viewport_blocks giờ trả về cặp [depth, blockId]</strong> — Trước đây chỉ depth (144 số). Giờ mỗi tia output 2 giá trị: depth (1-32 = khoảng cách) và blockId của khối bề mặt (0 nếu clear). Tổng 288 số.</li>
+  <li>AI có thể phân biệt đá, đất, nước trên từng tia mà không cần gọi API riêng.</li>
+</ul>
+
+<h3>Sửa Lỗi</h3>
+<ul>
+  <li><strong>Sửa stride công thức index</strong> — depth * 288 → depth * 144 (mỗi lớp depth có 16×9 = 144 cell, không phải 288).</li>
+  <li><strong>viewport_entities không pad rỗng</strong> — Bỏ padding 16 slot cố định. Chỉ trả entity thực tế (0-16 phần tử).</li>
+</ul>
 
 <h2 id="v121">v1.2.1 — Registry Endpoints + Sửa Lỗi + Đồng Bộ Tài Liệu</h2>
 
