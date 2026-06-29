@@ -21,7 +21,7 @@ public class ScreenObserver {
 
     public static JsonObject observe() {
         Minecraft client = Minecraft.getInstance();
-        Screen screen = client.screen;
+        Screen screen = client.gui.screen();
         JsonObject screenObj = new JsonObject();
 
         if (screen == null) return screenObj;

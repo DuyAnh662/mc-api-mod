@@ -33,7 +33,7 @@ public class ClientUIHandler implements HttpHandler {
         String targetText = body.get("button_text").getAsString();
 
         ApiServer.getInstance().queueClientCommand((client) -> {
-            var screen = client.screen;
+            var screen = client.gui.screen();
             if (screen == null) return;
             
             // Handle world selection screen entries

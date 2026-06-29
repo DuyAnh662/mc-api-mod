@@ -66,7 +66,7 @@ public class ScreenshotHandler implements HttpHandler {
         AtomicReference<String> errorRef = new AtomicReference<>();
 
         ApiServer.getInstance().queueClientCommand((client) -> {
-            var renderTarget = client.getMainRenderTarget();
+            var renderTarget = client.gameRenderer.mainRenderTarget();
             int ow = renderTarget.width;
             int oh = renderTarget.height;
             origWRef.set(ow);
