@@ -1,4 +1,4 @@
-accessWidener v2 named
+accessWidener v2 official
 
 # Allow access to Minecraft server internals for API operations
 accessible class net/minecraft/server/MinecraftServer

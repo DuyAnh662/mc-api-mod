@@ -30,7 +30,11 @@ public class WorldHandler {
 
                 ApiServer.getInstance().queueCommand((server) -> {
                     ServerLevel level = server.overworld();
-                    level.setDayTime(time);
+                    level.clockManager().setTotalTicks(
+                        level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.WORLD_CLOCK)
+                            .getOrThrow(net.minecraft.world.clock.WorldClocks.OVERWORLD),
+                        time
+                    );
 
                     JsonObject data = new JsonObject();
                     data.addProperty("time", time);
@@ -41,7 +45,7 @@ public class WorldHandler {
             } else if ("GET".equals(method)) {
                 ApiServer.getInstance().queueCommand((server) -> {
                     ServerLevel level = server.overworld();
-                    long dayTime = level.getDayTime();
+                    long dayTime = level.getOverworldClockTime();
                     long timeOfDay = dayTime % 24000;
                     JsonObject data = new JsonObject();
                     data.addProperty("time", dayTime);
@@ -76,16 +80,29 @@ public class WorldHandler {
                 ApiServer.getInstance().queueCommand((server) -> {
                     ServerLevel level = server.overworld();
 
+                    var weatherData = level.getWeatherData();
                     switch (weather.toLowerCase()) {
                         case "clear":
-                            level.setWeatherParameters(duration, 0, false, false);
+                            weatherData.setClearWeatherTime(duration);
+                            weatherData.setRainTime(0);
+                            weatherData.setThunderTime(0);
+                            weatherData.setRaining(false);
+                            weatherData.setThundering(false);
                             break;
                         case "rain":
-                            level.setWeatherParameters(0, duration, true, false);
+                            weatherData.setClearWeatherTime(0);
+                            weatherData.setRainTime(duration);
+                            weatherData.setThunderTime(0);
+                            weatherData.setRaining(true);
+                            weatherData.setThundering(false);
                             break;
                         case "thunder":
                         case "storm":
-                            level.setWeatherParameters(0, duration, true, true);
+                            weatherData.setClearWeatherTime(0);
+                            weatherData.setRainTime(duration);
+                            weatherData.setThunderTime(duration);
+                            weatherData.setRaining(true);
+                            weatherData.setThundering(true);
                             break;
                         default:
                             ApiServer.sendResponse(exchange, 400, ApiResponse.jsonError(400, "Invalid weather: " + weather + " (use clear, rain, or thunder)"));

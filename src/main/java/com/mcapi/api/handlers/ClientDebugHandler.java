@@ -43,7 +43,7 @@ public class ClientDebugHandler implements HttpHandler {
                 BlockPos pos = client.player.blockPosition();
 
                 if (all || contains(requestedFields, "days")) {
-                    data.addProperty("daysPlayed", client.level.getDayTime() / 24000L);
+                    data.addProperty("daysPlayed", client.level.getOverworldClockTime() / 24000L);
                 }
                 if (all || contains(requestedFields, "xyz")) {
                     data.addProperty("x", client.player.getX());

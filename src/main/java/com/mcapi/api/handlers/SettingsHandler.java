@@ -126,7 +126,7 @@ public class SettingsHandler {
                 ApiServer.getInstance().queueCommand((server) -> {
                     JsonObject data = new JsonObject();
                     data.addProperty("difficulty", server.getWorldData().getDifficulty().getId());
-                    data.addProperty("difficultyName", server.getWorldData().getDifficulty().getKey());
+                    data.addProperty("difficultyName", server.getWorldData().getDifficulty().getSerializedName());
                     data.addProperty("isHardcore", server.isHardcore());
                     ApiServer.sendResponse(exchange, 200, ApiResponse.ok("Current difficulty", data).toJson());
                 });

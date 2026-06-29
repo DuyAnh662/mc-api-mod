@@ -125,7 +125,7 @@ public class ObservationProvider {
 
     private static JsonObject buildWorld(ClientLevel level) {
         JsonObject w = new JsonObject();
-        long dayTime = level.getDayTime();
+        long dayTime = level.getOverworldClockTime();
         w.addProperty("time", dayTime % 24000L);
         w.addProperty("day", dayTime / 24000L);
         w.addProperty("is_day", dayTime % 24000L < 13000L);
