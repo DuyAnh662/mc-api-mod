@@ -152,20 +152,18 @@ Minecraft game tick counter. **20 ticks = 1 second.** Use this to:
 - `fov`: current field of view (default 70, can be 30-110)
 - `matrix`: depth-map ray grid of `viewport_blocks` = `[width=16, height=9]` (144 rays)
 
-**AI logic:** The `matrix` tells you the ray grid dimensions. `16×9 = 144` rays (288 ints = 144 [depth, blockId] pairs) from your eye position.
+**AI logic:** The `matrix` tells you the ray grid dimensions. `16×9 = 144` rays (encoded as RLE runs in viewport_blocks) from your eye position.
 
 ### 2.7 `inventory` — What You Carry
 
 ```json
 {
-  "slots": [
-    [0, 0], [1, 64], [0, 0], [5, 32], [3, 1], ...
-  ],
+  "slots": [[0, 271, 1], [1, 5, 64], [3, 299, 1], ...],
   "selected_slot": 3
 }
 ```
 
-**41 fixed slots:**
+**Sparse slots (only items):**
 
 | Index | Section | Count |
 |-------|---------|-------|
@@ -174,16 +172,16 @@ Minecraft game tick counter. **20 ticks = 1 second.** Use this to:
 | 36-39 | Armor (boots→legs→chest→helmet) | 4 |
 | 40 | Offhand | 1 |
 
-Each slot is `[item_id, count]`:
-- `[0, 0]` = empty slot
-- `[1, 64]` = 64 of item_id 1 (stone)
-- `[3, 1]` = 1 of item_id 3 (dirt)
+Each slot is `[slot_index, item_id, count]`:
+- Only non-empty slots are included (empty slots are omitted)
+- `[0, 271, 1]` = slot 0 has 1 of item_id 271 (obsidian)
+- `[1, 5, 64]` = slot 1 has 64 of item_id 5 (oak_planks)
 
 **AI logic for reading inventory:**
 - `selected_slot` tells you which hotbar slot is currently held (0-8)
 - To equip armor: check slots 36-39 for armor items (leather_chestplate, iron_helmet, etc.)
 - Crafting output is NOT in inventory — you must manually take it (slot 0 in crafting UI)
-- Item ID `0` = empty/air — use this to detect free space
+- Empty slots are omitted — use the slot index ranges (0-8 hotbar, 9-35 main, 36-39 armor, 40 offhand) to identify which slots are occupied vs free
 
 #### Interpreting item IDs
 
@@ -234,30 +232,23 @@ Item IDs are numeric (from `BuiltInRegistries.ITEM`). Key item IDs to recognize:
 
 ### 2.9 `viewport_blocks` — Depth-Map Vision
 
-A flat array of **288 integers** = 144 [depth, blockId] pairs (16×9 rays). For each ray: depth = distance in blocks (1–32) to first non-air block, blockId = numeric block ID of that surface block (0 if depth = 32).
+An **RLE array of runs** = [[count, depth, blockId], ...]. Each run represents N consecutive identical rays from the 16×9 ray grid. For each ray: depth = distance in blocks (1–32) to first non-air block, blockId = numeric block ID of that surface block (0 if depth = 32).
 
 #### How to read it mentally
 
-The array interleaves depth and blockId per ray:
-```
-for h = 0..8 (height):
-  for w = 0..15 (width):
-      arr[(h * 16 + w) * 2]     = depth     (1-32)
-      arr[(h * 16 + w) * 2 + 1] = blockId   (block ID, 0 if depth=32)
-```
+Consecutive rays with identical [depth, blockId] are merged. Each run: [count, depth, blockId]. To access ray at position (h,w), iterate through runs accumulating counts until you reach offset `h * 16 + w`.
 
 - Height = vertical offset (0 = bottom of frustum, 8 = top)
 - Width = horizontal offset (0 = left edge, 15 = right edge)
 
 #### Practical AI logic:
-1. **Check for walls:** Small depth values (1–3) across many adjacent rays → wall or cliff ahead
+1. **Check for walls:** Small depth values (1–3) across many adjacent rays → wall or cliff ahead (look for runs with small depth and large count)
 2. **Identify surface:** Check blockId to know if it's stone (pickaxe), dirt (shovel), water (swim through), etc.
 3. **Find paths:** Rays with depth 20–32 at center → clear path forward
-4. **Avoid danger:** If all depth values are small → you're boxed in, turn around
-2. **Find paths:** Look for columns of air (0) extending from center through all depths → that's an open path
-3. **Detect resources:** Scan for valuable block IDs
-4. **Avoid danger:** If lava blocks (ID ~11) appear up close → move away
-5. **Find the ground:** Blocks at the bottom of the frustum (h=0) that are non-zero can indicate ground/floor
+4. **Detect resources:** Scan for valuable block IDs
+5. **Avoid danger:** If lava blocks (ID ~11) appear up close → move away
+6. **Find the ground:** Blocks at the bottom of the frustum (h=0) that are non-zero can indicate ground/floor
+7. **RLE hint:** Multiple consecutive rays with the same [depth, blockId] = a wall/area spanning multiple tiles — the count tells you how wide
 
 #### Common block IDs reference:
 | Block | Typical ID |
@@ -663,12 +654,12 @@ TITLE → select "Singleplayer"
 | `player.status[3]` | int | Armor (0-20+) |
 | `player.status[4]` | int | Air (0-300) |
 | `player.flags[0]` | 0/1 | On ground |
-| `inventory.slots[i]` | [id,count] | Item in slot i |
+| `inventory.slots` | [[slot,id,count],...] | Items (sparse, only non-empty) |
 | `inventory.selected_slot` | int | Current hotbar slot (0-8) |
 | `target.block_id` | int | Block I'm aiming at (0=none) |
 | `target.distance` | float | Distance to target |
 | `target.face` | int | Face of targeted block |
-| `viewport_blocks` | [288] | 144 [depth,blockId] pairs: depth (1–32), blockId of surface (0 if clear) |
+| `viewport_blocks` | [[count,depth,blockId],...] | RLE runs of 144 rays: depth (1–32), blockId of surface (0 if clear) |
 | `viewport_entities[i]` | [type,x,y,z,yaw,pitch,hp,dist] | Nearby entities |
 | `screen.id` | string | Current UI screen (if any) |
 
@@ -702,10 +693,10 @@ TITLE → select "Singleplayer"
 | Symptom | Probable Cause | Recovery |
 |---------|---------------|----------|
 | `tick` not increasing | Game frozen/paused | Press Esc, check screen, resume |
-| All `viewport_blocks` = 0 | In void/loading/out of world | Check dimension, move to loaded area |
+| `viewport_blocks` = [] | In void/loading/out of world | Check dimension, move to loaded area |
 | `screen.id == "minecraft:death"` | You died | Click "Respawn", retrieve items |
 | `target.block_id` always 0 | Looking at sky/too far | Look down or move closer |
-| `inventory.slots` all [0,0] | Not in game | Navigate from title screen to world |
+| `inventory.slots` = [] | Not in game | Navigate from title screen to world |
 | Action returns "timeout" | Server busy/tick taking long | Retry after 1 second |
 | `screen.id == "minecraft:pause"` | World paused | Click "Resume" or Esc |
 | Can't connect to port 25566 | Mod not loaded / server down | Restart Minecraft |

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.2.3 — RLE Depth-Map + Sparse Inventory
+
+### ✨ Enhancements
+
+- **`viewport_blocks` now uses RLE compression** — Previously 288 ints (144 flat [depth, blockId] pairs). Now consecutive identical rays are merged into runs: `[[count, depth, blockId], ...]`. Typical scene: ~40-60% fewer tokens vs. flat format. Empty state returns `[]`.
+- **`inventory.slots` now sparse** — Previously 41 fixed `[item_id, count]` entries (82 ints + JSON overhead). Now only non-empty slots are included, each as `[slot_index, item_id, count]`. Empty state returns `[]`. Early-game saving: ~6-15 token vs 165.
+
 ## v1.2.2 — Depth-Map with Surface Block IDs
 
 ### ✨ Enhancements

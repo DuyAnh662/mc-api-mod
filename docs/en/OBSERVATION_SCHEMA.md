@@ -119,21 +119,13 @@ Game tick counter. **20 ticks = 1 second.** Resets when world loads.
 
 ## 7. `inventory` — Player Inventory
 
-### 7.1 `inventory.slots` — 41 fixed slots
+### 7.1 `inventory.slots` — Sparse slots (only non-empty)
 
-Each slot: `[ item_id, count ]`
+Each slot: `[ slot_index, item_id, count ]`
 
-| Index Range | Section | Count | Notes |
-|-------------|---------|-------|-------|
-| 0–8 | Hotbar | 9 | `selected_slot` indexes here (0–8) |
-| 9–35 | Main inventory | 27 | |
-| 36 | Boots | 1 | Armor slot |
-| 37 | Leggings | 1 | Armor slot |
-| 38 | Chestplate | 1 | Armor slot |
-| 39 | Helmet | 1 | Armor slot |
-| 40 | Offhand | 1 | Shield/torch/etc. |
+Only slots that contain items are included. Empty slots are omitted entirely.
 
-- `[0, 0]` = empty slot
+- `slot_index`: 0–8 = hotbar, 9–35 = main inventory, 36 = boots, 37 = leggings, 38 = chestplate, 39 = helmet, 40 = offhand
 - `item_id`: numeric ID from `BuiltInRegistries.ITEM` (**dynamic per session**)
 - `count`: stack size (1–99, max depends on item)
 
@@ -168,25 +160,20 @@ Currently held hotbar slot.
 
 ### Format
 ```json
-[ depth_0, blockId_0, depth_1, blockId_1, ..., depth_143, blockId_143 ]   // 288 ints
+[ [count, depth, blockId], [count, depth, blockId], ... ]   // RLE array
 ```
 
 ### Structure
-- **288 values** = 144 [depth, blockId] pairs (16 wide × 9 tall)
+- RLE array of runs, each run = [count, depth, blockId]
 - Each ray outputs 2 values: depth + blockId of the surface block
 
 ### Index
-```
-depth_index  = (height * 16 + width) * 2
-blockId_index = (height * 16 + width) * 2 + 1
-```
-where:
-- `height`: 0 (bottom of frustum) to 8 (top)
-- `width`: 0 (left) to 15 (right)
+Consecutive rays with identical [depth, blockId] are merged into a single run. Each run: [count, depth, blockId]. To find a specific ray at (h,w), iterate runs until reaching the desired offset.
 
 ### Values
 - `depth`: 1–31 = distance to first solid block; 32 = clear
 - `blockId`: numeric block ID at surface (0 if depth = 32) (**dynamic per session**)
+- In empty/unloaded state, returns `[]` (no runs).
 
 ---
 
@@ -454,18 +441,17 @@ Breadcrumb trail from main menu to current screen.
 ```
 Index   Section         Size    Item format
 ─────────────────────────────────────────────
- 0–8    Hotbar           9      [item_id, count]
- 9–35   Main inventory  27      [item_id, count]
-36      Boots            1      [item_id, count]
-37      Leggings         1      [item_id, count]
-38      Chestplate       1      [item_id, count]
-39      Helmet           1      [item_id, count]
-40      Offhand          1      [item_id, count]
+ 0–8    Hotbar           9      [slot_index, item_id, count]
+ 9–35   Main inventory  27      [slot_index, item_id, count]
+36      Boots            1      [slot_index, item_id, count]
+37      Leggings         1      [slot_index, item_id, count]
+38      Chestplate       1      [slot_index, item_id, count]
+39      Helmet           1      [slot_index, item_id, count]
+40      Offhand          1      [slot_index, item_id, count]
 ─────────────────────────────────────────────
-Total: 41 slots
 ```
 
-`[0, 0]` = empty slot. `item_id` is dynamic per session.
+Only non-empty slots are included. `item_id` is dynamic per session.
 
 ---
 

@@ -508,13 +508,11 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
     },
     "camera": { "fov": 70, "matrix": [16, 9] },
     "inventory": {
-      "slots": [
-        [0,0], [0,0], [0,0], [5,64], [0,0], ...
-      ],
+      "slots": [[3, 5, 64], [17, 1, 32], ...],
       "selected_slot": 3
     },
     "target": { "block_id": 56, "distance": 4.5, "face": 1 },
-    "viewport_blocks": [1, 1, 1, 0, 4, ...],
+    "viewport_blocks": [[5, 1, 1], [3, 3, 4], ...],
     "viewport_entities": [[54, 3.2, 0.0, 5.1, 180, 0, 20, 6.0], ...],
     "screen": {
       "id": "minecraft:title",
@@ -548,12 +546,12 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
 | `player.flags` | [on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1) |
 | `camera.fov` | Current field of view |
 | `camera.matrix` | Depth-map ray grid [width, height] |
-| `inventory.slots` | 41 fixed slots as [item_id, count] pairs (0 = empty) |
+| `inventory.slots` | Sparse slots [slot_index, item_id, count] (only non-empty slots) |
 | `inventory.selected_slot` | Currently held hotbar slot (0-8) |
 | `target.block_id` | Block ID the crosshair is pointing at |
 | `target.distance` | Distance to targeted block |
 | `target.face` | Face of targeted block (0=Up,1=Down,2=North,3=South,4=East,5=West) |
-| `viewport_blocks` | 288 values = 144 [depth, blockId] pairs (16×9 depth-map) |
+| `viewport_blocks` | RLE: [[count, depth, blockId], ...] — consecutive identical rays merged |
 | `viewport_entities` | Visible entities [type_id, relX, relY, relZ, yaw, pitch, health, distance] |
 | `screen` | Current UI screen info (only present when a screen is open) |
 
@@ -679,20 +677,22 @@ For a comprehensive guide on how AI agents should interpret the observation JSON
 
 ### Inventory Slots
 
-The inventory is a fixed array of **41 slots** (36 main + 4 armor + 1 offhand), each as `[item_id, count]`:
+Sparse format — only non-empty slots are included. Each entry: `[slot_index, item_id, count]`.
 
-| Index | Type | Size |
-|-------|------|------|
+Slot index layout (0-based):
+
+| Index Range | Section | Count |
+|-------------|---------|-------|
 | 0-8 | Hotbar | 9 |
 | 9-35 | Main inventory | 27 |
 | 36-39 | Armor (boots, legs, chest, head) | 4 |
 | 40 | Offhand | 1 |
 
-Empty slots are represented as `[0, 0]`. This fixed-size design allows direct mapping to ML tensors.
-
 ### Viewport Blocks
 
-A flat array of **288 integers** = 144 [depth, blockId] pairs (16 wide × 9 tall). For each ray: depth = distance in blocks (1–32) to first non-air block, blockId = numeric block ID of that surface block (0 if depth = 32).
+Run-length encoded (RLE): `[count, depth, blockId]` — consecutive rays with identical depth+blockId are merged into a single entry with `count` specifying how many rays in a row shared those values.
+
+Each ray represents a depth = distance in blocks (1–32) to the first non-air block, and blockId = numeric block ID of that surface block (0 if depth = 32). The original grid is 16 wide × 9 tall (144 rays).
 
 ### Viewport Entities
 

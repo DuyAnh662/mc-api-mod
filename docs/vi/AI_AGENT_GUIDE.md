@@ -147,14 +147,12 @@ Số tick game. **20 ticks = 1 giây.** Dùng để:
 
 ```json
 {
-  "slots": [
-    [0, 0], [1, 64], [0, 0], [5, 32], [3, 1], ...
-  ],
+  "slots": [[0, 271, 1], [1, 5, 64], ...],
   "selected_slot": 3
 }
 ```
 
-**41 slot cố định:**
+**Sparse slot (chỉ item có đồ):**
 
 | Index | Khu vực | Số lượng |
 |-------|---------|----------|
@@ -163,10 +161,9 @@ Số tick game. **20 ticks = 1 giây.** Dùng để:
 | 36-39 | Giáp (giày→quần→áo→mũ) | 4 |
 | 40 | Tay trái | 1 |
 
-Mỗi slot là `[item_id, count]`:
-- `[0, 0]` = rỗng
-- `[1, 64]` = 64 item_id 1 (stone)
-- `[3, 1]` = 1 item_id 3 (dirt)
+Mỗi slot là `[slot_index, item_id, count]`:
+- `[0, 271, 1]` = slot 0 có 1 item_id 271 (cobblestone)
+- `[1, 5, 64]` = slot 1 có 64 item_id 5 (oak_planks)
 
 ### 2.8 `target` — Bạn Đang Nhìn Gì
 
@@ -198,12 +195,13 @@ Mỗi slot là `[item_id, count]`:
 
 ### 2.9 `viewport_blocks` — Depth-Map
 
-Mảng **288 số nguyên** = 144 cặp [depth, blockId] (16×9 tia). Mỗi tia output 2 giá trị:
+Mảng RLE các run:
 
 ```
-arr[(h * 16 + w) * 2]     = depth     (1-32)
-arr[(h * 16 + w) * 2 + 1] = blockId   (ID block, 0 nếu depth=32)
+[count, depth, blockId]
 ```
+
+Các tia liên tiếp có [depth, blockId] giống nhau được gộp.
 
 - **depth 1–31**: khoảng cách tới khối đặc đầu tiên
 - **depth 32**: không vật cản trong tầm (blockId = 0)
@@ -323,7 +321,7 @@ Chống creeper:
 | Vấn đề | Nguyên nhân | Cách sửa |
 |--------|-------------|----------|
 | `tick` không tăng | Game bị đứng/tạm dừng | Ấn Esc, kiểm tra, Resume |
-| `viewport_blocks` toàn 0 | Void/đang load | Di chuyển đến khu vực đã load |
+| `viewport_blocks` = [] | Void/đang load | Di chuyển đến khu vực đã load |
 | `screen.id == "minecraft:death"` | Bạn chết | Click "Respawn", lấy lại đồ |
 | `target.block_id` luôn 0 | Nhìn trời/xa quá | Nhìn xuống hoặc lại gần |
 | Inventory toàn [0,0] | Chưa vào game | Điều hướng từ title vào world |

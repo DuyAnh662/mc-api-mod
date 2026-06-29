@@ -102,13 +102,7 @@ public class ObservationProvider {
 
     private static JsonObject emptyInventory() {
         JsonObject inv = new JsonObject();
-        JsonArray slots = new JsonArray();
-        for (int i = 0; i < TOTAL_SLOTS; i++) {
-            JsonArray slot = new JsonArray();
-            slot.add(0); slot.add(0);
-            slots.add(slot);
-        }
-        inv.add("slots", slots);
+        inv.add("slots", new JsonArray());
         inv.addProperty("selected_slot", 0);
         return inv;
     }
@@ -122,9 +116,7 @@ public class ObservationProvider {
     }
 
     private static JsonArray emptyViewportBlocks() {
-        JsonArray arr = new JsonArray();
-        for (int i = 0; i < VIEWPORT_RAYS; i++) { arr.add(0); arr.add(0); }
-        return arr;
+        return new JsonArray();
     }
 
     private static JsonArray emptyViewportEntities() {
@@ -230,14 +222,11 @@ public class ObservationProvider {
 
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack stack = inventory.getItem(i);
+            if (stack.isEmpty()) continue;
             JsonArray slot = new JsonArray();
-            if (stack.isEmpty()) {
-                slot.add(0); slot.add(0);
-            } else {
-                int id = BuiltInRegistries.ITEM.getId(stack.getItem());
-                slot.add(id);
-                slot.add(stack.getCount());
-            }
+            slot.add(i);
+            slot.add(BuiltInRegistries.ITEM.getId(stack.getItem()));
+            slot.add(stack.getCount());
             slots.add(slot);
         }
 
@@ -284,7 +273,7 @@ public class ObservationProvider {
     }
 
     private static JsonArray buildViewportBlocks(LocalPlayer player, ClientLevel level) {
-        JsonArray arr = new JsonArray();
+        JsonArray runs = new JsonArray();
 
         float yaw = player.getYRot();
         float pitch = player.getXRot();
@@ -311,6 +300,10 @@ public class ObservationProvider {
                 dirX * right.y - dirY * right.x
         ).normalize();
 
+        int prevDepth = -1;
+        int prevBlock = -1;
+        int runLen = 0;
+
         for (int h = 0; h < VIEWPORT_HEIGHT; h++) {
             double heightOffset = (h - halfH) * 0.5;
             for (int w = 0; w < VIEWPORT_WIDTH; w++) {
@@ -335,12 +328,33 @@ public class ObservationProvider {
                         }
                     }
                 }
-                arr.add(depthVal);
-                arr.add(blockId);
+
+                if (depthVal == prevDepth && blockId == prevBlock) {
+                    runLen++;
+                } else {
+                    if (runLen > 0) {
+                        JsonArray run = new JsonArray();
+                        run.add(runLen);
+                        run.add(prevDepth);
+                        run.add(prevBlock);
+                        runs.add(run);
+                    }
+                    prevDepth = depthVal;
+                    prevBlock = blockId;
+                    runLen = 1;
+                }
             }
         }
 
-        return arr;
+        if (runLen > 0) {
+            JsonArray run = new JsonArray();
+            run.add(runLen);
+            run.add(prevDepth);
+            run.add(prevBlock);
+            runs.add(run);
+        }
+
+        return runs;
     }
 
     private static double getPlayerFov(Minecraft client) {

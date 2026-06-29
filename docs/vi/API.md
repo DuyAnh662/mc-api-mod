@@ -506,11 +506,11 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
     },
     "camera": { "fov": 70, "matrix": [16, 9] },
     "inventory": {
-      "slots": [[0,0], [0,0], [0,0], [5,64], [0,0], ...],
+      "slots": [[3, 5, 64], [17, 1, 32], ...],
       "selected_slot": 3
     },
     "target": { "block_id": 56, "distance": 4.5, "face": 1 },
-    "viewport_blocks": [1, 1, 1, 0, 4, ...],
+      "viewport_blocks": [[5, 1, 1], [3, 3, 4], ...],
     "viewport_entities": [[54, 3.2, 0.0, 5.1, 180, 0, 20, 6.0], ...],
     "screen": {
       "id": "minecraft:title",
@@ -544,12 +544,12 @@ curl -H "Authorization: Bearer <token>" http://localhost:25566/observation
 | `player.flags` | [on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1) |
 | `camera.fov` | Góc nhìn hiện tại |
 | `camera.matrix` | Lưới tia depth-map [width, height] |
-| `inventory.slots` | 41 slot cố định [item_id, count] (0 = rỗng) |
+| `inventory.slots` | Sparse slots [slot_index, item_id, count] (chỉ slot có đồ) |
 | `inventory.selected_slot` | Slot hotbar đang cầm (0-8) |
 | `target.block_id` | ID khối đang ngắm |
 | `target.distance` | Khoảng cách tới khối đang ngắm |
 | `target.face` | Mặt của khối (0=Trên,1=Dưới,2=Bắc,3=Nam,4=Đông,5=Tây) |
-| `viewport_blocks` | 288 giá trị (144 cặp [depth, blockId]). Depth=1-32 (khoảng cách), blockId=ID block bề mặt (0 nếu depth=32) |
+| `viewport_blocks` | RLE: [[count, depth, blockId], ...] — gộp tia liên tiếp giống nhau |
 | `viewport_entities` | Thực thể nhìn thấy [type_id, relX, relY, relZ, yaw, pitch, health, distance] |
 | `screen` | Thông tin màn hình UI (chỉ xuất hiện khi có màn hình đang mở) |
 
@@ -675,7 +675,15 @@ Xem tài liệu hướng dẫn chi tiết cách AI đọc JSON observation và l
 
 ### Inventory Slots
 
-Inventory là mảng cố định **41 slot** (36 chính + 4 giáp + 1 offhand), mỗi slot là `[item_id, count]`:
+Inventory là mảng **sparse**: chỉ chứa các slot có đồ, mỗi phần tử là `[slot_index, item_id, count]`. Nếu rỗng, mảng là `[]`.
+
+| Phần tử | Mô tả |
+|---------|-------|
+| `slot_index` | Vị trí slot (0-40), xem bảng bên dưới |
+| `item_id` | ID numeric của item |
+| `count` | Số lượng (1-99) |
+
+**Bố trí slot tham chiếu:**
 
 | Index | Loại | Số lượng |
 |-------|------|----------|
@@ -684,11 +692,9 @@ Inventory là mảng cố định **41 slot** (36 chính + 4 giáp + 1 offhand),
 | 36-39 | Giáp (giày, quần, áo, mũ) | 4 |
 | 40 | Offhand | 1 |
 
-Slot rỗng là `[0, 0]`. Thiết kế kích thước cố định cho phép ánh xạ trực tiếp vào ML tensor.
-
 ### Viewport Blocks
 
-Mảng **288 số nguyên** = 144 cặp [depth, blockId] (16 ngang × 9 dọc). depth: 1-32 (khoảng cách tới khối đặc), blockId: ID block bề mặt (0 nếu depth=32 = không vật cản).
+Mảng **RLE** (Run-Length Encoding): `[[count, depth, blockId], ...]` — gộp các tia liên tiếp giống nhau. Mỗi phần tử: `count` = số tia liên tiếp, `depth` = khoảng cách (1-32), `blockId` = ID block bề mặt (0 nếu depth=32).
 
 ### Viewport Entities
 

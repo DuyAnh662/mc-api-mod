@@ -640,11 +640,11 @@ curl -X POST http://localhost:25566/api/cancel \\
     },
     "camera": { "fov": 70, "matrix": [16, 9] },
     "inventory": {
-      "slots": [[0,0], [0,0], [0,0], [5,64], [0,0], ...],
+      "slots": [[3, 5, 64], [17, 1, 32], ...],
       "selected_slot": 3
     },
     "target": { "block_id": 56, "distance": 4.5, "face": 1 },
-    "viewport_blocks": [1, 1, 1, 0, 4, ...],
+    "viewport_blocks": [[5, 1, 1], [3, 3, 4], ...],
     "viewport_entities": [[54, 3.2, 0.0, 5.1, 180, 0, 20, 6.0], ...],
     "screen": {
       "id": "minecraft:title",
@@ -790,12 +790,12 @@ SECTIONS['observation-schema'] = {
   <tr><td><code>player.flags</code></td><td>[on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1)</td></tr>
   <tr><td><code>camera.fov</code></td><td>Góc nhìn hiện tại (30-110)</td></tr>
   <tr><td><code>camera.matrix</code></td><td>Lưới tia viewport [width=16, height=9] = 288 giá trị (144 cặp [depth, blockId])</td></tr>
-  <tr><td><code>inventory.slots</code></td><td>41 slot cố định [item_id, count] (0 = rỗng)</td></tr>
+  <tr><td><code>inventory.slots</code></td><td>Mảng sparse [slot_index, item_id, count] (chỉ slot có đồ)</td></tr>
   <tr><td><code>inventory.selected_slot</code></td><td>Slot hotbar đang cầm (0-8)</td></tr>
   <tr><td><code>target.block_id</code></td><td>ID khối đang ngắm</td></tr>
   <tr><td><code>target.distance</code></td><td>Khoảng cách tới khối đang ngắm</td></tr>
   <tr><td><code>target.face</code></td><td>Mặt của khối (0=Trên,1=Dưới,2=Bắc,3=Nam,4=Tây,5=Đông)</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>288 giá trị (144 cặp [depth, blockId]). Depth=1-32 (khoảng cách), blockId=ID block bề mặt (0 nếu depth=32)</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>RLE: [[count, depth, blockId], ...] — gộp tia liên tiếp</td></tr>
   <tr><td><code>viewport_entities</code></td><td>Entity trong frustum (lọc FOV) [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
   <tr><td><code>screen</code></td><td>Thông tin màn hình UI (chỉ khi có màn hình mở)</td></tr>
 </table>
@@ -858,25 +858,18 @@ SECTIONS['observation-schema'] = {
       title: 'Inventory',
       content: `
 <h2 id="inventory-slots">Inventory Slots</h2>
-<p>Inventory là mảng cố định <strong>41 slot</strong>, mỗi slot là <code>[item_id, count]</code>.</p>
+<p>Sparse slots <code>[slot_index, item_id, count]</code> (chỉ slot có đồ).</p>
 
-<table>
-  <tr><th>Khoảng Index</th><th>Khu vực</th><th>Số lượng</th></tr>
-  <tr><td>0-8</td><td>Hotbar</td><td>9</td></tr>
-  <tr><td>9-35</td><td>Túi chính</td><td>27</td></tr>
-  <tr><td>36</td><td>Ủng</td><td>1</td></tr>
-  <tr><td>37</td><td>Quần</td><td>1</td></tr>
-  <tr><td>38</td><td>Áo giáp</td><td>1</td></tr>
-  <tr><td>39</td><td>Mũ</td><td>1</td></tr>
-  <tr><td>40</td><td>Tay trái</td><td>1</td></tr>
-</table>
+<p>Chỉ những slot có chứa item mới được trả về. Slot rỗng bị bỏ qua.</p>
 
 <ul>
-  <li><code>[0, 0]</code> = slot rỗng</li>
   <li><code>item_id</code>: ID số từ <code>BuiltInRegistries.ITEM</code> (thay đổi mỗi session)</li>
   <li><code>count</code>: số lượng (1-99)</li>
   <li><code>selected_slot</code>: slot hotbar đang cầm (0-8)</li>
 </ul>
+
+<p>Slot index reference:</p>
+<pre><code>slot_index: 0-8 = hotbar, 9-35 = túi chính, 36 = ủng, 37 = quần, 38 = áo giáp, 39 = mũ, 40 = tay trái</code></pre>
 
 <div class="alert alert-warn"><strong>Lưu ý:</strong> ID số của item/block có tính <strong>động</strong> — phụ thuộc vào thứ tự nạp registry. Ổn định trong một phiên chơi nhưng có thể khác giữa các lần khởi động. Dùng namespaced ID (<code>minecraft:stone</code>) để ổn định.</div>
 `
@@ -905,7 +898,7 @@ SECTIONS['observation-schema'] = {
 </table>
 
 <h2 id="viewport-blocks">Viewport Blocks — Depth-Map</h2>
-<p>Mảng <strong>288 số nguyên</strong> (16 ngang × 9 dọc = 144 cặp [depth, blockId]). Mỗi tia output 2 giá trị: depth (1-32) = khoảng cách tới khối đặc, blockId = ID block bề mặt (0 nếu depth=32 = không vật cản trong tầm).</p>
+<p>Mảng RLE <strong>[[count, depth, blockId], ...]</strong> — gộp tia liên tiếp giống nhau.</p>
 
 <h2 id="viewport-entities">Viewport Entities — Sinh Vật Gần Đó</h2>
 <p>Tối đa <strong>16 entity</strong> trong view frustum (lọc theo FOV, không phải bán kính), mỗi entity 8 giá trị. Chỉ trả về entity thực tế (không pad rỗng):</p>

@@ -648,11 +648,11 @@ curl -X POST http://localhost:25566/api/cancel \\
     },
     "camera": { "fov": 70, "matrix": [16, 9] },
     "inventory": {
-      "slots": [[0,0], [0,0], [0,0], [5,64], [0,0], ...],
+      "slots": [[3, 5, 64], [17, 1, 32], ...],
       "selected_slot": 3
     },
     "target": { "block_id": 56, "distance": 4.5, "face": 1 },
-    "viewport_blocks": [1, 1, 1, 0, 4, ...],
+    "viewport_blocks": [[5, 1, 1], [3, 3, 4], ...],
     "viewport_entities": [[54, 3.2, 0.0, 5.1, 180, 0, 20, 6.0], ...],
     "screen": {
       "id": "minecraft:title",
@@ -798,12 +798,12 @@ SECTIONS['observation-schema'] = {
   <tr><td><code>player.flags</code></td><td>[on_ground, sprinting, sneaking, swimming, flying, sleeping] (0/1)</td></tr>
   <tr><td><code>camera.fov</code></td><td>Current field of view (30-110)</td></tr>
   <tr><td><code>camera.matrix</code></td><td>Viewport ray grid [width=16, height=9] = 144 rays (288 values as [depth, blockId] pairs)</td></tr>
-  <tr><td><code>inventory.slots</code></td><td>41 fixed slots as [item_id, count] pairs (0 = empty)</td></tr>
+  <tr><td><code>inventory.slots</code></td><td>Sparse array [slot_index, item_id, count] (only non-empty)</td></tr>
   <tr><td><code>inventory.selected_slot</code></td><td>Currently held hotbar slot (0-8)</td></tr>
   <tr><td><code>target.block_id</code></td><td>Block ID the crosshair is pointing at</td></tr>
   <tr><td><code>target.distance</code></td><td>Distance to targeted block</td></tr>
   <tr><td><code>target.face</code></td><td>Face of targeted block (0=Up,1=Down,2=North,3=South,4=West,5=East)</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>288 values (144 [depth, blockId] pairs). Depth=1-32 (distance to nearest solid), blockId=numeric block ID of that block (0 if no block found)</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>RLE: [[count, depth, blockId], ...] — runs of identical rays. Depth=1-32 (distance to nearest solid), blockId=numeric block ID of that block (0 if no block found)</td></tr>
   <tr><td><code>viewport_entities</code></td><td>Visible entities in frustum (FOV-filtered) [type, relX, relY, relZ, yaw, pitch, health, distance]</td></tr>
   <tr><td><code>screen</code></td><td>Current UI screen info (only present when a screen is open)</td></tr>
 </table>
@@ -869,21 +869,12 @@ SECTIONS['observation-schema'] = {
       title: 'Inventory',
       content: `
 <h2 id="inventory-slots">Inventory Slots</h2>
-<p>The inventory is a fixed array of <strong>41 slots</strong>, each as <code>[item_id, count]</code>.</p>
+<p>Sparse slots <code>[slot_index, item_id, count]</code> (only non-empty).</p>
 
-<table>
-  <tr><th>Index Range</th><th>Section</th><th>Count</th></tr>
-  <tr><td>0-8</td><td>Hotbar</td><td>9</td></tr>
-  <tr><td>9-35</td><td>Main inventory</td><td>27</td></tr>
-  <tr><td>36</td><td>Boots</td><td>1</td></tr>
-  <tr><td>37</td><td>Leggings</td><td>1</td></tr>
-  <tr><td>38</td><td>Chestplate</td><td>1</td></tr>
-  <tr><td>39</td><td>Helmet</td><td>1</td></tr>
-  <tr><td>40</td><td>Offhand</td><td>1</td></tr>
-</table>
+<p>Only slots that contain items are included. Empty slots are omitted.</p>
 
 <ul>
-  <li><code>[0, 0]</code> = empty slot</li>
+  <li><code>slot_index</code>: 0-8 = hotbar, 9-35 = main inv, 36 = boots, 37 = leggings, 38 = chestplate, 39 = helmet, 40 = offhand</li>
   <li><code>item_id</code>: numeric ID from <code>BuiltInRegistries.ITEM</code> (dynamic per session)</li>
   <li><code>count</code>: stack size (1-99, max depends on item)</li>
   <li><code>selected_slot</code>: currently held hotbar slot (0-8)</li>
@@ -916,7 +907,7 @@ SECTIONS['observation-schema'] = {
 </table>
 
 <h2 id="viewport-blocks">Viewport Blocks — Depth-Map Vision</h2>
-<p>A flat depth-map of <strong>288 integers</strong> (144 [depth, blockId] pairs, 16 wide × 9 tall). Each pair: depth=distance in blocks (1–32) to the first non-air block (32=no solid within range), blockId=numeric block ID of that surface block (0 if depth=32).</p>
+<p>RLE array <code>[[count, depth, blockId], ...]</code> — consecutive identical rays merged into runs. Each run: count=number of consecutive rays in this run, depth=distance in blocks (1–32) to the first non-air block (32=no solid within range), blockId=numeric block ID of that surface block (0 if depth=32).</p>
 <ul>
   <li><code>width</code>: 0 (left) to 15 (right)</li>
   <li><code>height</code>: 0 (bottom of frustum) to 8 (top)</li>
@@ -1081,9 +1072,10 @@ SECTIONS['ai-guide'] = {
 
 <h3 id="inventory-interp">inventory — What You Carry</h3>
 <ul>
+  <li>Slots are sparse: <code>[slot_index, item_id, count]</code> — only non-empty slots are included</li>
   <li><code>selected_slot</code> tells you which hotbar slot is currently held (0-8)</li>
-  <li>To equip armor: check slots 36-39</li>
-  <li>Item ID <code>0</code> = empty/air — use this to detect free space</li>
+  <li>To equip armor: look for slot_index 36 (boots), 37 (leggings), 38 (chestplate), 39 (helmet)</li>
+  <li>Item ID <code>0</code> should never appear (empty slots are omitted)</li>
 </ul>
 
 <h3 id="target-interp">target — What You're Looking At</h3>
@@ -1095,6 +1087,7 @@ SECTIONS['ai-guide'] = {
 
 <h3 id="viewport-interp">viewport_blocks — Depth-Map Vision</h3>
 <ul>
+  <li><strong>RLE format:</strong> Data is run-length encoded — each element is <code>[count, depth, blockId]</code>. Expand by repeating each triplet <code>count</code> times to get the full 144-ray grid (16 wide × 9 tall).</li>
   <li><strong>Depth perception:</strong> Each ray has depth (distance to surface) + blockId (what surface is made of). Small depth values (1–3) = nearby wall. Check blockId to pick the right tool (pickaxe for stone, shovel for dirt). Large depth values (20–32) = open space.</li>
   <li><strong>Find paths:</strong> Look for rays with large depth values (20+) at center — these are clear paths</li>
   <li><strong>Avoid danger:</strong> If all rays in a region show small values (1–3), you're boxed in — turn around</li>
@@ -1326,12 +1319,12 @@ Step 5: OBSERVE → screen is gone (in-game!)</code></pre>
   <tr><td><code>player.status[1]</code></td><td>int</td><td>Food (0-20)</td></tr>
   <tr><td><code>player.status[4]</code></td><td>int</td><td>Air (0-300)</td></tr>
   <tr><td><code>player.flags[0]</code></td><td>0/1</td><td>On ground</td></tr>
-  <tr><td><code>inventory.slots[i]</code></td><td>[id,count]</td><td>Item in slot i</td></tr>
+  <tr><td><code>inventory.slots</code></td><td>[[idx,id,count],...]</td><td>Sparse slots (only non-empty)</td></tr>
   <tr><td><code>inventory.selected_slot</code></td><td>int</td><td>Current hotbar slot (0-8)</td></tr>
   <tr><td><code>target.block_id</code></td><td>int</td><td>Block I'm aiming at (0=none)</td></tr>
   <tr><td><code>target.distance</code></td><td>float</td><td>Distance to target</td></tr>
   <tr><td><code>target.face</code></td><td>int</td><td>Face of targeted block</td></tr>
-  <tr><td><code>viewport_blocks</code></td><td>[288]</td><td>Depth-map (144 [depth, blockId] pairs, 16×9 rays)</td></tr>
+  <tr><td><code>viewport_blocks</code></td><td>RLE array</td><td>RLE [[count,depth,blockId],...] — runs of identical rays</td></tr>
   <tr><td><code>viewport_entities[i]</code></td><td>[8 vals]</td><td>Nearby entities</td></tr>
   <tr><td><code>screen.id</code></td><td>string</td><td>Current UI screen (if any)</td></tr>
 </table>

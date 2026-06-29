@@ -119,21 +119,12 @@ Bộ đếm game tick. **20 ticks = 1 giây.** Reset khi tải world mới.
 
 ## 7. `inventory` — Túi đồ
 
-### 7.1 `inventory.slots` — 41 slot cố định
+### 7.1 `inventory.slots` — Sparse slots (chỉ slot có đồ)
 
-Mỗi slot: `[ item_id, count ]`
+Mỗi slot: `[slot_index, item_id, count]`
 
-| Khoảng index | Khu vực | Số lượng | Ghi chú |
-|--------------|---------|----------|---------|
-| 0–8 | Hotbar | 9 | `selected_slot` chỉ vào đây (0–8) |
-| 9–35 | Túi chính | 27 | |
-| 36 | Ủng | 1 | Slot giáp |
-| 37 | Quần | 1 | Slot giáp |
-| 38 | Áo giáp | 1 | Slot giáp |
-| 39 | Mũ | 1 | Slot giáp |
-| 40 | Tay trái | 1 | Khiên/đuốc/v.v. |
-
-- `[0, 0]` = slot rỗng
+- Chỉ những slot có chứa item mới được trả về. Slot rỗng được bỏ qua hoàn toàn.
+- `slot_index`: 0-8 = hotbar, 9-35 = túi chính, 36 = ủng, 37 = quần, 38 = áo giáp, 39 = mũ, 40 = tay trái
 - `item_id`: ID số từ `BuiltInRegistries.ITEM` (**thay đổi mỗi session**)
 - `count`: số lượng (1–99, tối đa tùy item)
 
@@ -168,21 +159,12 @@ Slot hotbar đang chọn.
 
 ### Định dạng
 ```json
-[ depth_0, blockId_0, depth_1, blockId_1, ..., depth_143, blockId_143 ]   // 288 số int
+[[count, depth, blockId], ...]   // Mảng RLE
 ```
 
 ### Cấu trúc
-- **288 giá trị** = 144 cặp [depth, blockId] (16 ngang × 9 dọc)
-- Mỗi tia output 2 giá trị: depth (khoảng cách), blockId (ID block bề mặt)
-
-### Công thức chỉ mục
-```
-depth_index  = (height * 16 + width) * 2
-blockId_index = (height * 16 + width) * 2 + 1
-```
-với:
-- `height`: 0 (đáy) đến 8 (đỉnh)
-- `width`: 0 (trái) đến 15 (phải)
+- Mảng RLE các run, mỗi run = [count, depth, blockId]
+- Các tia liên tiếp có [depth, blockId] giống nhau được gộp thành một run. Mỗi run: [count, depth, blockId].
 
 ### Giá trị depth
 - **1–31**: khoảng cách tới khối đặc đầu tiên
@@ -191,6 +173,8 @@ với:
 ### Giá trị blockId
 - ID block bề mặt từ `BuiltInRegistries.BLOCK` (**thay đổi mỗi session**)
 - **0**: nếu depth == 32 (không có vật cản)
+
+Trong trạng thái rỗng/chưa load, trả về `[]`.
 
 ---
 
@@ -456,18 +440,17 @@ Mảng các component tương tác trên màn hình. Mỗi component:
 ```
 Index   Khu vực          Số lượng   Định dạng item
 ────────────────────────────────────────────────────
- 0–8    Hotbar             9         [item_id, count]
- 9–35   Túi chính         27         [item_id, count]
-36      Ủng                1         [item_id, count]
-37      Quần               1         [item_id, count]
-38      Áo giáp            1         [item_id, count]
-39      Mũ                 1         [item_id, count]
-40      Tay trái           1         [item_id, count]
+ 0–8    Hotbar             9         [slot_index, item_id, count]
+ 9–35   Túi chính         27         [slot_index, item_id, count]
+36      Ủng                1         [slot_index, item_id, count]
+37      Quần               1         [slot_index, item_id, count]
+38      Áo giáp            1         [slot_index, item_id, count]
+39      Mũ                 1         [slot_index, item_id, count]
+40      Tay trái           1         [slot_index, item_id, count]
 ────────────────────────────────────────────────────
-Tổng: 41 slots
 ```
 
-`[0, 0]` = slot rỗng. `item_id` thay đổi mỗi session.
+Chỉ slot có đồ mới được bao gồm. `item_id` thay đổi mỗi session.
 
 ---
 
