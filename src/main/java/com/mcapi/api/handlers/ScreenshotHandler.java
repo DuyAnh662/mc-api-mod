@@ -6,6 +6,10 @@ import com.mcapi.api.ApiServer;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Screenshot;
+import net.minecraft.client.renderer.texture.TextureManager;
+
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -72,32 +76,31 @@ public class ScreenshotHandler implements HttpHandler {
             origWRef.set(ow);
             origHRef.set(oh);
 
-            net.minecraft.client.Screenshot.takeScreenshot(renderTarget, (nativeImg) -> {
-                try {
-                    BufferedImage image = new BufferedImage(nativeImg.getWidth(), nativeImg.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-                    for (int y = 0; y < nativeImg.getHeight(); y++) {
-                        for (int x = 0; x < nativeImg.getWidth(); x++) {
-                            int abgr = nativeImg.getPixel(x, y);
-                            int b = abgr & 0xFF;
-                            int g = (abgr >> 8) & 0xFF;
-                            int r = (abgr >> 16) & 0xFF;
-                            int rgb = (r << 16) | (g << 8) | b;
-                            image.setRGB(x, y, rgb);
-                        }
+            try {
+                var nativeImg = Screenshot.takeScreenshot(renderTarget);
+                BufferedImage image = new BufferedImage(nativeImg.getWidth(), nativeImg.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+                for (int y = 0; y < nativeImg.getHeight(); y++) {
+                    for (int x = 0; x < nativeImg.getWidth(); x++) {
+                        int abgr = nativeImg.getPixel(x, y);
+                        int b = abgr & 0xFF;
+                        int g = (abgr >> 8) & 0xFF;
+                        int r = (abgr >> 16) & 0xFF;
+                        int rgb = (r << 16) | (g << 8) | b;
+                        image.setRGB(x, y, rgb);
                     }
-                    nativeImg.close();
-
-                    BufferedImage resized = resizeImage(image, finalW, finalH);
-
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write(resized, "jpeg", baos);
-                    imgRef.set(Base64.getEncoder().encodeToString(baos.toByteArray()));
-                } catch (Exception e) {
-                    errorRef.set(e.getMessage());
-                } finally {
-                    latch.countDown();
                 }
-            });
+                nativeImg.close();
+
+                BufferedImage resized = resizeImage(image, finalW, finalH);
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(resized, "jpeg", baos);
+                imgRef.set(Base64.getEncoder().encodeToString(baos.toByteArray()));
+            } catch (Exception e) {
+                errorRef.set(e.getMessage());
+            } finally {
+                latch.countDown();
+            }
         });
 
         try {
