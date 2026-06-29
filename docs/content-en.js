@@ -187,36 +187,6 @@ curl -H "Authorization: Bearer &lt;token&gt;" -X GET "http://localhost:25566/api
 
 # Get FPS and days played
 curl -H "Authorization: Bearer &lt;token&gt;" -X GET "http://localhost:25566/api/client/debug?fields=fps,days"</code></pre>
-
-<h2 id="client-screenshot">2.5 Screenshot Capture (YOLO-ready)</h2>
-<div class="endpoint">
-  <span class="badge badge-get">GET</span>
-  <span class="endpoint-url">/api/client/screenshot</span>
-  <div class="endpoint-desc">Capture game window as base64 JPEG, optimized for YOLO detection.</div>
-</div>
-
-<h4>Query Parameters</h4>
-<table class="param-table">
-  <tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
-  <tr><td><code>width</code></td><td>int</td><td>640</td><td>Target width (64-1920)</td></tr>
-  <tr><td><code>height</code></td><td>int</td><td>360</td><td>Target height (36-1080)</td></tr>
-  <tr><td><code>quality</code></td><td>int</td><td>85</td><td>JPEG quality (10-100)</td></tr>
-</table>
-
-<h4>Example</h4>
-<pre><code>curl -H "Authorization: Bearer &lt;token&gt;" http://localhost:25566/api/client/screenshot</code></pre>
-
-<h4>Python + YOLO Example</h4>
-<pre><code>import requests, base64, cv2, numpy as np
-from ultralytics import YOLO
-
-r = requests.get("http://localhost:25566/api/client/screenshot",
-                 headers={"Authorization": "Bearer &lt;token&gt;"})
-img = cv2.imdecode(np.frombuffer(base64.b64decode(
-    r.json()["data"]["image"]), np.uint8), cv2.IMREAD_COLOR)
-# Run YOLO on img
-model = YOLO("yolo26n.pt")
-results = model(img)</code></pre>
 `
     },
     {
@@ -781,6 +751,36 @@ curl -X POST http://localhost:25566/close \\
 # Cancel all tasks globally
 curl -X POST http://localhost:25566/close \\
      -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+
+<h2 id="screenshot">8.7 Screenshot Capture</h2>
+<div class="endpoint">
+  <span class="badge badge-get">GET</span>
+  <span class="endpoint-url">/api/client/screenshot</span>
+  <div class="endpoint-desc">Capture game window as base64 JPEG, optimized for YOLO detection.</div>
+</div>
+
+<h4>Query Parameters</h4>
+<table class="param-table">
+  <tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>width</code></td><td>int</td><td>640</td><td>Target width (64-1920)</td></tr>
+  <tr><td><code>height</code></td><td>int</td><td>360</td><td>Target height (36-1080)</td></tr>
+  <tr><td><code>quality</code></td><td>int</td><td>85</td><td>JPEG quality (10-100)</td></tr>
+</table>
+
+<h4>Example</h4>
+<pre><code>curl -H "Authorization: Bearer &lt;token&gt;" http://localhost:25566/api/client/screenshot</code></pre>
+
+<h4>Python + YOLO Example</h4>
+<pre><code>import requests, base64, cv2, numpy as np
+from ultralytics import YOLO
+
+r = requests.get("http://localhost:25566/api/client/screenshot",
+                 headers={"Authorization": "Bearer &lt;token&gt;"})
+img = cv2.imdecode(np.frombuffer(base64.b64decode(
+    r.json()["data"]["image"]), np.uint8), cv2.IMREAD_COLOR)
+# Run YOLO on img
+model = YOLO("yolo26n.pt")
+results = model(img)</code></pre>
 `
     }
   ]

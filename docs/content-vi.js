@@ -186,35 +186,6 @@ curl -H "Authorization: Bearer &lt;token&gt;" -X GET "http://localhost:25566/api
 
 # Lấy FPS và số ngày đã chơi
 curl -H "Authorization: Bearer &lt;token&gt;" -X GET "http://localhost:25566/api/client/debug?fields=fps,days"</code></pre>
-
-<h2 id="client-screenshot">2.5 Chụp Màn Hình (YOLO-ready)</h2>
-<div class="endpoint">
-  <span class="badge badge-get">GET</span>
-  <span class="endpoint-url">/api/client/screenshot</span>
-  <div class="endpoint-desc">Chụp cửa sổ game thành JPEG base64, tối ưu cho YOLO detection.</div>
-</div>
-
-<h4>Tham số Query</h4>
-<table class="param-table">
-  <tr><th>Tham số</th><th>Kiểu</th><th>Mặc định</th><th>Mô tả</th></tr>
-  <tr><td><code>width</code></td><td>int</td><td>640</td><td>Chiều rộng đích (64-1920)</td></tr>
-  <tr><td><code>height</code></td><td>int</td><td>360</td><td>Chiều cao đích (36-1080)</td></tr>
-  <tr><td><code>quality</code></td><td>int</td><td>85</td><td>Chất lượng JPEG (10-100)</td></tr>
-</table>
-
-<h4>Ví dụ</h4>
-<pre><code>curl -H "Authorization: Bearer &lt;token&gt;" http://localhost:25566/api/client/screenshot</code></pre>
-
-<h4>Python + YOLO Ví dụ</h4>
-<pre><code>import requests, base64, cv2, numpy as np
-from ultralytics import YOLO
-
-r = requests.get("http://localhost:25566/api/client/screenshot",
-                 headers={"Authorization": "Bearer &lt;token&gt;"})
-img = cv2.imdecode(np.frombuffer(base64.b64decode(
-    r.json()["data"]["image"]), np.uint8), cv2.IMREAD_COLOR)
-model = YOLO("yolo26n.pt")
-results = model(img)</code></pre>
 `
     },
     {
@@ -772,6 +743,35 @@ curl -X POST http://localhost:25566/close \\
 # Hủy toàn bộ tác vụ
 curl -X POST http://localhost:25566/close \\
      -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+
+<h2 id="screenshot">8.7 Chụp Màn Hình</h2>
+<div class="endpoint">
+  <span class="badge badge-get">GET</span>
+  <span class="endpoint-url">/api/client/screenshot</span>
+  <div class="endpoint-desc">Chụp cửa sổ game thành JPEG base64, tối ưu cho YOLO detection.</div>
+</div>
+
+<h4>Tham số Query</h4>
+<table class="param-table">
+  <tr><th>Tham số</th><th>Kiểu</th><th>Mặc định</th><th>Mô tả</th></tr>
+  <tr><td><code>width</code></td><td>int</td><td>640</td><td>Chiều rộng đích (64-1920)</td></tr>
+  <tr><td><code>height</code></td><td>int</td><td>360</td><td>Chiều cao đích (36-1080)</td></tr>
+  <tr><td><code>quality</code></td><td>int</td><td>85</td><td>Chất lượng JPEG (10-100)</td></tr>
+</table>
+
+<h4>Ví dụ</h4>
+<pre><code>curl -H "Authorization: Bearer &lt;token&gt;" http://localhost:25566/api/client/screenshot</code></pre>
+
+<h4>Python + YOLO Ví dụ</h4>
+<pre><code>import requests, base64, cv2, numpy as np
+from ultralytics import YOLO
+
+r = requests.get("http://localhost:25566/api/client/screenshot",
+                 headers={"Authorization": "Bearer &lt;token&gt;"})
+img = cv2.imdecode(np.frombuffer(base64.b64decode(
+    r.json()["data"]["image"]), np.uint8), cv2.IMREAD_COLOR)
+model = YOLO("yolo26n.pt")
+results = model(img)</code></pre>
 `
     }
   ]
