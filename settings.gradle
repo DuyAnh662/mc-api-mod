@@ -16,4 +16,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'mc-api-mod'
+rootProject.name = 'ApiBridge'
