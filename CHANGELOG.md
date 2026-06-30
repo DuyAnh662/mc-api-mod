@@ -1,5 +1,51 @@
 # Changelog
 
+## v1.3.0 — Multi-Version Backport (1.21.0 → 26.2)
+
+### 📦 Supported Minecraft Versions
+
+The mod now supports **10 Minecraft version ranges** across 8 branches:
+
+| Branch | MC Range | Fabric API | Java |
+|---|---|---|---|
+| `1.21.0-1` | 1.21.0 – 1.21.1 | 0.102.0+1.21.1 | 21 |
+| `1.21.2-3` | 1.21.2 – 1.21.3 | 0.108.0+1.21.3 | 21 |
+| `1.21.4` | 1.21.4 | 0.119.0+1.21.4 | 21 |
+| `1.21.5` | 1.21.5 | 0.126.0+1.21.5 | 21 |
+| `1.21.6-8` | 1.21.6 – 1.21.8 | 0.136.1+1.21.8 | 21 |
+| `1.21.9-11` | 1.21.9 – 1.21.11 | 0.141.4+1.21.11 | 21 |
+| `26.1.0-2` | 26.1 – 26.1.2 | 0.151.0+26.1.2 | **25** |
+| `26.2` | 26.2 | 0.153.0+26.2 | **25** |
+
+### 🔧 Build System Changes (26.x)
+
+Minecraft 26.1+ is **unobfuscated** — Mojang removed obfuscation entirely. Major build script changes:
+- **Plugin**: `fabric-loom` → `net.fabricmc.fabric-loom`
+- **Mappings**: Removed `loom.officialMojangMappings()` (no longer needed)
+- **Dependencies**: `modImplementation` → `implementation`
+- **Access widener**: `named` → `official` namespace
+- **Java target**: 21 → 25 (required for 26.x)
+
+### 🔄 API Migration Notes
+
+| API | 1.21.x | 26.1.x | 26.2 |
+|---|---|---|---|
+| Day time | `getDayTime()` / `setDayTime()` | `getOverworldClockTime()` + `clockManager().setTotalTicks()` | same as 26.1 |
+| Weather | `setWeatherParameters(a,b,c,d)` | `getWeatherData().setRainTime()` / `.setThundering()` etc. | same as 26.1 |
+| Difficulty name | `Difficulty.getKey()` | `Difficulty.getSerializedName()` | same as 26.1 |
+| Screen | `client.screen` (field) | `client.gui.screen()` (method) | same as 26.1 |
+| Render target | `client.getMainRenderTarget()` | `client.gameRenderer.mainRenderTarget()` | same as 26.1 |
+| BlockState use | `useWithoutItem(level,player,hit)` | same | same |
+| NativeImage pixel | `getPixelRGBA(x,y)` | `getPixel(x,y)` | same as 26.1 |
+| Entity iteration | `entitiesForRendering()` | `getEntities(EntityTypeTest,AABB,Predicate)` | same as 26.1 |
+| EntityTypeTest package | `net.minecraft.world.level.entity` | same | same |
+
+### 🐛 Bug Fixes
+
+- **Fabric Loader compatibility**: Downgraded minimum loader from 0.19.3 → 0.19.2 to match upstream.
+
+---
+
 ## v1.3.0 — Screenshot for YOLO Detection
 
 ### ✨ New Features
