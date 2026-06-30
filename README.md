@@ -8,7 +8,8 @@ Created and developed by [@DuyAnh662](https://github.com/DuyAnh662)
 [Xem tài liệu Tiếng Việt (Vietnamese README)](#tài-liệu-tiếng-việt-vn)
 
 ---
-
+![API Bridge banner](https://cdn.modrinth.com/data/cached_images/f13df9e6dca9ca0ec376aaba5629f1dd1a2bbf8d_0.webp)
+---
 ## English Documentation
 
 ### Introduction
