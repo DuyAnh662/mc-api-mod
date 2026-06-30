@@ -5,7 +5,7 @@
 ### ✨ New Features
 
 - **`GET /api/client/screenshot`** — Capture game window as base64 JPEG. Parameters: `width`, `height`, `quality`. Default 640×360, ~30-60 KB. Designed for external YOLO inference (Python integration example included).
-
+- **`Support`** — Support MC 1.21.x, 26.x
 ## v1.2.4 — RLE Depth-Map + Sparse Inventory
 
 ### ✨ Enhancements
