@@ -1,4 +1,4 @@
-# ApiBridge
+# API Bridge
 
 ![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen)
 ![Fabric Loader](https://img.shields.io/badge/Fabric-0.19.3-blue)
