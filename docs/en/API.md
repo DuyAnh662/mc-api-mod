@@ -1,6 +1,6 @@
-# API Documentation - MC API Mod (1.21.11)
+# API Documentation - ApiBridge
 
-MC API Mod provides an HTTP REST API running inside Minecraft, allowing you to control the entire game via code (Python, Node.js, etc.) or command line (cURL) without touching keyboard or mouse.
+ApiBridge provides an HTTP REST API running inside Minecraft, allowing you to control the entire game via code (Python, Node.js, etc.) or command line (cURL) without touching keyboard or mouse.
 
 ---
 
