@@ -1,4 +1,4 @@
-# MC API Mod
+# ApiBridge
 
 [Read in English](README.md)
 
