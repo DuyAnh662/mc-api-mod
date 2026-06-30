@@ -1,4 +1,4 @@
-# MC API Mod
+# ApiBridge
 
 ![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen)
 ![Fabric Loader](https://img.shields.io/badge/Fabric-0.19.3-blue)
@@ -12,7 +12,7 @@ Created and developed by [@DuyAnh662](https://github.com/DuyAnh662)
 ## English Documentation
 
 ### Introduction
-**MC API Mod** is a powerful Fabric mod for Minecraft 1.21.11 that exposes an HTTP REST API to control almost every aspect of the game directly from your terminal or any external application. Whether you want to break blocks, teleport players, control the weather, or even simulate UI clicks, this mod provides a comprehensive interface to do so!
+**ApiBridge** is a powerful Fabric mod for Minecraft 1.21.11 that exposes an HTTP REST API to control almost every aspect of the game directly from your terminal or any external application. Whether you want to break blocks, teleport players, control the weather, or even simulate UI clicks, this mod provides a comprehensive interface to do so!
 
 ### Features
 *   **Block Manipulation:** Break, place, and interact with blocks anywhere in the world.
@@ -118,7 +118,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Tài Liệu Tiếng Việt (VN)
 
 ### Giới Thiệu
-**MC API Mod** là một bản mod Fabric cực kỳ mạnh mẽ dành cho Minecraft 1.21.11, cung cấp một HTTP REST API cho phép bạn điều khiển gần như toàn bộ game thông qua Terminal hoặc bất kỳ ứng dụng bên ngoài nào. Bạn có thể làm mọi thứ: phá khối, đặt khối, dịch chuyển người chơi, đổi thời tiết, hay thậm chí là click các nút trên giao diện!
+**ApiBridge** là một bản mod Fabric cực kỳ mạnh mẽ dành cho Minecraft 1.21.11, cung cấp một HTTP REST API cho phép bạn điều khiển gần như toàn bộ game thông qua Terminal hoặc bất kỳ ứng dụng bên ngoài nào. Bạn có thể làm mọi thứ: phá khối, đặt khối, dịch chuyển người chơi, đổi thời tiết, hay thậm chí là click các nút trên giao diện!
 
 ### Tính Năng Nổi Bật
 *   **Tương Tác Khối:** Phá, đặt, lấy thông tin, và tương tác (click chuột phải) vào các khối.
